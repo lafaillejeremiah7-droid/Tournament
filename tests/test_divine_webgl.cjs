@@ -165,18 +165,18 @@ assert(Math.abs(stemSevered-cutWorldY)<0.1,'deleted base is capped near the lowe
 // (3) ON-SCREEN VISIBILITY pin (FEAT-003): the whole point of the delete is that
 // the viewer SEES the avatar's corona tumble off the base, so we assert the
 // actual rendered motion of the deleted TOP piece, not just that geometry
-// exists. Read the real corona accent (kind 6) centroid from plant() while
+// exists. Read the real dorsal fins (kind 6.3) on the fish's upper body from plant() while
 // standing vs at full fall (age 1.65s = the end of the 0.72s fall ramp for an
 // ordinary cut). FEAT-001 strengthened the drop to ~4.05 (was ~2.4) and the
 // sideways drift to ~2.72 (was ~1.9); the claw tips travel ~11.1 forward (was
 // ~6.72). These thresholds sit strictly above the OLD baseline and just below
 // the NEW measured values, so reducing any magnitude back to the old (subtler)
 // delete FAILS this regression.
-const petalCentroid=age=>{const mesh=three._plantMesh(severModel,2,['p3','p7'],0,age);let sx=0,sy=0,n=0;for(let i=0;i<mesh.data.length;i+=10)if(mesh.data[i+9]===6){sx+=mesh.data[i];sy+=mesh.data[i+1];n++;}assert(n>0,'deleted avatar emits corona accent (kind 6) vertices');return {x:sx/n,y:sy/n};};
+const petalCentroid=age=>{const mesh=three._plantMesh(severModel,2,['p3','p7'],0,age);let sx=0,sy=0,n=0;for(let i=0;i<mesh.data.length;i+=10)if(Math.abs(mesh.data[i+9]-6.3)<1e-6){sx+=mesh.data[i];sy+=mesh.data[i+1];n++;}assert(n>0,'deleted sea creature emits dorsal fin accent (kind 6.3) vertices');return {x:sx/n,y:sy/n};};
 const bloomStanding=petalCentroid(0),bloomFallen=petalCentroid(1.65);
 const bloomDrop=bloomStanding.y-bloomFallen.y,bloomDrift=Math.abs(bloomFallen.x-bloomStanding.x);
-assert(bloomDrop>=3.4,'deleted corona visibly DROPS at full fall, far below the old ~2.4 baseline (fails if the drop magnitude is reverted): '+JSON.stringify({bloomDrop,bloomStandingY:bloomStanding.y,bloomFallenY:bloomFallen.y}));
-assert(bloomDrift>=2.3,'deleted corona visibly DRIFTS sideways at full fall, past the old ~1.9 baseline (fails if the drift magnitude is reverted): '+JSON.stringify({bloomDrift,bloomStandingX:bloomStanding.x,bloomFallenX:bloomFallen.x}));
+assert(bloomDrop>=3.4,'severed dorsal fin visibly DROPS at full fall, far below the old ~2.4 baseline (fails if the drop magnitude is reverted): '+JSON.stringify({bloomDrop,bloomStandingY:bloomStanding.y,bloomFallenY:bloomFallen.y}));
+assert(bloomDrift>=2.3,'severed dorsal fin visibly DRIFTS sideways at full fall, past the old ~1.9 baseline (fails if the drift magnitude is reverted): '+JSON.stringify({bloomDrift,bloomStandingX:bloomStanding.x,bloomFallenX:bloomFallen.x}));
 assert(fingersClosed-fingersOpen>=10,'claw-tip forward travel reads on screen at >=10 units, past the old ~6.72 baseline (fails if the curl is reverted): '+JSON.stringify({fingerTravel:fingersClosed-fingersOpen}));
 now=1520;frame();assert.equal(draws,2,'animation redraws WebGL geometry each frame');
 assert.equal(three.setAction(0,model,['p3','p7']),true,'cut updates the same WebGL scene');

@@ -403,7 +403,7 @@
   m.gem(...map([body*.68,height+body*.13,0]),.14,[.02,.12,.18],2,.9);
   for(let fin=0;fin<Math.max(1,tier-2);fin++){
     const px=(fin/Math.max(1,tier-2)-.5)*body;
-    m.gem(...map([px,height+body*.5,0]),.22+fin*.07,[.49,.94,.77],2,.8);
+    m.gem(...map([px,height+body*.5,0]),.22+fin*.07,[.49,.94,.77],6.3,.8);
   }
   if(tier>=4){
    for(let k=0;k<(tier===4?2:tier===5?4:6);k++){
