@@ -304,27 +304,40 @@ void main(){
    }
   });
   part('megastructure',()=>{
-   // The central megastructure terminating the grand avenue: a wireframe mainframe
-   // tower with a neon crown prism and two chrome spires flanking it.
-   const z=-133;
-   m.box(0,9,z-1,56,18,18,[.07,.11,.22]);
-   m.box(0,19,z-1,60,2,21,towerTop);
-   m.box(0,24,z-1,28,8,12,[.09,.14,.27]);
-   m.gem(0,31,z,3.5,[.90,.98,1.0],0,1.5);
-   for(let k=-5;k<=5;k++){
-    const x=k*4.4;
-    m.box(x,9.2,z+8,.8,14,.8,chrome);
-    m.box(x,16.7,z+8,2,.6,1.2,towerTop);
-    if(k%2===0)m.box(x,8,z+8.55,1.1,5,.2,[.08,.45,.58]);
-   }
-   for(const x of [-26,26]){m.box(x,14,z,5,28,5,[.06,.10,.20]);m.gem(x,30,z,4.5,[.98,.30,.72],0,1.2);}
+   // The central megastructure terminating the grand avenue: a boxy cyberpunk
+   // mainframe / data-tower - monolithic base slab, a ziggurat of rectangular blocks
+   // stepping inward and up to a tall rectangular data-mast, lit cyan/magenta window
+   // bands, a glowing emissive core and an antenna finial. No spires, no turrets.
+   const z=-133,cyan=[.25,.95,1.0],mag=[.98,.30,.72];
+   m.box(0,9,z-1,56,18,18,[.07,.11,.22]);// dark monolithic base slab
+   m.box(0,19,z-1,60,2,21,towerTop);// cornice ledge
+   // Stacked rectangular blocks stepping inward and up (boxy ziggurat, flat tops).
+   const steps=[[40,6,14,22],[28,6,11,28],[18,6,8,34]];
+   for(let s=0;s<steps.length;s++){const [w,h,d,y]=steps[s];m.box(0,y,z-1,w,h,d,[.09,.14,.27]);
+    // lit horizontal data-panel window bands on the front face, alternating neon.
+    for(let b=0;b<3;b++)m.box(0,y-h/2+1.6+b*(h-2)/2,z+d/2-.4,w-4,.9,.3,b%2?mag:cyan,3);}
+   // Glowing emissive core nested in the stack.
+   m.box(0,20,z-1,6,6,6,[.90,.98,1.0],3);
+   // Tall rectangular central data-mast (flat top, NOT a cone) with vertical neon ribs.
+   m.box(0,42,z-1,5,20,5,[.09,.14,.27]);
+   for(const sx of [-1,1])m.box(sx*2.4,42,z-1,.5,18,.5,cyan,3);
+   m.box(0,42,z+1.4,2.4,16,.3,mag,3);
+   // Horizontal cornice rings around the mast.
+   for(const ry of [34,52])m.loop([0,ry,z-1],[1,0,0],[0,0,-1],3.6,.4,cyan,3,8);
+   // Thin antenna / data-mast finial on top.
+   m.box(0,55,z-1,.4,6,.4,[.95,.98,1.0],3);
+   m.box(0,58.6,z-1,1.4,.5,1.4,mag,3);
+   // Boxy flanking data-pylons (flat tops, neon accents) to hold the silhouette width.
+   for(const x of [-26,26]){m.box(x,14,z,5,28,5,[.06,.10,.20]);
+    m.box(x,27.4,z,5.6,1,5.6,towerTop);
+    for(let b=0;b<4;b++)m.box(x,6+b*6,z+2.6,3.6,1.4,.3,b%2?cyan:mag,3);}
   });
   part('holo-signs',()=>{
    // Floating holo-signage pads scattered through the plazas, each projecting a
    // bright neon glyph up into the night.
    for(const [x,z,r] of [[0,-22,5],[0,-113,6],[-46,-66,4],[46,-66,4]]){
-    m.loop([x,.18,z],[1,0,0],[0,0,-1],r,.8,[.08,.45,.58]);
-    m.box(x,.14,z,r*1.28,.28,r*1.28,[.10,.20,.40]);
+    m.loop([x,.18,z],[1,0,0],[0,0,-1],r,.8,[.25,.95,1.0],3);
+    m.box(x,.14,z,r*1.28,.28,r*1.28,[.12,.10,.34]);
     m.gem(x,1.3,z,.7,[.60,.85,1.0]);
     m.gem(x,3,z,.3,[.98,.30,.72],3,3);
    }
