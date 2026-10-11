@@ -642,8 +642,8 @@ const flushMicro=async()=>{for(let i=0;i<20;i++)await Promise.resolve();};
  assert.equal(vm.runInContext("reducedMotion()",context),true,'sandbox defaults to reduced motion');
  vm.runInContext("playCutscene(['Casey','Dakota']);",context);
  const captionEl=context.document.querySelector('#cutscene-caption');
- assert(/THE ROSES BLOOM/.test(captionEl.innerHTML),'reduced motion shows the static THE ROSES BLOOM card');
- assert(captionEl.innerHTML.includes('Final'),'static beat labels the opened pavilion');
+ assert(/THE GRID CHARGES/.test(captionEl.innerHTML),'reduced motion shows the static THE GRID CHARGES card');
+ assert(captionEl.innerHTML.includes('Final'),'static beat labels the opened node');
  vm.runInContext('endCutscene();',context);
  // (E) EMPTY eliminated list: playCutscene resolves immediately and never flags active.
  vm.runInContext('cutsceneActive=false;',context);
@@ -655,5 +655,5 @@ const flushMicro=async()=>{for(let i=0;i<20;i++)await Promise.resolve();};
  vm.runInContext("playCutscene(verdictCuts,'Know Thy Nature','round1');",context);
  vm.runInContext('endCutscene();',context);
  vm.runInContext('endCutscene();',context);assert.equal(vm.runInContext('cutsceneActive',context),false,'a second dismiss is harmless');
- console.log('FEAT-003 elimination cutscene: divineCuts per stage, no-trigger on non-final, crown card fallback, skippable single-dismiss path, reduced-motion static PAVILION OPEN, and empty-list skip passed.');
+ console.log('FEAT-003 elimination cutscene: divineCuts per stage, no-trigger on non-final, crown card fallback, skippable single-dismiss path, reduced-motion static NODE ONLINE, and empty-list skip passed.');
 })().catch(e=>{console.error(e);process.exitCode=1;});

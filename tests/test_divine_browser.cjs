@@ -54,7 +54,7 @@ const url=new Promise((resolve,reject)=>{
      assert.equal(b.goals[i],a.goals[i],'cut plants stop growing between rounds');
    }
   }
-  assert(standings.round1.cuts.every(i=>standings.round1.tier[i]<5),'no Royal Rose is cut in the illustrative first round');
+  assert(standings.round1.cuts.every(i=>standings.round1.tier[i]<5),'no Prime Avatar is deleted in the illustrative first round');
   await page.goto(base,{waitUntil:'domcontentloaded'});
   const asset=await page.request.get(base+'/divine3d.js');
   assert.equal(asset.status(),200,'cutscene JavaScript must be served by app.py');
@@ -89,7 +89,7 @@ const url=new Promise((resolve,reject)=>{
     return Array.from(context.getImageData(0,0,1,1).data);
   },gateShot.toString('base64'));
   assert(paintedSky[0]<110&&paintedSky[2]>paintedSky[0]+25,
-    'painted PS2 sky must replace the flat clear color: '+JSON.stringify(paintedSky));
+    'painted synthwave night sky (deep indigo, blue over red) must replace the flat clear color: '+JSON.stringify(paintedSky));
   await page.waitForTimeout(750);
   const stage=await page.evaluate(()=>{
    const s=window.Divine3D._debug();
@@ -116,7 +116,7 @@ const url=new Promise((resolve,reject)=>{
   // Print one compact visual sample for design inspection; large images are
   // intentionally not saved to the repo.
   const jpg=await page.screenshot({type:'jpeg',quality:46});
-  assert(jpg.length>9000,'scene must draw actual portal, hand and garden rather than a blank clear-color canvas');
+  assert(jpg.length>9000,'scene must draw actual vortex, mech arm and neon city rather than a blank clear-color canvas');
   console.log('DIVINE_ARRIVAL_JPEG_BASE64='+jpg.toString('base64'));
   const next=await page.evaluate(()=>{
    const m=Array.from({length:10},(_,i)=>({id:'p'+(i+1),name:'Plant '+(i+1),tier:i%7,priorPruned:false}));

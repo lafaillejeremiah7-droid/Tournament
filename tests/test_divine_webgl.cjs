@@ -44,8 +44,8 @@ const geo=three._geometry(model,['p3','p7'],-1,0);
 assert.equal(geo.positions.length,10);
 assert(geo.positions[0][2]!==geo.positions[5][2],'two spatially separated rows of roses');
 assert(geo.triangles>1000);
-assert(geo.gardenTriangles>3000,'detailed 3D garden includes thousands of architectural triangles');
-assert(geo.gardenTriangles>8000,'the distant mountain-forest-river backdrop adds substantial painted-vista geometry behind the garden');
+assert(geo.gardenTriangles>3000,'detailed 3D neon city includes thousands of architectural triangles');
+assert(geo.gardenTriangles>8000,'the distant neon skyline-tower-stream backdrop adds substantial painted-vista geometry behind the city');
 assert(!rendererHasFloatingForest(),
   'distant trees, floating hills and mountains are removed from cinematic geometry');
 function rendererHasFloatingForest(){
@@ -61,23 +61,25 @@ assert.deepEqual(Array.from(meshes,x=>x.tier),[0,1,2,3,4,5,6]);
 assert.equal(new Set(meshes.map(x=>x.triangles)).size,7,'all growth levels have distinctive 3D surface complexity');
 assert(meshes[6].triangles>meshes[0].triangles*4,'full-bloom rose has substantially more modeled geometry than the zero-goal seedling');
 const rendererSource=fs.readFileSync(path.join(__dirname,'../static/divine3d.js'),'utf8');
-assert(rendererSource.includes('v_pos.y>44.0'),'skin and shears are clipped ABOVE the horizontal portal plane');
-// Re-skin invariants: weathered rusty shears, green foliage debris, and a
-// distant mountain-forest-river backdrop replace the old steel/gold look.
-assert(rendererSource.includes('metal=[.34,.21,.12]'),'shears use a weathered rusty metal base color, not cool steel');
+assert(rendererSource.includes('v_pos.y>44.0'),'mech alloy and plasma blades are clipped ABOVE the horizontal portal plane');
+// Re-skin invariants: neon-chrome plasma effector, neon-shard debris, and a
+// distant neon skyline-tower-stream backdrop replace the old steel/gold look.
+assert(rendererSource.includes('metal=[.12,.62,.78]'),'plasma grip-blades use a neon-chrome base color, not warm rust');
+assert(!rendererSource.includes('metal=[.34,.21,.12]'),'the old weathered rusty shear color is gone');
 assert(!rendererSource.includes('metal=[.29,.34,.36]'),'the old cold steel shear color is gone');
-assert(rendererSource.includes('Weathered rusty metal'),'kind-8 shader branch reads as aged rust rather than chrome');
-assert(rendererSource.includes('Green leaf and foliage fragments'),'blade-contact debris is green foliage');
-assert(rendererSource.includes('leafTones'),'cut debris uses leaf-green tones');
+assert(rendererSource.includes('Neon chrome / emissive mech alloy'),'kind-8 shader branch reads as glowing plasma-lit alloy');
+assert(rendererSource.includes('Neon shards and data fragments'),'blade-contact debris is neon shards / data fragments');
+assert(rendererSource.includes('sparkTones'),'cut debris uses neon spark tones');
+assert(!rendererSource.includes('leafTones'),'the old leaf-green debris tones are gone');
 assert(!rendererSource.includes('.12,[1,.86,.51],2,1.45)'),'the old gold gem debris burst at the cut is removed');
-assert(rendererSource.includes('layered fog-blue mountain ridges'),'createField adds a distant mountain ridge vista');
-assert(rendererSource.includes('conifer forest skirt'),'createField adds a forest band behind the garden');
-assert(rendererSource.includes('Winding river'),'createField adds a meandering river to the backdrop');
-assert(rendererSource.includes('God-rays'),'portal emits god-ray light shafts through the cloudy sky');
+assert(rendererSource.includes('layered neon-magenta skyline ridges'),'createField adds a distant neon skyline ridge vista');
+assert(rendererSource.includes('Dense neon tower skyline'),'createField adds a neon tower band behind the city');
+assert(rendererSource.includes('Flowing light-stream'),'createField adds a flowing data light-stream to the backdrop');
+assert(rendererSource.includes('Data-beams'),'portal emits scanning data-beam light shafts through the night sky');
 assert(!rendererSource.includes('Keep the horizon clear: no distant forest'),'the obsolete clear-horizon comment is gone');
 assert(!rendererSource.includes('this.cylinder(start,tip,.045,PALE'), 'retired unused blade helper must not reference undefined PALE');
 assert(rendererSource.includes("'xz',2"),'portal rings are modeled in the horizontal XZ plane');
-assert(geo.details.includes('fountains')&&geo.details.includes('gazebos')&&geo.details.includes('hedge maze')&&geo.details.includes('palace'),'3D field includes royal garden architecture');
+assert(geo.details.includes('data wells')&&geo.details.includes('holo pavilions')&&geo.details.includes('neon barriers')&&geo.details.includes('megastructure'),'3D field includes neon city architecture');
 assert.equal(geo.portalAxis,'y','portal opens overhead, normal to the vertical emergence axis');
 assert.equal(geo.portalPlane,geo.portalCenter[1],'horizontal portal and clip plane share an altitude');
 assert(geo.portalPlane>30,'overhead gate is far above the competing plants');
@@ -136,45 +138,46 @@ assert(Math.abs(finalAt.fingerClose-1)<EPS&&Math.abs(finalAt.bladeClose-1)<EPS&&
 // REAL rendered-geometry checks (FEAT-003 review): the above assertions read a
 // recomputed summary, so they would still pass if the finger-curl or stem-split
 // code were reverted. These inspect the ACTUAL vertices hand()/plant() emit, so
-// the suite fails if either behavior is removed. (1) Fingers: the ivory (kind 7)
-// skin's forward reach in +Z must grow substantially as the grip closes --
-// finger tips curl toward the shear handles; freezing `curl` collapses that
-// reach to just the thumb's small motion.
+// the suite fails if either behavior is removed. (1) Claw: the chrome (kind 7)
+// alloy's forward reach in +Z must grow substantially as the grip closes --
+// claw digits curl toward the plasma emitters; freezing `curl` collapses that
+// reach to just the thumb-clamp's small motion.
 const ivoryMaxZ=(step,age)=>{const mesh=three._handMesh(step,age,['p3','p7']);let z=-1e9;for(let i=0;i<mesh.data.length;i+=10)if(mesh.data[i+9]===7&&mesh.data[i+2]>z)z=mesh.data[i+2];return z;};
 const fingersOpen=ivoryMaxZ(0,0),fingersClosed=ivoryMaxZ(0,0.95);
-// The strengthened finger curl (FEAT-001) sweeps the fingertips +11.1 units
-// forward open->closed (was +6.72). Pin >+10 so the fingers must curl clearly
+// The strengthened grip curl (FEAT-001) sweeps the claw tips +11.1 units
+// forward open->closed (was +6.72). Pin >+10 so the claw must curl clearly
 // shut: a revert to the old curl math (only +6.72 reach) FAILS this.
-assert(fingersClosed>fingersOpen+10,'real hand() finger tips curl strongly forward as close ramps 0->1 (fails if the finger `curl` math is reverted to the old weaker curl): '+JSON.stringify({fingersOpen,fingersClosed,delta:fingersClosed-fingersOpen}));
-// (2) Stem split: render one real plant() mid/post-sever and read its green
-// stem (color [.11,.40,.16]) vertices. Whole, the stem reaches the bloom at
-// height+.75; once severed the upright stump is capped at cutY (=height*.78)
-// while the upper length rotates/drops away, so the stem's max Y falls well
-// below the whole height. Reverting the `if(severed){...}` split keeps the
-// stem a single full-height cylinder and this assertion fails.
+assert(fingersClosed>fingersOpen+10,'real hand() claw digits curl strongly forward as close ramps 0->1 (fails if the claw `curl` math is reverted to the old weaker curl): '+JSON.stringify({fingersOpen,fingersClosed,delta:fingersClosed-fingersOpen}));
+// (2) Core split: render one real plant() mid/post-delete and read its neon
+// core column (color [.16,.86,.92]) vertices. Whole, the core reaches the
+// corona at height+.75; once deleted the upright base is capped at cutY
+// (=height*.78) while the upper length rotates/drops away, so the core's max Y
+// falls well below the whole height. Reverting the `if(severed){...}` split
+// keeps the core a single full-height cylinder and this assertion fails.
 const severModel={id:'p3',tier:5,priorPruned:false};
-const stemMaxY=age=>{const mesh=three._plantMesh(severModel,2,['p3','p7'],0,age);let y=-1e9;const near=(a,b)=>Math.abs(a-b)<0.01;for(let i=0;i<mesh.data.length;i+=10)if(near(mesh.data[i+6],.11)&&near(mesh.data[i+7],.40)&&near(mesh.data[i+8],.16)&&mesh.data[i+1]>y)y=mesh.data[i+1];return y;};
-// The stump cap was lowered by fall*.12 (FEAT-001) to open a visible break, so
-// at full fall the severed stump max Y sits at cutY-0.12 world units, not cutY.
+const stemMaxY=age=>{const mesh=three._plantMesh(severModel,2,['p3','p7'],0,age);let y=-1e9;const near=(a,b)=>Math.abs(a-b)<0.01;for(let i=0;i<mesh.data.length;i+=10)if(near(mesh.data[i+6],.16)&&near(mesh.data[i+7],.86)&&near(mesh.data[i+8],.92)&&mesh.data[i+1]>y)y=mesh.data[i+1];return y;};
+// The base cap was lowered by fall*.12 (FEAT-001) to open a visible break, so
+// at full fall the deleted base max Y sits at cutY-0.12 world units, not cutY.
 const stemWhole=stemMaxY(0.80),stemSevered=stemMaxY(3.0),cutWorldY=4.63*.78-0.12+.75;
-assert(stemWhole>5.3,'whole rose stem reaches up to the bloom head before contact: '+stemWhole);
-assert(stemSevered<stemWhole-0.9,'real plant() stem splits: severed stump max Y drops well below the whole-stem height (fails if the stem split is reverted): '+JSON.stringify({stemWhole,stemSevered,drop:stemWhole-stemSevered}));
-assert(Math.abs(stemSevered-cutWorldY)<0.1,'severed stump is capped near the lowered cut line cutY=height*.78-fall*.12, not the full height: '+JSON.stringify({stemSevered,cutWorldY}));
-// (3) ON-SCREEN VISIBILITY pin (FEAT-003): the whole point of the sever is that
-// the viewer SEES the bloom tumble off the stump, so we assert the actual
-// rendered motion of the severed TOP piece, not just that geometry exists. Read
-// the real petal (kind 6) centroid from plant() while standing vs at full fall
-// (age 1.65s = the end of the 0.72s fall ramp for an ordinary cut). FEAT-001
-// strengthened the drop to ~4.05 (was ~2.4) and the sideways drift to ~2.72
-// (was ~1.9); the fingertips travel ~11.1 forward (was ~6.72). These thresholds
-// sit strictly above the OLD baseline and just below the NEW measured values, so
-// reducing any magnitude back to the old (subtler) sever FAILS this regression.
-const petalCentroid=age=>{const mesh=three._plantMesh(severModel,2,['p3','p7'],0,age);let sx=0,sy=0,n=0;for(let i=0;i<mesh.data.length;i+=10)if(mesh.data[i+9]===6){sx+=mesh.data[i];sy+=mesh.data[i+1];n++;}assert(n>0,'severed bloom emits petal (kind 6) vertices');return {x:sx/n,y:sy/n};};
+assert(stemWhole>5.3,'whole avatar core reaches up to the corona head before contact: '+stemWhole);
+assert(stemSevered<stemWhole-0.9,'real plant() core splits: deleted base max Y drops well below the whole-core height (fails if the core split is reverted): '+JSON.stringify({stemWhole,stemSevered,drop:stemWhole-stemSevered}));
+assert(Math.abs(stemSevered-cutWorldY)<0.1,'deleted base is capped near the lowered cut line cutY=height*.78-fall*.12, not the full height: '+JSON.stringify({stemSevered,cutWorldY}));
+// (3) ON-SCREEN VISIBILITY pin (FEAT-003): the whole point of the delete is that
+// the viewer SEES the avatar's corona tumble off the base, so we assert the
+// actual rendered motion of the deleted TOP piece, not just that geometry
+// exists. Read the real corona accent (kind 6) centroid from plant() while
+// standing vs at full fall (age 1.65s = the end of the 0.72s fall ramp for an
+// ordinary cut). FEAT-001 strengthened the drop to ~4.05 (was ~2.4) and the
+// sideways drift to ~2.72 (was ~1.9); the claw tips travel ~11.1 forward (was
+// ~6.72). These thresholds sit strictly above the OLD baseline and just below
+// the NEW measured values, so reducing any magnitude back to the old (subtler)
+// delete FAILS this regression.
+const petalCentroid=age=>{const mesh=three._plantMesh(severModel,2,['p3','p7'],0,age);let sx=0,sy=0,n=0;for(let i=0;i<mesh.data.length;i+=10)if(mesh.data[i+9]===6){sx+=mesh.data[i];sy+=mesh.data[i+1];n++;}assert(n>0,'deleted avatar emits corona accent (kind 6) vertices');return {x:sx/n,y:sy/n};};
 const bloomStanding=petalCentroid(0),bloomFallen=petalCentroid(1.65);
 const bloomDrop=bloomStanding.y-bloomFallen.y,bloomDrift=Math.abs(bloomFallen.x-bloomStanding.x);
-assert(bloomDrop>=3.4,'severed bloom visibly DROPS at full fall, far below the old ~2.4 baseline (fails if the drop magnitude is reverted): '+JSON.stringify({bloomDrop,bloomStandingY:bloomStanding.y,bloomFallenY:bloomFallen.y}));
-assert(bloomDrift>=2.3,'severed bloom visibly DRIFTS sideways at full fall, past the old ~1.9 baseline (fails if the drift magnitude is reverted): '+JSON.stringify({bloomDrift,bloomStandingX:bloomStanding.x,bloomFallenX:bloomFallen.x}));
-assert(fingersClosed-fingersOpen>=10,'fingertip forward travel reads on screen at >=10 units, past the old ~6.72 baseline (fails if the curl is reverted): '+JSON.stringify({fingerTravel:fingersClosed-fingersOpen}));
+assert(bloomDrop>=3.4,'deleted corona visibly DROPS at full fall, far below the old ~2.4 baseline (fails if the drop magnitude is reverted): '+JSON.stringify({bloomDrop,bloomStandingY:bloomStanding.y,bloomFallenY:bloomFallen.y}));
+assert(bloomDrift>=2.3,'deleted corona visibly DRIFTS sideways at full fall, past the old ~1.9 baseline (fails if the drift magnitude is reverted): '+JSON.stringify({bloomDrift,bloomStandingX:bloomStanding.x,bloomFallenX:bloomFallen.x}));
+assert(fingersClosed-fingersOpen>=10,'claw-tip forward travel reads on screen at >=10 units, past the old ~6.72 baseline (fails if the curl is reverted): '+JSON.stringify({fingerTravel:fingersClosed-fingersOpen}));
 now=1520;frame();assert.equal(draws,2,'animation redraws WebGL geometry each frame');
 assert.equal(three.setAction(0,model,['p3','p7']),true,'cut updates the same WebGL scene');
 assert.equal(three._debug().canvas,firstCanvas,'no canvas replacement during elimination');

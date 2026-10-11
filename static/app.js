@@ -358,23 +358,25 @@ function plantGardenModel(key){
  });
 }
 function plantSvg(level){
+ // A neon avatar / data-construct: a glowing core column with boot-up fins and
+ // an orbiting corona of data plates that grows denser with each goal tier.
  const tip=94-level*10,leafCount=Math.min(level+1,6);
  const leaf=Array.from({length:leafCount},(_,i)=>{
   const y=101-i*9,dir=i%2?-1:1,edge=18+level*1.7;
-  return `<path d="M56 ${y} Q${56+dir*11} ${y-14} ${56+dir*edge} ${y-6} Q${56+dir*9} ${y+5} 56 ${y}Z" fill="${i%2?'#5f9c54':'#85c66b'}" stroke="#315f39" stroke-width="0.8"/>`;
+  return `<path d="M56 ${y} Q${56+dir*11} ${y-14} ${56+dir*edge} ${y-6} Q${56+dir*9} ${y+5} 56 ${y}Z" fill="${i%2?'#1f9fd0':'#3fd6ec'}" stroke="#0d5c86" stroke-width="0.8"/>`;
  }).join('');
- let head='<ellipse cx="56" cy="99" rx="5" ry="6" fill="#94bd69" stroke="#486836"/>';
- if(level===1)head=`<ellipse cx="56" cy="${tip+5}" rx="6" ry="9" fill="#d78ca0" stroke="#f5c9bc"/>`;
+ let head='<ellipse cx="56" cy="99" rx="5" ry="6" fill="#4fd8ea" stroke="#0f6a8c"/>';
+ if(level===1)head=`<ellipse cx="56" cy="${tip+5}" rx="6" ry="9" fill="#ff79cf" stroke="#ffd0ef"/>`;
  if(level>=2){
   const count=level>=5?9:level>=4?8:6,r=5+level*1.25;
-  head=(level>=5?`<circle cx="56" cy="${tip+5}" r="${19+level*2}" fill="none" stroke="#e3b45d" stroke-opacity=".58" stroke-width="2" stroke-dasharray="3 5"/>`:'');
+  head=(level>=5?`<circle cx="56" cy="${tip+5}" r="${19+level*2}" fill="none" stroke="#39e3ff" stroke-opacity=".58" stroke-width="2" stroke-dasharray="3 5"/>`:'');
   head+=Array.from({length:count},(_,i)=>{
    const angle=(i/count)*Math.PI*2,x=56+Math.cos(angle)*r,y=tip+5+Math.sin(angle)*r;
-   return `<ellipse cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" rx="${(6+level*.8).toFixed(1)}" ry="${(4.4+level*.6).toFixed(1)}" fill="${i%2?'#ffb5c6':'#e96d91'}" stroke="#f9d5c8" stroke-width=".6"/>`;
-  }).join('')+`<circle cx="56" cy="${tip+5}" r="${3+level*.5}" fill="#f6cd64" stroke="#b17b39"/>`;
+   return `<ellipse cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" rx="${(6+level*.8).toFixed(1)}" ry="${(4.4+level*.6).toFixed(1)}" fill="${i%2?'#ff8fd6':'#e64bb0'}" stroke="#ffd6ef" stroke-width=".6"/>`;
+  }).join('')+`<circle cx="56" cy="${tip+5}" r="${3+level*.5}" fill="#4fe6ff" stroke="#1685ad"/>`;
  }
- const base=`<ellipse cx="56" cy="126" rx="34" ry="5" fill="#102219" opacity=".5"/><path d="M39 107 L73 107 L69 125 L43 125 Z" fill="#a77553" stroke="#e1b07d" stroke-width="1.5"/><path d="M37 105 H75 V111 H37 Z" fill="#d59d6a" stroke="#f1cd9a" stroke-width="1"/>`;
- return `<svg class="plant-art" viewBox="0 0 112 135" aria-hidden="true" focusable="false">${level>=5?`<ellipse cx="56" cy="${tip+7}" rx="30" ry="26" fill="#eec46a" opacity=".12"/>`:''}<path d="M56 109 Q${60+level} ${tip+30} 56 ${tip+8}" fill="none" stroke="#437b46" stroke-width="${2.4+level*.6}" stroke-linecap="round"/>${leaf}${head}${base}</svg>`;
+ const base=`<ellipse cx="56" cy="126" rx="34" ry="5" fill="#071320" opacity=".5"/><path d="M39 107 L73 107 L69 125 L43 125 Z" fill="#13405c" stroke="#2fb4df" stroke-width="1.5"/><path d="M37 105 H75 V111 H37 Z" fill="#1a5c82" stroke="#5fd6f1" stroke-width="1"/>`;
+ return `<svg class="plant-art" viewBox="0 0 112 135" aria-hidden="true" focusable="false">${level>=5?`<ellipse cx="56" cy="${tip+7}" rx="30" ry="26" fill="#39e3ff" opacity=".12"/>`:''}<path d="M56 109 Q${60+level} ${tip+30} 56 ${tip+8}" fill="none" stroke="#2bbfe6" stroke-width="${2.4+level*.6}" stroke-linecap="round"/>${leaf}${head}${base}</svg>`;
 }
 function plantGarden(key){
  const model=plantGardenModel(key);
@@ -409,17 +411,20 @@ function advancementButton(stage){
  return `<div class="panel divine-advance"><div><span class="eyebrow">THE SYSTEM AWAITS</span><h2>Judgement before the next trial</h2><p>Enter the grid. The system will scan the surviving nodes for five seconds before deleting this round's two eliminated competitors.</p></div><button class="accent" data-action="advance-stage" data-stage="${stage}">Continue to ${target} →</button></div>`;
 }
 function divineHandSvg(){
+ // A giant robotic/mech arm with a plasma grip-claw effector. Keeps the
+ // 'divine-hand-art' root and inner 'divine-shears' group so playback CSS and
+ // the regression tests still bind, but the art is now neon mech / laser.
  return `<svg class="divine-hand-art" viewBox="0 0 380 300" aria-hidden="true" focusable="false">
- <defs><linearGradient id="divine-gold" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#fffde8"/><stop offset=".4" stop-color="#ffdc87"/><stop offset=".8" stop-color="#c18836"/><stop offset="1" stop-color="#fff3bc"/></linearGradient><linearGradient id="divine-steel" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#caa06a"/><stop offset=".45" stop-color="#9c5a2e"/><stop offset="1" stop-color="#5c3016"/></linearGradient><filter id="divine-light"><feGaussianBlur stdDeviation="6"/></filter></defs>
- <path d="M83 0 L156 0 L162 69 Q182 82 194 104 L207 130 Q217 143 205 153 Q193 165 181 148 L154 117 L161 163 Q163 179 151 183 Q137 187 132 170 L118 125 L119 177 Q118 194 104 193 Q90 191 89 176 L88 122 L79 169 Q75 182 61 179 Q50 174 53 159 L59 89 Q63 53 83 37Z" fill="url(#divine-gold)" stroke="#fff4bd" stroke-width="5"/>
- <path d="M73 75 Q104 57 144 76 M74 97 L68 150 M99 100 L99 160 M127 95 L140 159" fill="none" stroke="#af7026" stroke-width="3" opacity=".55"/>
+ <defs><linearGradient id="divine-gold" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#dffcff"/><stop offset=".4" stop-color="#45d6ff"/><stop offset=".8" stop-color="#2a6ea8"/><stop offset="1" stop-color="#bff6ff"/></linearGradient><linearGradient id="divine-steel" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#8af0ff"/><stop offset=".45" stop-color="#19a7d6"/><stop offset="1" stop-color="#0d5c86"/></linearGradient><filter id="divine-light"><feGaussianBlur stdDeviation="6"/></filter></defs>
+ <path d="M83 0 L156 0 L162 69 Q182 82 194 104 L207 130 Q217 143 205 153 Q193 165 181 148 L154 117 L161 163 Q163 179 151 183 Q137 187 132 170 L118 125 L119 177 Q118 194 104 193 Q90 191 89 176 L88 122 L79 169 Q75 182 61 179 Q50 174 53 159 L59 89 Q63 53 83 37Z" fill="url(#divine-gold)" stroke="#cffaff" stroke-width="5"/>
+ <path d="M73 75 Q104 57 144 76 M74 97 L68 150 M99 100 L99 160 M127 95 L140 159" fill="none" stroke="#2bc3ef" stroke-width="3" opacity=".65"/>
  <g class="divine-shears" stroke-linejoin="round">
- <path d="M170 145 L333 30 Q313 105 194 175Z" fill="url(#divine-steel)" stroke="#d8b483" stroke-width="5"/>
- <path class="divine-moving-blade" d="M174 156 L346 228 Q270 227 196 178Z" fill="url(#divine-steel)" stroke="#d8b483" stroke-width="5"/>
- <circle cx="184" cy="165" r="12" fill="#ffdf93" stroke="#fff5be" stroke-width="4"/>
- <path d="M184 165 L117 222 M184 165 L219 235" fill="none" stroke="#d0a15c" stroke-width="17" stroke-linecap="round"/>
- <ellipse cx="99" cy="238" rx="28" ry="19" fill="none" stroke="#ffdb82" stroke-width="14" transform="rotate(-38 99 238)"/>
- <ellipse cx="231" cy="249" rx="30" ry="18" fill="none" stroke="#ffdb82" stroke-width="14" transform="rotate(30 231 249)"/>
+ <path d="M170 145 L333 30 Q313 105 194 175Z" fill="url(#divine-steel)" stroke="#9ff2ff" stroke-width="5"/>
+ <path class="divine-moving-blade" d="M174 156 L346 228 Q270 227 196 178Z" fill="url(#divine-steel)" stroke="#9ff2ff" stroke-width="5"/>
+ <circle cx="184" cy="165" r="12" fill="#39e3ff" stroke="#d6fbff" stroke-width="4"/>
+ <path d="M184 165 L117 222 M184 165 L219 235" fill="none" stroke="#1f9fd0" stroke-width="17" stroke-linecap="round"/>
+ <ellipse cx="99" cy="238" rx="28" ry="19" fill="none" stroke="#ff57c6" stroke-width="14" transform="rotate(-38 99 238)"/>
+ <ellipse cx="231" cy="249" rx="30" ry="18" fill="none" stroke="#ff57c6" stroke-width="14" transform="rotate(30 231 249)"/>
  </g></svg>`;
 }
 function divineModels(stage){
@@ -436,15 +441,15 @@ function renderDivineScene(stage,cuts,latest=-1){
  const flowers=models.map((p,n)=>{
   const idx=cuts.indexOf(p.id),severed=idx>=0&&idx<latest,severing=idx>=0&&idx===latest;
   const cls=p.priorPruned?'prior-pruned':severed?'severed':severing?'severing':'';
-  return `<div class="divine-plant ${cls}" data-player="${p.id}" data-goals="${p.goals}"><div class="divine-stems">${plantSvg(p.tier)}</div><strong class="divine-name">${esc(p.name)}</strong><small>${p.goals} ${p.goals===1?'GOAL':'GOALS'}</small><em class="divine-stage-name">${esc(plantNames[p.tier]||'Rose')}</em><b class="divine-cut-label">${p.priorPruned||severed?'PRUNED':severing?'TARGETED':''}</b></div>`;
+  return `<div class="divine-plant ${cls}" data-player="${p.id}" data-goals="${p.goals}"><div class="divine-stems">${plantSvg(p.tier)}</div><strong class="divine-name">${esc(p.name)}</strong><small>${p.goals} ${p.goals===1?'GOAL':'GOALS'}</small><em class="divine-stage-name">${esc(plantNames[p.tier]||'Node')}</em><b class="divine-cut-label">${p.priorPruned||severed?'DELETED':severing?'TARGETED':''}</b></div>`;
  }).join('');
  const html=`<div class="divine-scene ${latest>=0?'is-cutting':'is-thinking'}" data-stage="${stage}" style="--strike-x:${strikeX}%;--strike-y:${strikeY}%">`+
-  `<canvas class="divine-canvas" aria-label="A gigantic luminous hand and silver shears emerging from a portal above ten three-dimensional player plants"></canvas>`+
+  `<canvas class="divine-canvas" aria-label="A gigantic neon mech arm and plasma grip-claw descending through a vortex above ten three-dimensional neon avatars"></canvas>`+
   `<div class="divine-stars"></div><div class="divine-halo"></div><div class="divine-portal" aria-hidden="true"></div>`+
   `<div class="divine-judge">${divineHandSvg()}</div>`+
-  `<div class="divine-oracle">${latest<0?'THE HAND DELIBERATES':'THE VERDICT IS ABSOLUTE'}</div>`+
+  `<div class="divine-oracle">${latest<0?'THE SYSTEM SCANS':'THE VERDICT IS ABSOLUTE'}</div>`+
   `<div class="divine-plants">${flowers}</div><div class="divine-flash"></div>`+
-  `<div class="divine-progress">${latest<0?'JUDGEMENT IN 5 SECONDS':`PRUNING ${latest+1} OF ${cuts.length}`}</div></div>`;
+  `<div class="divine-progress">${latest<0?'VERDICT IN 5 SECONDS':`DELETING ${latest+1} OF ${cuts.length}`}</div></div>`;
  const host=$('#cutscene-stage');
  // One continuous WebGL scene: do not destroy the canvas, reset the portal
  // clock, or teleport the camera between targets.
@@ -458,12 +463,12 @@ function renderDivineScene(stage,cuts,latest=-1){
    if(!plant)continue;
    plant.className='divine-plant '+(p.priorPruned?'prior-pruned':old?'severed':selected?'severing':'');
    const badge=plant.querySelector('.divine-cut-label');
-   if(badge)badge.textContent=p.priorPruned||old?'PRUNED':selected?'TARGETED':'';
+   if(badge)badge.textContent=p.priorPruned||old?'DELETED':selected?'TARGETED':'';
   }
   const oracle=host.querySelector('.divine-oracle');
   if(oracle)oracle.textContent='THE VERDICT IS ABSOLUTE';
   const progress=host.querySelector('.divine-progress');
-  if(progress)progress.textContent='PRUNING '+(latest+1)+' OF '+cuts.length;
+  if(progress)progress.textContent='DELETING '+(latest+1)+' OF '+cuts.length;
   return;
  }
  host.innerHTML=html;
@@ -483,13 +488,13 @@ function strikeDivinePlant(stage,cuts,i){
   if(stage==='final'){
    const winner=view.final.rows.find(p=>p.rank===1);
    window.Divine3D?.celebrate?.(winner?.id);
-   $('#cutscene-caption').innerHTML='<strong>THE CHAMPION AWAKENS</strong><br>'+esc(winner?.name||'THE LAST BLOOM');
+   $('#cutscene-caption').innerHTML='<strong>THE CHAMPION COMES ONLINE</strong><br>'+esc(winner?.name||'THE LAST BLOOM');
    const label=Array.from($('#cutscene-stage').querySelectorAll?.('.divine-plant')||[]).find(el=>el.dataset.player===winner?.id);
    label?.classList.add('divine-champion');
-   const badge=label?.querySelector('.divine-cut-label');if(badge)badge.textContent='CHAMPION’S CROWN';
+   const badge=label?.querySelector('.divine-cut-label');if(badge)badge.textContent='CHAMPION NODE';
    schedule(()=>{window.Divine3D?.stop?.();revealFinalWinners(cutsceneRunId);},4500);
   }else{
-   $('#cutscene-caption').innerHTML='<strong>THE TWO HAVE BEEN PRUNED</strong><br>THE NEXT TRIAL AWAITS';
+   $('#cutscene-caption').innerHTML='<strong>THE TWO HAVE BEEN DELETED</strong><br>THE NEXT TRIAL AWAITS';
    schedule(()=>{const overlay=$('#cutscene');overlay.classList.add('divine-leaving');schedule(endCutscene,650);},850);
   }
   return;
@@ -497,23 +502,23 @@ function strikeDivinePlant(stage,cuts,i){
  renderDivineScene(stage,cuts,i);
  const p=view[stage].rows.find(r=>r.id===cuts[i]);
  const finale=stage==='final'&&i>=3;
- $('#cutscene-caption').innerHTML=finale?'<strong>'+ (i===3?'THREE ROSES REMAIN':'TWO ROSES REMAIN')+'</strong><br>THE SHEARS HESITATE':'<strong>THE HAND CHOOSES.</strong><br>'+esc(p?.name||'');
- // Contact happens 950ms after the movement starts; the name, blade closure,
- // collapse and metallic audio belong to that same moment, not the scene start.
+ $('#cutscene-caption').innerHTML=finale?'<strong>'+ (i===3?'THREE AVATARS REMAIN':'TWO AVATARS REMAIN')+'</strong><br>THE BEAM HESITATES':'<strong>THE SYSTEM TARGETS.</strong><br>'+esc(p?.name||'');
+ // Contact happens 950ms after the movement starts; the name, grip closure,
+ // power-down and audio belong to that same moment, not the scene start.
  schedule(()=>{
   window.BrawlAudio?.shears?.();
   const plant=Array.from($('#cutscene-stage').querySelectorAll?.('.divine-plant')||[])
     .find(e=>e.dataset.player===cuts[i]);
   plant?.classList.remove('severing');plant?.classList.add('severed');
   const badge=plant?.querySelector('.divine-cut-label');
-  if(badge)badge.textContent='PRUNED';
-  $('#cutscene-caption').innerHTML='<strong>SNIP! · PRUNED</strong><br>'+esc(p?.name||'');
+  if(badge)badge.textContent='DELETED';
+  $('#cutscene-caption').innerHTML='<strong>DELETE! · PURGED</strong><br>'+esc(p?.name||'');
  },divineCutContact(stage,i));
  schedule(()=>strikeDivinePlant(stage,cuts,i+1),divineCutDuration(stage,i));
 }
 function beginDivineJudgement(stage,cuts){
  renderDivineScene(stage,cuts);
- $('#cutscene-caption').innerHTML='<strong>SILENCE. THE HAND CONSIDERS.</strong><br>TEN ROOTS. ONLY THE STRONG CONTINUE.';
+ $('#cutscene-caption').innerHTML='<strong>SILENCE. THE SYSTEM SCANS.</strong><br>TEN NODES. ONLY THE STRONG REMAIN ONLINE.';
  schedule(()=>strikeDivinePlant(stage,cuts,0),5000);
 }
 function playDivineCutscene(stage){
@@ -527,8 +532,8 @@ function playDivineCutscene(stage){
   ceremonyLabel=stageMeta[stage].label;ceremonyStage=stage;
   overlay.classList.remove('divine-leaving');overlay.classList.add('divine-mode','open');
   overlay.hidden=false;overlay.setAttribute?.('aria-hidden','false');
-  $('#cutscene .eyebrow').textContent='THE GARDENER’S JUDGEMENT';
-  $('#cutscene-label').textContent=stageMeta[stage].label+' · DIVINE SELECTION';
+  $('#cutscene .eyebrow').textContent='THE SYSTEM’S VERDICT';
+  $('#cutscene-label').textContent=stageMeta[stage].label+' · SYSTEM PURGE';
   overlay.showModal();overlay.focus?.({preventScroll:true});
   cutsceneKeyHandler=e=>{if(e.key==='Escape'||e.key==='Esc'){e.preventDefault?.();e.stopPropagation?.();endCutscene();}};
   document.addEventListener?.('keydown',cutsceneKeyHandler,true);
@@ -1152,14 +1157,18 @@ let ceremonyLabel="",ceremonyStage="",cutsceneRunId=0,cutsceneReturnResult=false
 const titled=(label,suffix)=>(label?label+': ':'')+suffix;
 const schedule=(fn,ms)=>cutsceneTimers.push(setTimeout(()=>{if(cutsceneActive)fn();},ms));
 const verdictPhases=['enter','judge','down','hook','drag','gone','summary'];
-const verdictCaptions={enter:'THE GARDENER CALLS YOUR NAME',judge:'THE SHEARS RISE',down:'SNIP!',hook:'FLUNG INTO THE COMPOST',drag:'COMPOST IMPACT',gone:'PRUNED'};
+// Captions retheme to the neon purge; 'PRUNED'/'SNIP!' tokens stay for the
+// verdict regression test and the preserved gv-* fallback art classes.
+const verdictCaptions={enter:'THE SYSTEM LOCKS YOUR NODE',judge:'THE BEAM CHARGES',down:'SNIP!',hook:'HURLED INTO THE VOID',drag:'PURGE IMPACT',gone:'PRUNED'};
 const verdictSounds={judge:a=>a.horn(),down:a=>a.shears(),hook:a=>a.hook(),drag:a=>a.compost(),gone:a=>a.slam()};
 function verdictBackdrop(){
+ // Neon-city fallback art reusing the gv-* class hooks: dark grid, holo arch,
+ // a mech-arm effector and a void bin instead of the garden/gardener/shears.
  return '<div class="gv-sky"></div><div class="gv-palace"></div><div class="gv-hedge gv-hedge-left"></div><div class="gv-hedge gv-hedge-right"></div>'
-  +'<div class="gv-path"></div><div class="gv-rose-arch"></div><div class="gv-compost"><b>COMPOST HEAP</b><i></i><i></i><i></i></div>'
+  +'<div class="gv-path"></div><div class="gv-rose-arch"></div><div class="gv-compost"><b>VOID BIN</b><i></i><i></i><i></i></div>'
   +'<div class="gv-gardener"><svg viewBox="0 0 130 190" aria-hidden="true"><path class="gv-hat" d="M14 45L62 7L110 45Z M0 47H125V57H0Z"/><circle cx="63" cy="66" r="21"/><path class="gv-coat" d="M37 91L87 91L108 145L20 145Z"/><path class="gv-body" d="M43 144L36 189M83 144L91 189M38 103L17 134M87 103L112 131"/></svg></div>'
   +'<svg class="gv-shears" viewBox="0 0 190 170" aria-hidden="true"><path class="gv-blade gv-blade-a" d="M84 102L22 4L95 80Z"/><path class="gv-blade gv-blade-b" d="M84 102L164 13L95 80Z"/><circle class="gv-pivot" cx="84" cy="102" r="8"/><circle class="gv-handle" cx="52" cy="139" r="19"/><circle class="gv-handle" cx="120" cy="140" r="19"/><path class="gv-handle-bar" d="M84 102L52 125M84 102L120 126"/></svg>'
-  +'<div class="gv-snip">SNIP!</div><div class="gv-pruned">PRUNED</div>';
+  +'<div class="gv-snip">DELETE!</div><div class="gv-pruned">PURGED</div>';
 }
 const stickman=name=>'<div class="av-player"><svg class="av-stickman" viewBox="0 0 60 120" aria-hidden="true"><circle class="av-head" cx="30" cy="14" r="10"/><line class="av-body" x1="30" y1="24" x2="30" y2="70"/><line class="av-arm av-arm-l" x1="30" y1="36" x2="12" y2="56"/><line class="av-arm av-arm-r" x1="30" y1="36" x2="48" y2="56"/><line class="av-leg av-leg-l" x1="30" y1="70" x2="16" y2="112"/><line class="av-leg av-leg-r" x1="30" y1="70" x2="44" y2="112"/></svg><span class="av-name">'+esc(name)+'</span></div>';
 const laurelSvg=cls=>'<svg class="'+cls+'" viewBox="0 0 120 80" aria-hidden="true"><path d="M60 74C30 70 14 48 18 14M60 74C90 70 106 48 102 14"/>'+
@@ -1224,20 +1233,20 @@ async function startGateCeremony(){
   return;
  }
  setVerdictClass('');overlay.classList.remove('verdict-mode','final-mode');overlay.classList.add('crown-mode');
- $('#cutscene .eyebrow').textContent='ROUND COMPLETE';$('#cutscene-label').textContent=titled(ceremonyLabel,'The pavilion blooms');
+ $('#cutscene .eyebrow').textContent='ROUND COMPLETE';$('#cutscene-label').textContent=titled(ceremonyLabel,'The node comes online');
  runCrownFallback(ceremonyLabel);
 }
-// Used when the 3D garden is unavailable: a floral card represents the pavilion ceremony.
+// Used when the 3D grid is unavailable: a neon card represents the node ceremony.
 function runCrownFallback(label){
  if(!cutsceneActive)return;
  label=String(label||'');
- $('#cutscene-stage').innerHTML='<div class="crown-card">'+laurelSvg('crown-laurel')+'<strong class="crown-label">PAVILION OPEN · '+esc(label)+'</strong></div>';
- $('#cutscene-caption').innerHTML='<strong>THE ROSES BLOOM</strong><br>'+esc(label);
+ $('#cutscene-stage').innerHTML='<div class="crown-card">'+laurelSvg('crown-laurel')+'<strong class="crown-label">NODE ONLINE · '+esc(label)+'</strong></div>';
+ $('#cutscene-caption').innerHTML='<strong>THE GRID CHARGES</strong><br>'+esc(label);
  window.BrawlAudio?.fanfare();
  schedule(endCutscene,reducedMotion()?1500:2500);
 }
 
-// Final verdict: the gardener prunes the five losing finalists; one $30 champion survives.
+// Final verdict: the system deletes the five losing finalists; one $30 champion survives.
 let finalWinners=null;
 function finalRoster(){
  const rows=Array.isArray(view?.final?.rows)?view.final.rows:[];
@@ -1296,8 +1305,8 @@ function playCutscene(names,roundLabel='',stage=''){
   const verdict=stage==='round1'||stage==='round2',label=String(roundLabel||'');
   ceremonyLabel=roundLabel||'Final';ceremonyStage=stage||'final';
   overlay.classList.toggle('verdict-mode',verdict);overlay.classList.toggle('final-mode',stage==='final');
-  $('#cutscene .eyebrow').textContent=verdict?'THE GARDENER HAS SPOKEN':stage==='final'?"THE GARDENER'S VERDICT":'ROUND COMPLETE';
-  $('#cutscene-label').textContent=verdict?titled(label,'PRUNED'):stage==='final'?titled(label,'The final pruning'):titled(String(ceremonyLabel),'The pavilion blooms');
+  $('#cutscene .eyebrow').textContent=verdict?'THE SYSTEM HAS SPOKEN':stage==='final'?"THE SYSTEM'S VERDICT":'ROUND COMPLETE';
+  $('#cutscene-label').textContent=verdict?titled(label,'PURGED'):stage==='final'?titled(label,'The final purge'):titled(String(ceremonyLabel),'The node comes online');
   overlay.hidden=false;if(overlay.setAttribute)overlay.setAttribute('aria-hidden','false');overlay.classList.add('open');
   // Native top layer keeps the cutscene above both scoring and tie-result dialogs.
   overlay.showModal();

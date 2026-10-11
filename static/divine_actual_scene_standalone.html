@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Divine Selection — Actual WebGL Source (Offline)</title>
+<title>The System's Verdict — Actual WebGL Source (Offline)</title>
 <style>
 *{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#0b141b;color:#e4e9e6;font-family:system-ui,sans-serif}
 main{max-width:1550px;margin:0 auto;padding:16px}.nav{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px}.nav h1{font:normal clamp(26px,4vw,44px) Georgia,serif;letter-spacing:.08em;flex:1;margin:0}.nav button,.nav select{padding:9px 12px;font:600 12px system-ui;background:#233847;color:#eaf6f7;border:1px solid #829caf;border-radius:4px;cursor:pointer}
@@ -11,16 +11,18 @@ main{max-width:1550px;margin:0 auto;padding:16px}.nav{display:flex;gap:8px;align
 @media(max-width:650px){main{padding:6px}.scene{min-height:520px;height:78vh}.caption{bottom:174px}.plate{padding:2px}.plate strong{font-size:9px}.plate small,.plate em{font-size:8px}.nav h1{flex-basis:100%}}
 </style>
 </head><body><main>
-<div class="nav"><h1>Divine Selection</h1><select id="round"><option value="round1">Know Thy Nature · 2 cuts</option><option value="round2">Adapt or Wither · 2 cuts</option><option value="final">The Last Bloom · 5 cuts</option></select><button id="again">Replay actual 3D scene</button><button id="full">Fullscreen</button></div>
-<div class="scene" id="scene"><canvas id="canvas" aria-label="Original Brawl Hockey Divine Selection 3D cutscene"></canvas><div class="title"><span id="phase">PORTAL EMERGENCE</span><span>LIVE WEBGL · FROM THE TOURNAMENT CODE</span></div><div class="caption" id="caption">The ancient hand emerges from the portal.</div><div class="plates" id="plates"></div></div>
-<div class="foot"><span id="info">Real WebGL scene loading…</span><span>Five-second judgment · 10 growth-stage plants · 3 tournament rounds</span></div>
-<p class="note">This file embeds the exact 3D renderer from the GitHub project at creation time. Names and goals are illustrative. In this preview, the lowest-scoring eligible players are pruned, and eliminated flowers remain withered in later rounds. The real tournament also evaluates wins, placement and tiebreakers.</p>
+<div class="nav"><h1>The System's Verdict</h1><select id="round"><option value="round1">Know Thy Nature · 2 cuts</option><option value="round2">Adapt or Wither · 2 cuts</option><option value="final">The Last Bloom · 5 cuts</option></select><button id="again">Replay actual 3D scene</button><button id="full">Fullscreen</button></div>
+<div class="scene" id="scene"><canvas id="canvas" aria-label="Brawl Hockey elimination cutscene: a giant mech arm deleting neon avatars"></canvas><div class="title"><span id="phase">VORTEX EMERGENCE</span><span>LIVE WEBGL · FROM THE TOURNAMENT CODE</span></div><div class="caption" id="caption">The mech arm descends through the neon vortex.</div><div class="plates" id="plates"></div></div>
+<div class="foot"><span id="info">Real WebGL scene loading…</span><span>Five-second scan · 10 boot-up-stage avatars · 3 tournament rounds</span></div>
+<p class="note">This file embeds the exact 3D renderer from the GitHub project at creation time. Names and goals are illustrative. In this preview, the lowest-scoring eligible players are deleted, and purged avatars stay powered-down in later rounds. The real tournament also evaluates wins, placement and tiebreakers.</p>
 </main>
 <script>
-/* Royal Garden Divine Selection: the same dependency-free, low-poly WebGL
- * geometry approach as city.js, rendered into an independent cinematic canvas.
- * All plants, the golden hand, and the articulated giant shears are genuine 3D
- * meshes with normals, lighting, depth testing and a perspective camera. */
+/* THE SYSTEM'S VERDICT: the same dependency-free, low-poly WebGL geometry
+ * approach as city.js, rendered into an independent cinematic canvas. All neon
+ * avatars, the giant mech arm, and its articulated plasma grip-claw are genuine
+ * 3D meshes with normals, lighting, depth testing and a perspective camera.
+ * Retro-'80s synthwave / TRON: neon cyan + magenta on near-black, glowing
+ * wireframe, grid horizon, CRT scanline. The SYSTEM scans then DELETES. */
 (function(){
  'use strict';
  const TAU=Math.PI*2,clamp=(n,a=0,b=1)=>Math.max(a,Math.min(b,n));
@@ -120,155 +122,163 @@ main{max-width:1550px;margin:0 auto;padding:16px}.nav{display:flex;gap:8px;align
   }
  }
 
- // The same geometry style as the 3D garden, rebuilt into a richly layered,
- // formal royal grounds. Structural meshes are cached: dynamic action remains
- // only the 10 living competitors, vortex, floating petals and enormous hand.
- function hedge(m,x,y,z,w,d,h=2.1){
-  m.box(x,y+h/2,z,w,h,d,[.09,.23,.13],5);
-  m.box(x,y+h-.17,z,w+.15,.45,d+.15,[.15,.39,.20],5);
+ // The same geometry style as the 3D grid city, rebuilt into a layered neon
+ // skyline. Structural meshes are cached: dynamic action remains only the 10
+ // living competitors, the vortex, drifting data-motes and the giant mech arm.
+ function wall(m,x,y,z,w,d,h=2.1){
+  // Low neon barrier bar: dark base rail with a glowing emissive cap stripe.
+  m.box(x,y+h/2,z,w,h,d,[.05,.07,.12],5);
+  m.box(x,y+h-.17,z,w+.15,.45,d+.15,[.14,.72,.86],5);
   const n=Math.ceil((w>d?w:d)/2.1);
   for(let i=0;i<n;i++){
    const alongX=w>d,t=(i+.5)/n-.5,px=x+(alongX?t*w:0),pz=z+(alongX?0:t*d);
-   m.gem(px,y+h+.14,pz,.31,[.23,.47,.24],5,.55);
+   m.gem(px,y+h+.14,pz,.31,[.95,.24,.72],2,.55);
   }
  }
- function rose(m,x,y,z,tier=3,palette=0){
-  const stems=[[.91,.47,.61],[.97,.73,.53],[.81,.66,.97],[1,.89,.64]];
-  const col=stems[Math.floor(Math.abs(palette))%4];
+ function holoSign(m,x,y,z,tier=3,palette=0){
+  // A tiny holographic sign post: emissive stalk crowned with a neon glyph.
+  const tints=[[.17,.95,.92],[.95,.26,.74],[.60,.42,.98],[.98,.80,.32]];
+  const col=tints[Math.floor(Math.abs(palette))%4];
   const height=.24+.11*tier;
-  m.cylinder([x,y,z],[x,y+height,z],.065,[.13,.42,.20],.043,6);
-  if(tier<2){m.gem(x,y+height,z,.14,[.18,.59,.29],0,1.2);return;}
-  m.gem(x,y+height,z,.19,[.99,.90,.58],2,1.0);
+  m.cylinder([x,y,z],[x,y+height,z],.065,[.20,.60,.80],.043,6);
+  if(tier<2){m.gem(x,y+height,z,.14,[.24,.78,.92],2,1.2);return;}
+  m.gem(x,y+height,z,.19,[.20,.95,.95],2,1.0);
   for(let i=0;i<5;i++){
    const a=i*TAU/5;
    m.gem(x+Math.cos(a)*.20,y+height+.055,z+Math.sin(a)*.20,.19,col,6,.85);
   }
  }
- function lamp(m,x,z,scale=1){
-  m.box(x,1.55*scale,z,.18*scale,3.1*scale,.18*scale,[.66,.64,.48]);
-  m.gem(x,3.15*scale,z,.48*scale,[.96,.78,.36],2,1.2);
-  m.box(x,3.64*scale,z,.77*scale,.15*scale,.77*scale,[.88,.71,.37]);
-  m.gem(x,3.9*scale,z,.32*scale,[1,.93,.62],2,1.4);
+ function pylon(m,x,z,scale=1){
+  // Street grid light pylon with a magenta lamp halo.
+  m.box(x,1.55*scale,z,.18*scale,3.1*scale,.18*scale,[.14,.18,.26]);
+  m.gem(x,3.15*scale,z,.48*scale,[.98,.30,.74],2,1.2);
+  m.box(x,3.64*scale,z,.77*scale,.15*scale,.77*scale,[.20,.72,.90],2);
+  m.gem(x,3.9*scale,z,.32*scale,[.40,.95,1],2,1.4);
  }
- function arch(m,x,z,wide=5.0){
-  const stone=[.81,.78,.66],trim=[.83,.67,.37];
-  m.box(x-wide/2,3.0,z,.62,6,.72,stone,1);
-  m.box(x+wide/2,3.0,z,.62,6,.72,stone,1);
-  m.box(x,6.1,z,wide+.8,.65,.95,stone,1);
-  m.box(x,6.58,z,wide+.9,.24,1.04,trim);
+ function neonArch(m,x,z,wide=5.0){
+  // Glowing TRON gateway arch straddling the grid avenue.
+  const frame=[.08,.12,.20],trim=[.18,.86,.92];
+  m.box(x-wide/2,3.0,z,.62,6,.72,frame,1);
+  m.box(x+wide/2,3.0,z,.62,6,.72,frame,1);
+  m.box(x,6.1,z,wide+.8,.65,.95,frame,1);
+  m.box(x,6.58,z,wide+.9,.24,1.04,trim,2);
   for(let k=0;k<8;k++){
    const a=k*Math.PI/7,r=wide*.55;
-   m.gem(x-r*Math.cos(a),6+Math.sin(a)*2.0,z+.22,.40,[.17,.43,.21],5,1.3);
+   m.gem(x-r*Math.cos(a),6+Math.sin(a)*2.0,z+.22,.40,[.95,.26,.74],2,1.3);
   }
-  for(let k=0;k<5;k++)rose(m,x+(k-2)*wide/5,6.43,z+.35,3,k);
+  for(let k=0;k<5;k++)holoSign(m,x+(k-2)*wide/5,6.43,z+.35,3,k);
  }
- function topiary(m,x,z,height=7){
-  const dark=[.10,.28,.16],light=[.23,.46,.25];
-  m.cylinder([x,0,z],[x,height*.6,z],.36,[.35,.26,.16],.24,7);
+ function dataSpire(m,x,z,height=7){
+  // Clustered emissive data-node obelisk, a stand-in for a wireframe tree.
+  const dark=[.05,.10,.18],light=[.20,.88,.92];
+  m.cylinder([x,0,z],[x,height*.6,z],.36,[.10,.14,.22],.24,7);
   for(let j=0;j<3;j++){
    const y=height*(.43+j*.21),r=(1.6-j*.26);
    m.sphere([x,y,z],r,.85+j*.06,r,dark,5,5,9);
-   m.gem(x,y+.66,z,r*.71,light,5,.54);
+   m.gem(x,y+.66,z,r*.71,light,2,.54);
   }
-  m.gem(x,height+.55,z,.35,[.88,.72,.37],2,1.4);
+  m.gem(x,height+.55,z,.35,[.98,.32,.76],2,1.4);
  }
- function fountain(m,x,z){
-  const pale=[.84,.83,.76],blue=[.19,.55,.62],shimmer=[.57,.82,.87];
-  m.cylinder([x,.05,z],[x,.50,z],3.6,pale,3.9,20);
-  m.cylinder([x,.54,z],[x,.62,z],3.15,blue,3.12,20);
-  m.cylinder([x,.15,z],[x,1.52,z],.61,pale,.64,12);
-  m.cylinder([x,1.48,z],[x,1.70,z],1.63,pale,1.72,14);
-  m.cylinder([x,1.71,z],[x,1.75,z],1.34,blue,1.34,14);
-  m.gem(x,2.55,z,.49,[.96,.77,.40],2,1.45);
+ function dataWell(m,x,z){
+  // A circular holo-fountain: concentric neon rings over a dark basin, with
+  // light jets of cyan data arcing outward like spraying water.
+  const base=[.06,.09,.16],ring=[.16,.80,.90],spray=[.55,.92,1];
+  m.cylinder([x,.05,z],[x,.50,z],3.6,base,3.9,20);
+  m.cylinder([x,.54,z],[x,.62,z],3.15,ring,3.12,20,2);
+  m.cylinder([x,.15,z],[x,1.52,z],.61,base,.64,12);
+  m.cylinder([x,1.48,z],[x,1.70,z],1.63,base,1.72,14);
+  m.cylinder([x,1.71,z],[x,1.75,z],1.34,ring,1.34,14,2);
+  m.gem(x,2.55,z,.49,[.98,.34,.78],2,1.45);
   for(let j=0;j<12;j++){
    const a=j*TAU/12,u=x+2.45*Math.cos(a),v=z+2.45*Math.sin(a);
-   m.gem(u,.77,v,.17,shimmer,2,1.9);
+   m.gem(u,.77,v,.17,spray,2,1.9);
   }
   for(let i=0;i<8;i++){
    const a=i*TAU/8;
    m.cylinder([x+Math.cos(a)*.85,1.72,z+Math.sin(a)*.85],
-      [x+Math.cos(a)*2.55,.67,z+Math.sin(a)*2.55],.042,shimmer,.024,5,2);
+      [x+Math.cos(a)*2.55,.67,z+Math.sin(a)*2.55],.042,spray,.024,5,2);
   }
  }
- function gazebo(m,x,z){
-  const cream=[.83,.78,.65],gold=[.90,.69,.32];
-  m.cylinder([x,0,z],[x,.52,z],5.0,cream,5.0,12);
+ function holoPavilion(m,x,z){
+  // Hovering holo-canopy on neon columns, a floating city kiosk.
+  const strut=[.10,.16,.26],glow=[.95,.30,.76];
+  m.cylinder([x,0,z],[x,.52,z],5.0,strut,5.0,12);
   for(let i=0;i<8;i++){
    const a=i*TAU/8,p=[x+Math.cos(a)*4.0,z+Math.sin(a)*4.0];
-   m.cylinder([p[0],.52,p[1]],[p[0],6.8,p[1]],.34,cream,.34,8);
-   m.gem(p[0],6.98,p[1],.5,gold,2,.45);
+   m.cylinder([p[0],.52,p[1]],[p[0],6.8,p[1]],.34,strut,.34,8);
+   m.gem(p[0],6.98,p[1],.5,glow,2,.45);
   }
-  m.cylinder([x,7.10,z],[x,8,z],5.05,[.21,.43,.30],2.2,12);
-  m.gem(x,9.4,z,2.9,gold,0,1.08);
-  m.gem(x,12.5,z,.58,[1,.85,.51],2,1.7);
+  m.cylinder([x,7.10,z],[x,8,z],5.05,[.14,.76,.88],2.2,12,2);
+  m.gem(x,9.4,z,2.9,[.18,.84,.92],2,1.08);
+  m.gem(x,12.5,z,.58,[.55,.92,1],2,1.7);
  }
  function createField(){
   const m=new Mesh();
-  // Painted sky triangle at the far depth plane, drawn with the garden mesh.
-  m.tri([-1,-1,0],[3,-1,0],[-1,3,0],[.32,.48,.59],9.5);
-  const grass=[.11,.29,.19],floor=[.20,.36,.24],
-      stone=[.77,.72,.62],gold=[.77,.60,.31];
-  m.box(0,-1.05,0,70,2.1,73,[.08,.21,.15],3);
-  m.box(0,.012,0,64,.06,69,grass,3);
-  // Checker lawn, flower island borders and textured grass tile pattern.
+  // Painted sky triangle at the far depth plane, drawn with the city mesh.
+  m.tri([-1,-1,0],[3,-1,0],[-1,3,0],[.07,.05,.16],9.5);
+  const deck=[.04,.06,.12],plaza=[.06,.09,.17],
+      slab=[.09,.13,.22],neon=[.16,.84,.92];
+  m.box(0,-1.05,0,70,2.1,73,[.03,.04,.09],3);
+  m.box(0,.012,0,64,.06,69,deck,3);
+  // Glowing TRON grid floor: alternating dark tiles with emissive seam motes.
   for(let x=-30;x<=30;x+=5)for(let z=-30;z<=30;z+=5){
    const dark=(Math.round(x+z)/5)%2===0;
-   m.box(x,.057,z,4.85,.04,4.85,dark?[.14,.34,.19]:[.15,.37,.21],3);
+   m.box(x,.057,z,4.85,.04,4.85,dark?[.05,.08,.15]:[.07,.11,.19],3);
    const seed=(x+31)*571+(z+31)*43;
    for(let i=0;i<3;i++){
     const px=x+(pseudoRand(seed+i*3)-.5)*3.7,pz=z+(pseudoRand(seed+i*5+17)-.5)*3.8;
-    m.gem(px,.16,pz,.085,[.24,.47,.23],0,.75);
+    m.gem(px,.16,pz,.085,[.20,.70,.85],2,.75);
    }
   }
-  // Grand forecourt: straight stone paths with gold-inlaid rims and stepped dais.
-  m.box(0,.105,-.4,35,.12,28,floor,3);
-  for(const x of [-17.0,17.0])m.box(x,.19,-.4,.27,.17,29,gold);
-  m.box(0,.20,.30,35,.20,3.45,stone,1);
-  m.box(0,.315,.30,35,.04,.16,gold);
-  for(const x of [-14.75,14.75])m.box(x,.20,-.4,1.05,.19,28,stone,1);
-  for(let n=0;n<18;n++)m.box(-17.0+n*2,.329,.30,.035,.023,3.2,[.89,.83,.65]);
-  // Wide stepped entrance leading forward toward the viewer.
-  for(let k=0;k<5;k++)m.box(0,.24-k*.035,16+k*1.9,31-k*.7,.23,1.65,stone,1);
-  // Ten identical player plinths; stage-specific vegetation grows above.
+  // Central concourse: straight light-strips with cyan-inlaid rims and a dais.
+  m.box(0,.105,-.4,35,.12,28,plaza,3);
+  for(const x of [-17.0,17.0])m.box(x,.19,-.4,.27,.17,29,neon,2);
+  m.box(0,.20,.30,35,.20,3.45,slab,1);
+  m.box(0,.315,.30,35,.04,.16,neon,2);
+  for(const x of [-14.75,14.75])m.box(x,.20,-.4,1.05,.19,28,slab,1);
+  for(let n=0;n<18;n++)m.box(-17.0+n*2,.329,.30,.035,.023,3.2,[.18,.86,.94],2);
+  // Wide stepped ramp leading forward toward the viewer.
+  for(let k=0;k<5;k++)m.box(0,.24-k*.035,16+k*1.9,31-k*.7,.23,1.65,slab,1);
+  // Ten identical player nodes; a stage-specific neon avatar boots up above.
   for(let i=0;i<10;i++){
    const [x,,z]=positions[i];
-   m.cylinder([x,.12,z],[x,.43,z],1.80,[.67,.61,.49],1.91,12,1);
-   m.cylinder([x,.44,z],[x,.56,z],1.96,gold,1.96,12);
-   m.cylinder([x,.57,z],[x,.70,z],1.80,stone,1.80,12,1);
+   m.cylinder([x,.12,z],[x,.43,z],1.80,[.08,.12,.20],1.91,12,1);
+   m.cylinder([x,.44,z],[x,.56,z],1.96,neon,1.96,12,2);
+   m.cylinder([x,.57,z],[x,.70,z],1.80,slab,1.80,12,1);
    for(let j=0;j<6;j++){
     const a=j*TAU/6;
-    m.gem(x+Math.cos(a)*1.57,.78,z+Math.sin(a)*1.57,.11,[.95,.73,.35],2,.9);
+    m.gem(x+Math.cos(a)*1.57,.78,z+Math.sin(a)*1.57,.11,[.98,.32,.76],2,.9);
    }
   }
-  // Symmetrical hedge maze walls, elevated flower beds and marble edging.
+  // Symmetrical neon barrier lanes, raised data-rails and glowing edging.
   for(const s of [-1,1]){
-   hedge(m,s*21,0,-3,2.4,39,2.9);
-   hedge(m,s*28,0,2,1.4,48,3.7);
-   hedge(m,s*24,0,19,9,1.55,2.1);
-   hedge(m,s*24,0,-22,9,1.55,2.1);
-   topiary(m,s*25,-14,8.2);
-   topiary(m,s*25,12,7.0);
-   gazebo(m,s*32,-29);
-   fountain(m,s*26,0);
-   arch(m,s*22,-7,6.6);
+   wall(m,s*21,0,-3,2.4,39,2.9);
+   wall(m,s*28,0,2,1.4,48,3.7);
+   wall(m,s*24,0,19,9,1.55,2.1);
+   wall(m,s*24,0,-22,9,1.55,2.1);
+   dataSpire(m,s*25,-14,8.2);
+   dataSpire(m,s*25,12,7.0);
+   holoPavilion(m,s*32,-29);
+   dataWell(m,s*26,0);
+   neonArch(m,s*22,-7,6.6);
    for(let k=0;k<32;k++){
     const z=-20+k*1.30,x=s*(22.8+(k%4)*1.11);
-    rose(m,x,.1,z,3,k);
+    holoSign(m,x,.1,z,3,k);
    }
-   for(let k=0;k<4;k++)lamp(m,s*18,-13+k*9,.9);
+   for(let k=0;k<4;k++)pylon(m,s*18,-13+k*9,.9);
   }
-  hedge(m,0,0,-26,55,1.7,3.9);
-  hedge(m,0,0,25,55,1.7,2.8);
-  // Royal rose arch behind the competition field; gilded lamps flank the portal.
-  arch(m,-15,-23,6.3);arch(m,15,-23,6.3);
+  wall(m,0,0,-26,55,1.7,3.9);
+  wall(m,0,0,25,55,1.7,2.8);
+  // Neon gateway arches behind the arena; light pylons flank the vortex.
+  neonArch(m,-15,-23,6.3);neonArch(m,15,-23,6.3);
   for(let x=-14;x<=14;x+=4){
-   rose(m,x,.1,-18.4,4,(x+20)/4);
-   rose(m,x,.1,19.4,4,(x+24)/4);
+   holoSign(m,x,.1,-18.4,4,(x+20)/4);
+   holoSign(m,x,.1,19.4,4,(x+24)/4);
   }
-  // Distant painted vista: layered fog-blue mountain ridges, a soft forest
-  // band and a meandering river threading toward the horizon. Kept far back
-  // and low on screen so the foreground plants and plinths remain the focus.
-  const ridgeTones=[[.44,.52,.60],[.37,.47,.57],[.31,.42,.54]];
+  // Distant painted vista: layered neon-magenta skyline ridges, a glowing
+  // data-tower band and a flowing light-stream threading toward the horizon.
+  // Kept far back and low on screen so the foreground avatars stay the focus.
+  const ridgeTones=[[.30,.10,.42],[.22,.08,.38],[.14,.06,.30]];
   for(let ridge=0;ridge<3;ridge++){
    const depth=-58-ridge*9,baseH=15+ridge*5,tone=ridgeTones[ridge];
    let prevX=-56,prevY=.4;
@@ -281,41 +291,42 @@ main{max-width:1550px;margin:0 auto;padding:16px}.nav{display:flex;gap:8px;align
     prevX=px;prevY=peak;
    }
   }
-  // Soft conifer forest skirt sitting below the ridges in the mid distance.
-  const canopy=[.17,.33,.21],canopyLit=[.24,.44,.26];
+  // Dense neon tower skyline sitting below the ridges in the mid distance.
+  const tower=[.95,.24,.70],towerLit=[.30,.86,.95];
   for(let t=0;t<22;t++){
    const tz=-46-pseudoRand(t*5+3)*7,tx=-50+t*4.6+pseudoRand(t*9)*2.4;
    const th=3.2+pseudoRand(t*13+1)*2.6;
-   m.cylinder([tx,.4,tz],[tx,.4+th*.3,tz],.26,[.30,.22,.14],.2,5,1);
-   m.gem(tx,.4+th*.55,tz,th*.42,canopy,5,1.7);
-   m.gem(tx,.4+th*.82,tz,th*.26,canopyLit,5,1.8);
+   m.cylinder([tx,.4,tz],[tx,.4+th*.3,tz],.26,[.08,.10,.18],.2,5,1);
+   m.gem(tx,.4+th*.55,tz,th*.42,tower,2,1.7);
+   m.gem(tx,.4+th*.82,tz,th*.26,towerLit,2,1.8);
   }
-  // Winding river: a chain of water-blue segments catching the sky light as it
-  // meanders out of the valley toward the garden forecourt.
-  const water=[.34,.56,.68];
+  // Flowing light-stream: a chain of cyan data-river segments catching the
+  // skyline glow as it threads out of the far grid toward the concourse.
+  const stream=[.22,.78,.92];
   let riverX=-4,riverZ=-50;
   for(let bend=0;bend<10;bend++){
    const nz=riverZ+5.2,nx=riverX+Math.sin(bend*.9)*6.0;
    const wNear=1.4+bend*.55,wFar=1.4+(bend-1)*.55;
    m.quad([riverX-wFar,.14,riverZ],[riverX+wFar,.14,riverZ],
-     [nx+wNear,.15,nz],[nx-wNear,.15,nz],water,2);
+     [nx+wNear,.15,nz],[nx-wNear,.15,nz],stream,2);
    riverX=nx;riverZ=nz;
   }
-  // Palace terrace background, parapets and tall stone towers.
-  m.box(0,5.8,-33.8,52,11.6,3.0,[.65,.64,.56],1);
-  m.box(0,12.3,-34.2,54,1.1,4.0,[.30,.39,.34]);
+  // Megastructure backdrop: a long dark server wall, light parapet and towers.
+  m.box(0,5.8,-33.8,52,11.6,3.0,[.06,.09,.16],1);
+  m.box(0,12.3,-34.2,54,1.1,4.0,[.16,.80,.90],2);
   for(let x=-25;x<=25;x+=5){
-   m.box(x,9.0,-31.8,.63,5.7,.55,[.91,.88,.75],1);
-   m.gem(x,13.1,-34,.59,gold,2,.9);
+   m.box(x,9.0,-31.8,.63,5.7,.55,[.20,.84,.94],2);
+   m.gem(x,13.1,-34,.59,[.95,.28,.72],2,.9);
   }
   for(const x of [-25,25]){
-   m.box(x,12,-34,4.2,24,4.1,stone,1);
-   m.gem(x,25,-34,3.5,gold,0,1.55);
+   m.box(x,12,-34,4.2,24,4.1,slab,1);
+   m.gem(x,25,-34,3.5,[.98,.32,.76],2,1.55);
   }
   return m;
  }
  let baseField=null;
- function addLeaf(m,root,direction,y,len,width,col){
+ function addFin(m,root,direction,y,len,width,col){
+  // A flat emissive fin / data-wing jutting off the avatar frame.
   const x=root[0],z=root[2],p=[x,y,z],
       tip=[x+len*direction,y+len*.40,z+len*.22*direction],
       side=[x+len*.38*direction,y+len*.12,z+width];
@@ -323,28 +334,30 @@ main{max-width:1550px;margin:0 auto;padding:16px}.nav{display:flex;gap:8px;align
   const back=[side[0],side[1],z-width];
   m.tri(p,back,tip,col,5);m.tri(p,tip,back,col,5);
  }
- function bloom(m,center,scale,petals,col,royal=false){
+ function corona(m,center,scale,petals,col,prime=false){
+  // The avatar's holographic crown: a glowing core wrapped in orbiting data
+  // plates. `prime` adds the full data-ring halo for the top tiers.
   const [x,y,z]=center;
-  m.gem(x,y,z,scale*.41,[1,.84,.40],2,1.2);
-  for(let layer=0;layer<(royal?3:2);layer++){
+  m.gem(x,y,z,scale*.41,[.30,.95,1],2,1.2);
+  for(let layer=0;layer<(prime?3:2);layer++){
    const ring=petals+(layer%2?2:0),r=scale*(.38+layer*.34);
    for(let j=0;j<ring;j++){
     const a=j*TAU/ring+layer*.26;
     const tone=col.map((c,i)=>clamp(c+(layer===0?.13:layer===2?-.12:0)));
     m.gem(x+Math.cos(a)*r,y+layer*.07+.08*Math.sin(a*2),z+Math.sin(a)*r,
-      scale*(royal?.39:.44),tone,layer===0?2:6,.72);
+      scale*(prime?.39:.44),tone,layer===0?2:6,.72);
    }
   }
-  if(royal){
-   m.ring([x,y+.18,z],scale*1.34,.055,[.94,.75,.36],'xz',2);
+  if(prime){
+   m.ring([x,y+.18,z],scale*1.34,.055,[.98,.34,.78],'xz',2);
    for(let i=0;i<5;i++){
     const a=i*TAU/5;m.gem(x+Math.cos(a)*scale*1.26,y+.30,z+Math.sin(a)*scale*1.26,
-      scale*.18,[1,.92,.52],2,1.65);
+      scale*.18,[.55,.95,1],2,1.65);
    }
   }
  }
- // One goal -> the first split leaves; by 21 goals a full royal rose canopy.
- // Each tier has a distinct 3D silhouette, branching, buds and petal count.
+ // One goal -> the first boot-up fins; by 21 goals a full neon-avatar corona.
+ // Each tier has a distinct 3D silhouette, limbs, nodes and corona plate count.
  function plant(m,model,index,cutIds,step,age,elapsed){
   const [x,,z]=positions[index],tier=clamp(Math.floor(Number(model.tier)||0),0,6);
   const cutIndex=cutIds.indexOf(model.id),
@@ -356,11 +369,11 @@ main{max-width:1550px;margin:0 auto;padding:16px}.nav{display:flex;gap:8px;align
   const fall=prior?1:cutting?ease(clamp((age-(contact-.02))/.72)):0;
   const sway=prior?0:Math.sin(elapsed*1.4+index*1.31)*.055;
   const height=[.48,1.18,1.98,2.78,3.65,4.63,5.58][tier]*(prior?.64:1);
-  const leafColor=prior?[.25,.27,.22]:tier>3?[.23,.56,.29]:[.21,.48,.24];
-  const palette=[[.96,.48,.55],[.98,.72,.41],[.77,.57,.93],[.96,.86,.61]][index%4];
-  // The rose is bisected at `cutY`, just below the bloom head. Anything below
-  // stays an upright rooted stump; anything at/above cutY is the severed top
-  // that tips, drops under gravity and drifts sideways as `fall` ramps 0->1.
+  const limbColor=prior?[.22,.24,.30]:tier>3?[.28,.80,.92]:[.22,.68,.86];
+  const palette=[[.98,.30,.72],[.30,.92,.98],[.70,.46,.98],[.98,.74,.34]][index%4];
+  // The avatar is split at `cutY`, just below the corona head. Anything below
+  // stays an upright rooted base; anything at/above cutY is the deleted top
+  // that tips, drops and drifts sideways as `fall` ramps 0->1 (power-down).
   const cutY=height*.78,dir=index%2?-1:1;
   const base=p=>[x+p[0]+sway*p[1],.75+p[1],z+p[2]];
   const map=p=>{
@@ -370,71 +383,71 @@ main{max-width:1550px;margin:0 auto;padding:16px}.nav{display:flex;gap:8px;align
    return [x+p[0]*Math.cos(t)+dy*Math.sin(t)*dir+sway*cutY+drift,
      .75+cutY+dy*Math.cos(t)-p[0]*Math.sin(t)*dir-drop,z+p[2]+fall*.6];
   };
-  m.cylinder([x,.71,z],[x,.95,z],.89,[.42,.28,.18],1.04,10);
-  m.cylinder([x,.96,z],[x,1.01,z],1.05,[.68,.50,.28],1.05,10);
-  // Stem: a single upright length when whole; once severed it splits into a
-  // rooted stump (below cutY) and an upper length riding away with the bloom.
+  m.cylinder([x,.71,z],[x,.95,z],.89,[.10,.14,.22],1.04,10);
+  m.cylinder([x,.96,z],[x,1.01,z],1.05,[.16,.80,.90],1.05,10);
+  // Core column: a single upright length when whole; once deleted it splits
+  // into a rooted base (below cutY) and an upper length riding away powered-down.
   const severed=fall>0;
   if(severed){
-   m.cylinder(base([0,.05,0]),base([0,cutY-fall*.12,0]),.10+tier*.016,[.11,.40,.16],.035+tier*.011,8);
-   m.cylinder(map([0,cutY,0]),map([0,height,0]),.10+tier*.016,[.11,.40,.16],.035+tier*.011,8);
+   m.cylinder(base([0,.05,0]),base([0,cutY-fall*.12,0]),.10+tier*.016,[.16,.86,.92],.035+tier*.011,8);
+   m.cylinder(map([0,cutY,0]),map([0,height,0]),.10+tier*.016,[.16,.86,.92],.035+tier*.011,8);
   }else{
-   m.cylinder(base([0,.05,0]),base([0,height,0]),.10+tier*.016,[.11,.40,.16],.035+tier*.011,8);
+   m.cylinder(base([0,.05,0]),base([0,height,0]),.10+tier*.016,[.16,.86,.92],.035+tier*.011,8);
   }
-  // Growth stage 0 is a seedling, not a pre-bloomed flower.
+  // Growth stage 0 is a bare boot-up spark, not a formed avatar.
   if(tier===0){
-   for(const d of [-1,1])addLeaf(m,map([0,.18,0]),d,.2,.20,.13,[.37,.69,.30]);
-   m.gem(...map([0,height,0]),.20,[.35,.63,.27],0,1.18);
+   for(const d of [-1,1])addFin(m,map([0,.18,0]),d,.2,.20,.13,[.30,.86,.92]);
+   m.gem(...map([0,height,0]),.20,[.34,.90,.95],2,1.18);
    return;
   }
   for(let j=0;j<Math.min(8,2+tier);j++){
    const a=j*TAU/3,y=.35+(height-.65)*(j/(3+tier));
    const dir=j%2?1:-1;
    const p=map([0,y,0]),q=map([dir*(.38+tier*.073),y+.20,Math.sin(a)*.30]);
-   m.cylinder(p,q,.062,[.16,.48,.20],.025,6);
-   m.gem(...q,.28+tier*.036,leafColor,0,.31);
-   if(tier>=4)addLeaf(m,p,dir,p[1]+.16,.31,.18,[.30,.58,.25]);
+   m.cylinder(p,q,.062,[.18,.70,.88],.025,6);
+   m.gem(...q,.28+tier*.036,limbColor,2,.31);
+   if(tier>=4)addFin(m,p,dir,p[1]+.16,.31,.18,[.26,.78,.90]);
   }
-  if(tier===1){m.gem(...map([0,height,0]),.25,[.28,.59,.24],0,1.55);return;}
+  if(tier===1){m.gem(...map([0,height,0]),.25,[.30,.88,.94],2,1.55);return;}
   if(tier===2){
-   m.gem(...map([0,height,0]),.44,prior?[.30,.28,.25]:palette,0,1.6);
-   m.gem(...map([0,height+.26,0]),.19,[.31,.59,.31],0,1.2);return;
+   m.gem(...map([0,height,0]),.44,prior?[.28,.26,.32]:palette,2,1.6);
+   m.gem(...map([0,height+.26,0]),.19,[.34,.90,.95],2,1.2);return;
   }
-  const color=prior?[.33,.30,.30]:palette;
-  bloom(m,map([0,height,0]),[0,0,0,.43,.58,.67,.82][tier],
+  const color=prior?[.30,.28,.34]:palette;
+  corona(m,map([0,height,0]),[0,0,0,.43,.58,.67,.82][tier],
     tier===3?5:tier===4?7:tier===5?9:12,color,tier>=5);
   if(tier>=4){
    for(let k=0;k<(tier===4?2:tier===5?4:6);k++){
     const a=k*TAU/Math.max(2,tier===4?2:tier===5?4:6);
     const by=height*(.52+(k%3)*.13),reach=.45+(k%2)*.33+tier*.03;
     const p=map([0,by,0]),q=map([Math.cos(a)*reach,by+reach*.43,Math.sin(a)*reach]);
-    m.cylinder(p,q,.058,[.14,.42,.18],.028,6);
-    bloom(m,q,tier===6?.34:.25,5,prior?[.28,.27,.26]:palette,false);
+    m.cylinder(p,q,.058,[.16,.64,.84],.028,6);
+    corona(m,q,tier===6?.34:.25,5,prior?[.26,.24,.30]:palette,false);
    }
   }
-  // A golden rose cage and flowering coronet is earned, never present at 0 goals.
+  // A neon halo-ring and node crown is earned, never present at 0 goals.
   if(tier>=5&&!prior){
-   m.ring(map([0,height*.71,0]),tier===6?1.18:.80,.065,[.86,.67,.34],'xz',2);
+   m.ring(map([0,height*.71,0]),tier===6?1.18:.80,.065,[.98,.34,.78],'xz',2);
    if(tier===6){
     for(let k=0;k<8;k++){
      const a=k*TAU/8;
      m.cylinder(map([Math.cos(a)*1.02,height*.55,Math.sin(a)*1.02]),
-        map([Math.cos(a)*1.17,height*.94,Math.sin(a)*1.17]),.06,[.83,.66,.31],.05,5,2);
-     m.gem(...map([Math.cos(a)*1.17,height*.96,Math.sin(a)*1.17]),.21,[1,.88,.47],2,1.6);
+        map([Math.cos(a)*1.17,height*.94,Math.sin(a)*1.17]),.06,[.20,.84,.92],.05,5,2);
+     m.gem(...map([Math.cos(a)*1.17,height*.96,Math.sin(a)*1.17]),.21,[.55,.95,1],2,1.6);
     }
    }
   }
   if(cutting&&age>contact-.01&&age<contact+.73){
-   // Green leaf and foliage fragments scatter outward and fall at the snip.
-   const leafTones=[[.26,.57,.26],[.34,.66,.31],[.19,.46,.22],[.44,.72,.34]];
+   // Neon shards and data fragments burst outward and fall as the beam deletes.
+   const sparkTones=[[.30,.90,.98],[.98,.34,.78],[.60,.46,.98],[.55,.95,1]];
    for(let j=0;j<12;j++){
     const a=j*TAU/12,spread=clamp((age-contact)/.75),drop=spread*spread*1.9;
     const lx=x+Math.cos(a)*spread*1.8,lz=z+Math.sin(a)*spread*1.8;
     const ly=height+Math.sin(j)*.3-drop;
-    const tone=leafTones[j%4];
-    // Flattened, elongated motes read as torn leaves tumbling off the blades.
-    m.gem(lx,ly,lz,.17,tone,5,.26);
-    m.gem(lx+Math.cos(a)*.12,ly-.14,lz+Math.sin(a)*.12,.11,tone,5,.4);
+    const tone=sparkTones[j%4];
+    // Flattened, elongated emissive motes read as data shards shearing off.
+    m.gem(lx,ly,lz,.17,tone,2,.26);
+    m.gem(lx+Math.cos(a)*.12,ly-.14,lz+Math.sin(a)*.12,.11,tone,2,.4);
    }
   }
  }
@@ -442,10 +455,10 @@ main{max-width:1550px;margin:0 auto;padding:16px}.nav{display:flex;gap:8px;align
   const opening=portalOpening(step,age);
   if(opening<.008)return;
   const [x,y,z]=PORTAL_CENTER,r=PORTAL_RADIUS*opening,SEG=64;
-  // The camera sees the UNDERSIDE of this horizontal XZ opening. Its central
-  // vortex is behind the hand; the ring always stays above the skin and shears.
+  // The camera sees the UNDERSIDE of this horizontal XZ opening. The neon
+  // vortex spins behind the arm; the ring always stays above the mech grip.
   const p=(a,rad,dy=0)=>[x+Math.cos(a)*rad,y+dy,z+Math.sin(a)*rad];
-  const vortex=[[.038,.055,.12],[.095,.14,.26],[.24,.31,.42],[.36,.47,.59],[.66,.78,.83]];
+  const vortex=[[.05,.02,.14],[.22,.05,.30],[.52,.10,.52],[.14,.52,.72],[.30,.92,.98]];
   for(let band=0;band<5;band++){
    const low=band*r/5,high=(band+1)*r/5;
    for(let j=0;j<SEG;j++){
@@ -453,58 +466,58 @@ main{max-width:1550px;margin:0 auto;padding:16px}.nav{display:flex;gap:8px;align
     const col=vortex[band];m.quad(p(a,low,.2),p(b,low,.2),p(b,high,.2),p(a,high,.2),col,2);
    }
   }
-  // Pale concentric whirlpool rings, as in the provided PS2 cinematic.
+  // Concentric neon whirlpool rings, cyan and magenta spiralling inward.
   for(let i=0;i<10;i++){
    const t=i/10,rad=r*(.27+t*.86);
-   const tint=i%3===0?[.99,1,1]:i%3===1?[.57,.73,.82]:[.30,.45,.62];
+   const tint=i%3===0?[.40,.96,1]:i%3===1?[.98,.34,.80]:[.52,.30,.86];
    const offset=.27*Math.sin(elapsed*(i%2?1:-1)+i);
    m.ring([x,y-.18+offset,z],rad,.18+.16*(i%3===0),tint,'xz',2);
   }
-  for(const [size,tube,col] of [[1.00,.53,[1,1,.96]],[1.12,.25,[.72,.82,.93]],[1.23,.12,[.42,.56,.72]]]){
+  for(const [size,tube,col] of [[1.00,.53,[.45,.98,1]],[1.12,.25,[.98,.40,.82]],[1.23,.12,[.40,.30,.80]]]){
    m.ring([x,y-.32,z],r*size,tube*opening,col,'xz',2);
   }
-  // Swirling elongated filaments; no square runes or fake gemstone halos.
+  // Swirling elongated data filaments; no square runes or fake halos.
   for(let arm=0;arm<8;arm++)for(let j=0;j<14;j++){
    const a=arm*TAU/8+elapsed*.62+j*.075,rad=r*(.16+j*.054);
    const q=p(a,rad,-.39),q2=p(a+.18,rad+r*.045,-.41);
-   m.cylinder(q,q2,.055*opening,[.85,.93,1],.012*opening,4,2);
+   m.cylinder(q,q2,.055*opening,[.55,.95,1],.012*opening,4,2);
   }
   for(let j=0;j<26;j++){
    const a=j*TAU/26+elapsed*.3,rr=r*(1.07+Math.sin(j*5+elapsed)*.025);
    const q=p(a,rr,-.48);
-   m.gem(...q,.13+(j%3)*.05,[.87,.95,1],2,1.6);
+   m.gem(...q,.13+(j%3)*.05,[.60,.96,1],2,1.6);
   }
-  // God-rays: soft emissive light shafts fanning down out of the vortex to
-  // suggest sunlight breaking through the cloudy sky around the gate.
+  // Data-beams: emissive light shafts fanning down out of the neon vortex,
+  // the SYSTEM casting scanning light across the grid around the gate.
   const shafts=9;
   for(let s=0;s<shafts;s++){
    const a=s*TAU/shafts+elapsed*.07,rad=r*(.5+(s%3)*.17);
    const top=[x+Math.cos(a)*rad*.3,y-.6,z+Math.sin(a)*rad*.3];
    const foot=[x+Math.cos(a)*rad,y-24-(s%2)*5,z+Math.sin(a)*rad];
-   const beam=[.90,.95,1.0];
+   const beam=[.45,.92,1.0];
    m.cylinder(top,foot,.18*opening,beam,2.0*opening,4,2);
   }
  }
  function hand(m,position,elapsed,step,age,cutIds){
   const [x,y,z]=position,at=(a,b,c)=>[x+a,y+b,z+c];
-  const ivory=[.77,.72,.63],shade=[.57,.57,.56],highlight=[.92,.86,.73],
-   stone=[.75,.76,.78],metal=[.34,.21,.12],edge=[.62,.40,.26],dark=[.19,.11,.07];
-  // Soft-shaded sculpted arm and palm, veined knuckles and jointed fingers.
+  const chrome=[.52,.60,.72],shade=[.34,.40,.52],highlight=[.55,.95,1],
+   stone=[.40,.46,.58],metal=[.12,.62,.78],edge=[.30,.86,.96],dark=[.04,.08,.16];
+  // Soft-shaded mech forearm and knuckle housing, jointed grip-claw segments.
   // The forearm extends ABOVE the gate; the shader hides that portion.
   m.softTube([at(0,12,0),at(0,8.5,0),at(0,5.2,-.16),at(0,2.3,.02)],
-    [1.24,1.42,1.30,1.01],ivory,7,16);
-  m.softSphere(at(0,1.09,.06),1.60,1.84,.77,ivory,7,12,20);
-  m.softSphere(at(0,-.55,.48),1.74,1.34,.91,ivory,7,12,20);
+    [1.24,1.42,1.30,1.01],chrome,7,16);
+  m.softSphere(at(0,1.09,.06),1.60,1.84,.77,chrome,7,12,20);
+  m.softSphere(at(0,-.55,.48),1.74,1.34,.91,chrome,7,12,20);
   m.softSphere(at(-.42,-.55,.83),.67,1.10,.51,shade,7,10,12);
-  // Shear closure progress. The SAME `close` ease drives both the blades and
-  // the fingers, so the hand visibly grips shut and reaches full curl at the
-  // instant the blades meet (`touch`): finger-close, blade-close, contact and
-  // the sever all coincide. close=0 is the open pose (also the step<0 pose).
+  // Grip closure progress. The SAME `close` ease drives both the plasma
+  // grip-blades and the claw digits, so the arm visibly clamps shut and reaches
+  // full curl at the instant the blades meet (`touch`): finger-close,
+  // blade-close, contact and the delete all coincide. close=0 is the open pose.
   const dramatic=isDramatic(step,cutIds);
   const touch=contactTime(step,cutIds);
   const close=step<0?0:ease(clamp((age-(touch-(dramatic?1.9:.33)))/(dramatic?1.9:.33)));
-  // Fingers curl inward/downward as `close` ramps 0->1, bending each joint
-  // progressively toward the shear handles so the grip drives the snip.
+  // Claw digits curl inward/downward as `close` ramps 0->1, each joint bending
+  // progressively toward the plasma emitters so the grip drives the delete.
   const spread=[-1.17,-.39,.41,1.16];
   for(let i=0;i<4;i++){
    const dx=spread[i],length=[2.30,2.82,2.68,2.14][i],
@@ -513,31 +526,31 @@ main{max-width:1550px;margin:0 auto;padding:16px}.nav{display:flex;gap:8px;align
      knuckle=at(dx*(.99-.07*curl),-1.55-length*.34+length*.14*curl,1.42+.82*curl),
      joint=at(dx*(.89-.16*curl),-1.65-length*.71+length*.58*curl,2.05+1.46*curl*length*.34),
      tip=at(dx*(.79-.26*curl),-1.62-length+length*1.08*curl,2.22+2.08*curl*length*.34);
-   m.softSphere(from,.40,.42,.40,ivory,7,8,12);
-   m.softTube([from,knuckle,joint,tip],[.38,.36,.27,.12],ivory,7,12);
+   m.softSphere(from,.40,.42,.40,chrome,7,8,12);
+   m.softTube([from,knuckle,joint,tip],[.38,.36,.27,.12],chrome,7,12);
    m.softSphere(joint,.28,.28,.30,shade,7,7,10);
    m.softSphere(tip,.15,.17,.21,highlight,7,7,10);
-   // Subtle finger nails and creases rather than sharp geometric spikes.
+   // Glowing emitter tips rather than organic nails: an emissive claw cap.
    m.softSphere(add(tip,[0,.075,.17]),.125,.064,.09,highlight,7,6,10);
   }
-  // Thumb presses in across the palm with the same closure factor.
+  // Opposing thumb-clamp presses in across the housing with the same closure.
   const thumb=[at(-1.42,.02,.74),
     at(-2.08+1.05*close,-.92-.55*close,1.45+.42*close),
     at(-1.53+1.35*close,-2.04-.30*close,2.07+.46*close)];
-  m.softTube(thumb,[.57,.42,.24],ivory,7,12);
+  m.softTube(thumb,[.57,.42,.24],chrome,7,12);
   m.softSphere(thumb[1],.43,.41,.43,shade,7,8,12);
-  // Faint tendon detail, like an older game with baked normal textures.
+  // Faint cable/conduit detail running down the alloy forearm.
   for(let i=-1;i<=1;i++){
    const u=i*.58;m.softTube([at(u,1.4,.77),at(u*.93,.55,.96),at(u*.9,-.7,1.09)],
     [.035,.048,.027],highlight,7,5);
   }
-  // Engraved gold cuff and embossed palm seal, for a painted PS2 fantasy boss.
-  for(const yy of [5.45,7.35])m.ring(at(0,yy,-.05),1.40,.095,[.81,.65,.35],'xz',2);
-  m.gem(...at(0,.10,1.03),.43,[.82,.61,.28],2,1.4);
-  for(const sx of [-1,1])m.gem(...at(sx*.54,.30,.94),.15,[.83,.67,.42],2,1.1);
-  // Weathered rusty open shears. One oxidized pivot, two ring handles, twin
-  // broad blades that progressively close on the target flower at exactly 0.95 s.
-  // Blades share the `close` ease computed above with the fingers.
+  // Emissive neon cuff bands and a glowing palm sigil on the mech housing.
+  for(const yy of [5.45,7.35])m.ring(at(0,yy,-.05),1.40,.095,[.98,.34,.78],'xz',2);
+  m.gem(...at(0,.10,1.03),.43,[.20,.88,.96],2,1.4);
+  for(const sx of [-1,1])m.gem(...at(sx*.54,.30,.94),.15,[.40,.92,1],2,1.1);
+  // Twin plasma grip-blades on a glowing pivot, with two ring mounts. The
+  // emitters progressively close on the target avatar at exactly 0.95 s.
+  // Blades share the `close` ease computed above with the claw digits.
   const pivot=at(.72,-2.69,2.22);
   const width=(1-close)*1.25;
   const left=at(.72-width,-5.55,2.38),right=at(.72+width,-5.55,2.38);
@@ -549,7 +562,7 @@ main{max-width:1550px;margin:0 auto;padding:16px}.nav{display:flex;gap:8px;align
    m.cylinder(base,tip,.045,edge,.022,5,8);
   }
   blade(left,-1);blade(right,1);
-  m.softSphere(pivot,.26,.26,.24,[.44,.28,.17],8,8,12);
+  m.softSphere(pivot,.26,.26,.24,[.18,.74,.90],8,8,12);
   const handleL=at(-.23,-2.50,2.24),handleR=at(1.62,-2.50,2.24);
   m.softTube([pivot,at(.08,-1.72,2.36),handleL],[.18,.15,.13],metal,8,10);
   m.softTube([pivot,at(1.38,-1.76,2.35),handleR],[.18,.15,.13],metal,8,10);
@@ -607,11 +620,12 @@ main{max-width:1550px;margin:0 auto;padding:16px}.nav{display:flex;gap:8px;align
   const m=new Mesh();
   m.data=baseField.data.slice();m.triangles=baseField.triangles;
   for(let i=0;i<10;i++)if(models[i])plant(m,models[i],i,cutIds,step,age,elapsed);
+  // Drifting neon data-motes rising through the arena air.
   for(let j=0;j<22;j++){
    const x=(pseudoRand(j+2)*2-1)*16.5,z=(pseudoRand(j+44)*2-1)*13;
    const y=.3+pseudoRand(j+13)*8;
    const p=[x+.6*Math.sin(elapsed*.4+j),y+(elapsed*.45+j)%7,z+.7*Math.cos(elapsed*.3+j)];
-   m.gem(...p,.10,pseudoRand(j)>.5?[.97,.68,.73]:[1,.84,.49],2,.32);
+   m.gem(...p,.10,pseudoRand(j)>.5?[.98,.40,.80]:[.40,.92,1],2,.32);
   }
   portal(m,step,age,elapsed);
   if(coronation){
@@ -620,17 +634,17 @@ main{max-width:1550px;margin:0 auto;padding:16px}.nav{display:flex;gap:8px;align
     const [x,,z]=positions[index],height=1.1+Math.min(6,Number(models[index].tier)||0)*.8;
     const t=clamp((elapsed-coronation.started)/2.8),beam=ease(t);
     m.softTube([[x,1.1,z],[x,4+height*beam,z],[x,12+height*beam,z]],
-      [.05+beam*.2,.45+beam*.65,.08+beam*.1],[1,.88,.37],2,14);
+      [.05+beam*.2,.45+beam*.65,.08+beam*.1],[.30,.92,1],2,14);
     for(let k=0;k<12;k++){
      const angle=k*TAU/12+elapsed*.85,rad=1.35+beam*.65;
      m.gem(x+Math.cos(angle)*rad,1.3+height+Math.sin(elapsed*1.3+k)*.22,
-       z+Math.sin(angle)*rad,.14+beam*.20,[1,.82,.33],2,1.6);
+       z+Math.sin(angle)*rad,.14+beam*.20,[.98,.36,.80],2,1.6);
     }
     for(let k=0;k<8;k++){
      const angle=k*TAU/8;const px=x+Math.cos(angle)*(1.4+beam*.3),pz=z+Math.sin(angle)*(1.4+beam*.3);
-     m.gem(px,1.4+height+beam*(2.2+(k%2)*.9),pz,.25,[1,.89,.42],2,1.8);
+     m.gem(px,1.4+height+beam*(2.2+(k%2)*.9),pz,.25,[.45,.94,1],2,1.8);
     }
-    m.ring([x,1.6+height+beam*2,z],1.5+beam*.7,.12+beam*.10,[1,.88,.36],'xz',2);
+    m.ring([x,1.6+height+beam*2,z],1.5+beam*.7,.12+beam*.10,[.98,.34,.78],'xz',2);
    }
   }
   const [hx,hy,hz]=handPosition(models,cutIds,step,age,previous,elapsed);
@@ -654,8 +668,8 @@ main{max-width:1550px;margin:0 auto;padding:16px}.nav{display:flex;gap:8px;align
  function init(canvas){
   const gl=canvas.getContext('webgl',{alpha:false,antialias:true,powerPreference:'low-power'});
   if(!gl)return null;
-  // Painted retro textures and light bands; no network texture files or
-  // high-end GPU extensions. The floating hand and roses remain actual 3D.
+  // Painted retro neon textures and light bands; no network texture files or
+  // high-end GPU extensions. The giant mech arm and avatars remain actual 3D.
   const vertex=`
 precision mediump float;
 attribute vec3 a_pos,a_normal,a_color;
@@ -668,8 +682,8 @@ void main(){
  if(a_kind>9.0)gl_Position=vec4(a_pos.xy,.99998,1.0);
  else gl_Position=u_vp*vec4(a_pos,1.0);
 }`;
-  // Kinds: 1 masonry, 2 emissive gold/portal, 3 grass, 5 foliage,
-  // 6 petals, 7 aged ivory, 8 steel, 9.5 painted sky.
+  // Kinds: 1 dark structure, 2 emissive neon/portal, 3 grid floor, 5 panel,
+  // 6 avatar accent, 7 chrome mech alloy, 8 neon-chrome edges, 9.5 painted sky.
   const fragment=`
 precision mediump float;
 varying vec3 v_normal,v_color,v_pos;
@@ -687,18 +701,21 @@ float cloudNoise(vec2 p){
 }
 void main(){
  if(v_kind>9.0){
+  // Synthwave night sky: a near-black indigo base deepening into magenta at
+  // the horizon, with a neon grid-sun and scanning data-beams instead of sun.
   vec2 uv=v_pos.xy*.5+.5;
   float t=smoothstep(.04,.94,uv.y);
-  vec3 sky=mix(vec3(.74,.66,.58),vec3(.19,.30,.47),t);
+  vec3 sky=mix(vec3(.28,.05,.34),vec3(.04,.05,.22),t);
   float clouds=cloudNoise(uv*vec2(13.,7.))*.66+cloudNoise(uv*vec2(34.,17.))*.34;
-  float veil=smoothstep(.46,.8,clouds)*(1.-t)*.28;
-  sky=mix(sky,vec3(.90,.80,.68),veil);
-  // Sun breaking through the cloud deck with angled light shafts.
-  vec2 sunPos=vec2(.60,.78);
+  float veil=smoothstep(.46,.8,clouds)*(1.-t)*.24;
+  sky=mix(sky,vec3(.40,.08,.44),veil);
+  // Neon grid-sun low on the horizon with angled scanning beams.
+  vec2 sunPos=vec2(.60,.30);
   float sun=exp(-length((uv-sunPos)*vec2(1.,1.4))*21.);
   float ang=atan(uv.y-sunPos.y,uv.x-sunPos.x);
-  float shafts=smoothstep(.3,1.,.5+.5*sin(ang*9.))*smoothstep(.0,.55,uv.y)*.16;
-  sky+=vec3(.22,.17,.09)*sun+vec3(.17,.15,.10)*shafts*(1.-t);
+  float shafts=smoothstep(.3,1.,.5+.5*sin(ang*9.))*smoothstep(.55,1.,uv.y)*.14;
+  float stars=step(.997,hash2(floor(uv*vec2(140.,90.))))*smoothstep(.4,1.,uv.y);
+  sky+=vec3(.42,.14,.30)*sun+vec3(.10,.26,.30)*shafts+vec3(.5,.7,.8)*stars;
   gl_FragColor=vec4(floor(sky*63.+.5)/63.,1.);return;
  }
  if(v_kind>6.5&&v_kind<8.5&&v_pos.y>44.0)discard;
@@ -706,49 +723,54 @@ void main(){
  vec3 sunDir=normalize(vec3(-.48,.83,.32));
  float nd=max(dot(n,sunDir),0.);
  float light=floor((.48+nd*.56)*7.+.5)/7.;
- vec3 warm=vec3(1.10,1.015,.87),cool=vec3(.68,.81,.98);
+ vec3 warm=vec3(1.02,.80,1.04),cool=vec3(.56,.86,1.04);
  vec3 col=v_color*mix(cool,warm,clamp(nd*.70+.22,0.,1.))*light;
  vec2 uv=v_pos.xz;
  float noise=painted(uv*2.4);
  if(v_kind>.5&&v_kind<1.5){
-  // Stone blocks: mottled paint, courses of mortar, greenish age.
+  // Dark structure panels: matte alloy with faint seam lines and a cool tint.
   uv=abs(n.y)>.60?v_pos.xz:v_pos.xy+v_pos.yz*.35;
   noise=painted(uv*3.5);
   vec2 p=uv*vec2(.43,.73);
   p.x+=floor(p.y)*.5;
   vec2 f=fract(p);
-  float mortar=(1.-step(.045,f.x))+(1.-step(.065,f.y));
-  col*=.77+noise*.32;
-  col*=1.-min(mortar,1.)*.28;
-  float moss=smoothstep(.72,.95,painted(uv*1.1+vec2(8.)));
-  col=mix(col,col*vec3(.65,.82,.60),moss*.17);
+  float seam=(1.-step(.045,f.x))+(1.-step(.065,f.y));
+  col*=.60+noise*.30;
+  col+=vec3(.06,.22,.28)*min(seam,1.)*.5;
  }else if(v_kind>2.5&&v_kind<3.5){
-  float blade=painted(uv*vec2(7.,11.));
-  col*=.74+blade*.22+painted(uv*1.6)*.24;
+  // Grid floor: dark tiles cut by glowing cyan seam lines.
+  float cell=painted(uv*vec2(7.,11.));
+  vec2 g=abs(fract(v_pos.xz*.172)-.5);
+  float lineGlow=smoothstep(.46,.5,max(g.x,g.y));
+  col*=.42+cell*.22;
+  col+=vec3(.08,.42,.52)*lineGlow;
  }else if(v_kind>4.5&&v_kind<5.5){
-  float leaf=painted(v_pos.xz*5.5+v_pos.y*.8);
-  col*=.70+leaf*.53;
+  float panel=painted(v_pos.xz*5.5+v_pos.y*.8);
+  col*=.60+panel*.55;
  }else if(v_kind>5.5&&v_kind<6.5){
-  col*=.91+painted(v_pos.xy*13.)*.18;
+  col*=.96+painted(v_pos.xy*13.)*.20;
  }else if(v_kind>6.5&&v_kind<7.5){
-  float patina=painted(v_pos.xy*1.8+v_pos.z*.37);
-  float veins=1.-smoothstep(.06,.14,abs(sin(v_pos.x*1.9+v_pos.y*.7+patina*2.)));
-  col=v_color*(.46+nd*.52)*vec3(1.06,1.01,.94);
-  col*=.82+patina*.29;
-  col*=1.-veins*.105;
- }else if(v_kind>7.5&&v_kind<8.5){
-  // Weathered rusty metal: oxidized warm base, pitted mottling, only a dim
-  // worn specular glint rather than a bright chrome highlight.
+  // Chrome mech alloy: brushed metallic sheen with a cool rim and a crisp
+  // specular glint, lit cyan-cool rather than warm ivory.
   vec3 eyeDir=normalize(u_eye-v_pos);
-  float spec=pow(max(dot(reflect(-sunDir,n),eyeDir),0.),18.);
+  float spec=pow(max(dot(reflect(-sunDir,n),eyeDir),0.),26.);
+  float brush=painted(v_pos.xy*1.8+v_pos.z*.37);
+  col=v_color*(.46+nd*.56)*vec3(.92,1.0,1.08);
+  col*=.84+brush*.26;
+  col+=vec3(.34,.70,.86)*spec*.6;
+ }else if(v_kind>7.5&&v_kind<8.5){
+  // Neon chrome / emissive mech alloy: bright emissive edge with a hot
+  // specular highlight, reading as glowing plasma-lit metal rather than rust.
+  vec3 eyeDir=normalize(u_eye-v_pos);
+  float spec=pow(max(dot(reflect(-sunDir,n),eyeDir),0.),22.);
   float pit=painted(v_pos.xy*5.2+v_pos.z*.6);
-  float rust=painted(v_pos.xy*2.1+vec2(4.,9.));
-  col=v_color*(.42+nd*.52);
-  col=mix(col,col*vec3(.74,.46,.28),rust*.55);
-  col*=.70+pit*.42;
-  col+=vec3(.26,.20,.14)*spec*.55;
+  float glow=painted(v_pos.xy*2.1+vec2(4.,9.));
+  col=v_color*(.70+nd*.46);
+  col=mix(col,col*vec3(.60,1.1,1.2),glow*.55);
+  col*=.78+pit*.34;
+  col+=vec3(.30,.76,.92)*spec*.75;
  }else if(v_kind>1.5&&v_kind<2.5){
-  col=v_color*(1.13+.08*nd);
+  col=v_color*(1.22+.08*nd);
  }else{
   col*=.84+noise*.24;
  }
@@ -763,12 +785,12 @@ void main(){
  }
  if(u_crown.y>.5){
   float glow=1.-smoothstep(1.,10.,length(v_pos.xz-u_crown.xz));
-  col+=glow*vec3(.30,.17,.035);
+  col+=glow*vec3(.08,.28,.34);
  }
- // Soft atmospheric haze: a cool blue-grey that lets the distant mountain,
- // forest and river vista fade gently into the painted horizon.
+ // Soft neon haze: a deep indigo that lets the distant skyline, data-towers
+ // and light-stream vista fade gently into the painted night horizon.
  float fog=smoothstep(35.,145.,length(v_pos-u_eye))*.62;
- col=mix(col,vec3(.56,.63,.68),fog);
+ col=mix(col,vec3(.10,.08,.22),fog);
  float dither=(hash2(mod(gl_FragCoord.xy,4.))-.5)/85.;
  col=clamp(floor((col+dither)*63.+.5)/63.,0.,1.);
  gl_FragColor=vec4(col,1.);
@@ -825,7 +847,7 @@ void main(){
    const w=Math.max(1,Math.floor(rect.width*dpr)),h=Math.max(1,Math.floor(rect.height*dpr));
    if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;}
    const {gl,program,buffer,attrs,uniform,eyeUniform,handUniform,crownUniform}=instance;
-   gl.viewport(0,0,w,h);gl.clearColor(.48,.58,.66,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+   gl.viewport(0,0,w,h);gl.clearColor(.03,.03,.11,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
    gl.enable(gl.DEPTH_TEST);gl.disable(gl.CULL_FACE);
    const now=performance.now(),age=(now-(stepAgeStart(instance)))/1000,elapsed=(now-instance.start)/1000;
    const shot=shotCamera(instance.models,instance.cuts,instance.step,age,instance.cameraFrom,elapsed);
@@ -884,7 +906,7 @@ void main(){
    ...(()=>{const dramatic=isDramatic(step,cuts),contact=contactTime(step,cuts),
      close=step<0?0:ease(clamp((age-(contact-(dramatic?1.9:.33)))/(dramatic?1.9:.33)));
     return {contact,touch:contact,severed:step>=0&&age>=contact-.02,fingerClose:close,bladeClose:close};})(),
-   gardenTriangles:baseField.triangles,plantStages:7,details:['marble paths','hedge maze','fountains','gazebos','rose arches','topiary','lamps','flower beds','palace']}),
+   gardenTriangles:baseField.triangles,plantStages:7,details:['grid floor','neon barriers','data wells','holo pavilions','neon arches','data spires','pylons','holo signs','megastructure']}),
   // Non-mutating access to the REAL assembled frame mesh (flat Float32 data,
   // 10 floats/vertex: x,y,z,nx,ny,nz,r,g,b,kind) so a browserless test can
   // inspect the actual vertices plant()/hand() emit, not a recomputed summary.
@@ -923,7 +945,7 @@ void main(){
 (()=>{
 'use strict';
 const names=Array.from({length:10},(_,i)=>'PLAYER '+String(i+1).padStart(2,'0'));
-const growth=['Seedling','First Leaves','Bud','Young Rose','Blooming Rose','Royal Rose','Full Bloom'];
+const growth=['Boot Spark','First Fins','Node','Young Avatar','Charged Avatar','Prime Avatar','Full Construct'];
 const presets={
  // Illustrative GOALS-ONLY standings. In the actual tournament, the scoring
  // engine also accounts for wins, rank and tiebreakers.
@@ -940,18 +962,18 @@ function plates(){
  $('plates').innerHTML=names.map((name,i)=>{
  const cut=p.prior.includes(i)||past.includes(i),selected=target===i;
  const crown=step>=p.cuts.length&&currentStage==='final'&&i===p.champion;
- return '<div class="plate'+(cut?' cut':selected?' target':'')+'"'+(crown?' style="border-color:#f9d560;box-shadow:0 0 17px #e8b644;background:#443419"':'')+'><strong>'+name+'</strong><small>'+p.goals[i]+' goals</small><em>'+(crown?'CHAMPION’S CROWN':growth[p.tier[i]])+(cut?' · PRUNED':selected?' · SELECTED':'')+'</em></div>';
+ return '<div class="plate'+(cut?' cut':selected?' target':'')+'"'+(crown?' style="border-color:#39e0ff;box-shadow:0 0 17px #27b8e8;background:#102a3a"':'')+'><strong>'+name+'</strong><small>'+p.goals[i]+' goals</small><em>'+(crown?'CHAMPION NODE':growth[p.tier[i]])+(cut?' · DELETED':selected?' · TARGETED':'')+'</em></div>';
  }).join('');
 }
 const later=(fn,ms)=>timers.push(setTimeout(fn,ms));
 function replay(){
  timers.forEach(clearTimeout);timers=[];if(pollRaf)cancelAnimationFrame(pollRaf);pollRaf=0;window.Divine3D.stop();currentStage=stage.value;step=-1;target=-1;plates();
- $('phase').textContent='THE PORTAL OPENS';$('caption').textContent='THE ANCIENT HAND BEGINS TO EMERGE.';
+ $('phase').textContent='THE VORTEX OPENS';$('caption').textContent='THE MECH ARM BEGINS TO DESCEND.';
  const roster=models(),cuts=presets[currentStage].cuts.map(i=>roster[i].id);
  if(!window.Divine3D.mount($('canvas'),roster,cuts,-1,[])){$('info').textContent='WebGL context unavailable';return;}
  const debug=()=>{const s=window.Divine3D._debug();if(s)$('info').textContent='Actual WebGL · '+s.phase+' · '+s.triangles.toLocaleString()+' triangles';};
  debug();
- later(()=>{$('phase').textContent='FIVE-SECOND JUDGMENT';$('caption').textContent='SILENCE. THE HAND CONSIDERS.'},3250);
+ later(()=>{$('phase').textContent='FIVE-SECOND SCAN';$('caption').textContent='SILENCE. THE SYSTEM SCANS.'},3250);
  let elapsedCutTime=5000;
  presets[currentStage].cuts.forEach((idx,i)=>{
   const contact=currentStage==='final'&&i===4?4300:currentStage==='final'&&i===3?3000:950;
@@ -959,21 +981,21 @@ function replay(){
   const thisStart=elapsedCutTime;
   later(()=>{
    step=i;target=idx;plates();
-   $('phase').textContent=currentStage==='final'&&i>=3?(i===3?'FINAL THREE · THIRD PLACE':'FINAL TWO · SECOND PLACE'):'PRUNING '+(i+1)+' / '+cuts.length;
-   $('caption').textContent=currentStage==='final'&&i>=3?'THE SHEARS HESITATE ABOVE THE REMAINING ROSES.':'THE HAND CHOOSES '+names[idx];
+   $('phase').textContent=currentStage==='final'&&i>=3?(i===3?'FINAL THREE · THIRD PLACE':'FINAL TWO · SECOND PLACE'):'DELETING '+(i+1)+' / '+cuts.length;
+   $('caption').textContent=currentStage==='final'&&i>=3?'THE BEAM HESITATES ABOVE THE REMAINING AVATARS.':'THE SYSTEM TARGETS '+names[idx];
    window.Divine3D.setAction(i,models(),cuts);
-   later(()=>{target=-1;plates();$('caption').textContent=names[idx]+' — PRUNED';},contact);
+   later(()=>{target=-1;plates();$('caption').textContent=names[idx]+' — DELETED';},contact);
   },thisStart);
   elapsedCutTime+=duration;
  });
  later(()=>{
   step=cuts.length;target=-1;plates();
-  $('phase').textContent=currentStage==='final'?'CHAMPION AWAKENING':'VERDICT COMPLETE';
+  $('phase').textContent=currentStage==='final'?'CHAMPION ONLINE':'VERDICT COMPLETE';
   if(currentStage==='final'){
    const winner=presets.final.champion;
    window.Divine3D.celebrate('p'+(winner+1));
-   $('caption').textContent=names[winner]+' — CHAMPION’S CROWN';
-  }else $('caption').textContent='TWO ARE PRUNED. THE NEXT STAGE AWAITS.';
+   $('caption').textContent=names[winner]+' — CHAMPION NODE';
+  }else $('caption').textContent='TWO ARE DELETED. THE NEXT STAGE AWAITS.';
  },elapsedCutTime+150);
  function poll(){if(!window.Divine3D._debug()){pollRaf=0;return}debug();pollRaf=requestAnimationFrame(poll)}poll();
 }
