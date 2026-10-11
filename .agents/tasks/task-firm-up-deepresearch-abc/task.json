@@ -1,0 +1,7 @@
+{
+  "task_id": "task-firm-up-deepresearch-abc",
+  "task_description": "Firm up the Deep Research agent (bot #1) on branch feat/deep-research-agent (rolls into open PR #1) by implementing user-chosen enhancements A+B+C: (A) grow the topic->passage anchor map with aliases and bundled verse text for a fixture-backed subset; (B) expand the public-domain Strong's/commentary/verse fixtures so those topics produce rich, complete, schema-valid dossiers offline; (C) add a deterministic programmatic denominational-neutrality check (new deepresearch/neutrality.py) wired after synthesize, surfacing structured review flags for the human reviewer without censoring content. Keep the whole suite green and fully offline with no keys/network; all data strictly public-domain; any schema change additive/backward-compatible with schema_version staying 0.1.0.",
+  "status": "in_progress",
+  "feature_order": ["FEAT-001", "FEAT-002", "FEAT-003"],
+  "blocked_reason": null
+}

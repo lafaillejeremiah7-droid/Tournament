@@ -170,6 +170,25 @@ The pipeline runs **six discrete stages**, each a method on
    Matthew 5:39), so a topic dossier also carries scripture text. An unmapped
    topic simply resolves no anchors and the dossier records the absence as a
    gap rather than crashing.
+
+   **Topic-map coverage.** `topic_anchors.json` currently maps **35 lowercase
+   topic/alias keys** (several aliases normalize to the same anchor list, e.g.
+   "camel through the eye of a needle" and "eye of the needle" both resolve to
+   Matthew 19:24 / Mark 10:25 / Luke 18:25) across the most commonly
+   *misunderstood* teachings about Jesus. A subset of anchors ships bundled
+   public-domain KJV/WEB/ASV verse text in `deepresearch/fixtures/verses.json`,
+   so those topics carry real scripture **fully offline** (no network, no keys):
+
+   - **Fixture-backed (work offline):** "turn the other cheek" → Matthew 5:39,
+     "judge not" → Matthew 7:1, "ask and it will be given" → Matthew 7:7,
+     "narrow gate" / "narrow road" → Matthew 7:13-14, "born again" → John 3:3,
+     and "i am the way the truth and the life" → John 14:6.
+   - **Gap-degrading offline:** every other mapped anchor (e.g. "render unto
+     caesar", "faith without works", "eye of the needle") resolves correctly but
+     has no bundled verse text yet, so offline it records a structured gap
+     instead of scripture. Those anchors fetch live text when a network/cache is
+     available; FEAT-002 adds matching Strong's/commentary enrichment for the
+     fixture-backed subset.
 3. **`extract_original_terms`** — pull Strong's / lexicon key terms.
 4. **`gather_context`** — pull historical background and classic commentary /
    Church-Fathers excerpts (plus cross-references).

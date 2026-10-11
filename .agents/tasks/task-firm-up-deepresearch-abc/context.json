@@ -1,0 +1,33 @@
+{
+  "project_type": "Python 3 CLI package (deepresearch) - bot #1 of a faith-content video pipeline; produces a sourced research dossier (JSON + Markdown) around a 'common misconception vs. deeper truth' spine.",
+  "language": "Python (>=3.10; dev interpreter is 3.12)",
+  "build_system": "setuptools via pyproject.toml; editable install `pip install -e '.[dev]'`. A .venv built with 3.12 already exists at /projects/sandbox/Tournament/.venv.",
+  "test_framework": "pytest. tests/conftest.py is an autouse guard that unsets OPENAI_API_KEY/ANTHROPIC_API_KEY and monkeypatches the default live HTTP getter to RAISE, so any real network call fails the suite. Connectors are built with an offline cache. 54 tests currently pass.",
+  "build_command": ".venv/bin/pip install -e '.[dev]'  (already installed; re-run only if deps change)",
+  "test_command": "unset OPENAI_API_KEY ANTHROPIC_API_KEY && .venv/bin/python -m pytest -q",
+  "verification_instructions": "From /projects/sandbox/Tournament run: `unset OPENAI_API_KEY ANTHROPIC_API_KEY && .venv/bin/python -m pytest -q`. Must pass with zero network and zero keys. pytest is the required runner (unittest discover will NOT collect the function/parametrize tests). Optionally spot-check dry-run: `.venv/bin/python -m deepresearch research \"judge not\" --dry-run --output-dir /tmp/dr` and inspect the JSON/MD.",
+  "snapshot_or_generated_files": "output/ and .cache/ are generated and git-ignored. No checked-in generated/snapshot files. deepresearch.egg-info is build metadata (ignore).",
+  "setup_instructions": "Interpreter MUST be the 3.12 venv (`/projects/sandbox/Tournament/.venv/bin/python`); the default python3 on PATH is 3.9 and must NOT be used. Dev deps already installed via `.venv/bin/pip install -e '.[dev]'`.",
+  "environment_constraints": "NO outbound network and NO API keys. Everything added must work and be tested fully offline from bundled fixtures. All data added must be strictly PUBLIC DOMAIN (Strong's, KJV/WEB/ASV, public-domain Church Fathers/commentary). Do NOT touch /projects/sandbox/Autosurveryai or /projects/sandbox/Tourament.",
+  "contribution_requirements": "Work on branch feat/deep-research-agent (rolls into open PR #1). Add commits on top; do NOT push, merge, or open a new PR (orchestrator pushes afterward). schema_version is 0.1.0 and should stay 0.1.0 if the only schema change is ADDITIVE/backward-compatible (new OPTIONAL field); if bumped, update deepresearch/__init__.py SCHEMA_VERSION and every assertion in lockstep. No secrets; .env.example stays placeholder-only.",
+  "key_patterns": "KEY LOOKUP SEMANTICS (critical): (1) topic queries - fetch_translations uses anchors from fixtures/topic_anchors.json (resolve_topic_anchors matches keys whitespace-collapsed + lowercased, so topic_anchors.json keys should be lowercase and may map to a LIST of anchors, de-duped downstream); (2) extract_original_terms + gather_context + gather_cross_references key strongs.json/commentary.json by the RAW query string for a topic (NOT normalized/lowercased) and by the normalized reference for a verse query - so topic fixtures must be keyed by the EXACT phrasing a test/user passes; (3) bible_api fixture fallback (_fixture_body) looks up verses.json by the ORIGINAL single-verse reference (e.g. 'Matthew 7:1'), not the context-window-expanded passage, so verses.json keyed by the single verse works for dry-run. Connectors never raise: they return SourceResult.missing(name, reason) -> recorded as a Gap -> graceful degradation. Fixtures are plain JSON loaded via deepresearch/fixtures/__init__.py::load_fixture (lru_cached). Stub provider templates spine prose from gathered material (commentary excerpt / historical note), so neutrality check must not false-positive on neutral boilerplate OR on the seeded public-domain commentary text. Integrity check (synthesis.py) resolves every claim citation back to gathered material; the stub reuses only brief citations. Adversarial fake-provider test pattern lives in tests/test_integrity.py (subclass LLMProvider, return crafted JSON from complete()).",
+  "relevant_files": [
+    "deepresearch/fixtures/topic_anchors.json (A: grow map; currently 1 entry; keys lowercase; values = list of anchor refs)",
+    "deepresearch/pipeline.py (resolve_topic_anchors, run(); wire neutrality after synthesize/before write_output; _render_markdown for C surfacing)",
+    "deepresearch/fixtures/verses.json (B: add kjv/web/asv text for new fixture-backed anchors)",
+    "deepresearch/fixtures/strongs.json (B: add Strong's terms keyed by reference and/or topic query)",
+    "deepresearch/fixtures/commentary.json (B: add public-domain commentary/historical/cross-reference entries keyed by reference and/or topic query)",
+    "deepresearch/synthesis.py (pattern for post-synthesis processing of a Dossier; integrity check)",
+    "deepresearch/models.py (C: Dossier dataclass + to_dict + validate; add optional review_flags if schema-additive path chosen)",
+    "deepresearch/schema/dossier.schema.json (C: optionally add OPTIONAL additive review_flags property; keep additionalProperties:false consistent)",
+    "deepresearch/neutrality.py (C: NEW module - deterministic denominational-neutrality scanner + data-driven lexicon)",
+    "deepresearch/llm/stub_provider.py (reference for determinism; prose templating)",
+    "deepresearch/cli.py (A: optional --list-topics ONLY if cheap+tested, else skip)",
+    "tests/test_end_to_end.py (pattern for dry-run end-to-end + schema validation)",
+    "tests/test_integrity.py (pattern for adversarial fake-provider tests)",
+    "tests/test_normalization.py (pattern for topic/reference + connector keying tests)",
+    "tests/conftest.py (offline/no-key guard; reuse in new tests)",
+    "README.md (update: topic map coverage, fixture-backed vs gap-degrading, neutrality now prompt + programmatic)"
+  ],
+  "directory_structure": "deepresearch/ (cli.py, config.py, pipeline.py, synthesis.py, models.py, cache.py, __init__.py exports SCHEMA_VERSION 0.1.0); deepresearch/sources/ (base, registry, bible_api, strongs, commentary); deepresearch/llm/ (base+build_provider, stub_provider, openai_provider, anthropic_provider, prompts); deepresearch/schema/dossier.schema.json; deepresearch/fixtures/ (verses.json, strongs.json, commentary.json, topic_anchors.json, __init__.py loader); tests/ (pytest suite + conftest offline guard + tests/fixtures/)."
+}

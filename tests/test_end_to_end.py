@@ -81,6 +81,67 @@ def test_topic_spine_tracks_the_query(tmp_path):
     assert "cancel" not in spine and "overturns" not in spine
 
 
+def test_end_to_end_topic_judge_not(tmp_path):
+    """A new fixture-backed topic (enhancement A) carries real scripture offline."""
+    data = _run(tmp_path, "judge not")
+    assert data["query_kind"] == "topic"
+    assert data["resolved_reference"] is None
+    assert data["translations"], "a fixture-backed topic should resolve anchor translations"
+    assert data["resolved_references"] == ["Matthew 7:1"]
+    for t in data["translations"]:
+        assert t["reference"] == "Matthew 7:1"
+    _assert_valid_and_populated(data)
+
+
+def test_end_to_end_topic_born_again(tmp_path):
+    """A second new fixture-backed topic (enhancement A) carries real scripture offline."""
+    data = _run(tmp_path, "born again")
+    assert data["query_kind"] == "topic"
+    assert data["resolved_reference"] is None
+    assert data["translations"], "a fixture-backed topic should resolve anchor translations"
+    assert data["resolved_references"] == ["John 3:3"]
+    for t in data["translations"]:
+        assert t["reference"] == "John 3:3"
+    _assert_valid_and_populated(data)
+
+
+def test_topic_alias_normalization(tmp_path):
+    """resolve_topic_anchors maps aliases + varied casing/whitespace to the same anchors."""
+    config = Config.from_env_and_args(
+        dry_run=True,
+        output_dir=str(tmp_path / "out"),
+        cache_dir=str(tmp_path / "cache"),
+        load_env_file=False,
+    )
+    pipe = Pipeline(config)
+
+    # Case- and whitespace-insensitive matching of the same phrasing.
+    assert pipe.resolve_topic_anchors("judge not") == ["Matthew 7:1"]
+    assert pipe.resolve_topic_anchors("Judge Not") == ["Matthew 7:1"]
+    assert pipe.resolve_topic_anchors("  judge   not ") == ["Matthew 7:1"]
+
+    # Distinct alias phrasings resolve to the same anchor list.
+    needle = ["Matthew 19:24", "Mark 10:25", "Luke 18:25"]
+    assert pipe.resolve_topic_anchors("eye of the needle") == needle
+    assert pipe.resolve_topic_anchors("camel through the eye of a needle") == needle
+
+    # An unmapped topic yields no anchors.
+    assert pipe.resolve_topic_anchors("the meaning of grace") == []
+
+
+def test_end_to_end_unmapped_topic_degrades(tmp_path):
+    """An unmapped topic still yields a schema-valid dossier with a recorded gap, no crash."""
+    data = _run(tmp_path, "the meaning of grace")
+    assert data["query_kind"] == "topic"
+    assert data["resolved_reference"] is None
+    assert data["resolved_references"] == []
+    assert data["translations"] == []
+    # No anchor means no scripture; the run degrades gracefully and records gaps
+    # (e.g. strongs/commentary) rather than crashing.
+    assert data["gaps"], "an unmapped topic should record at least one gap"
+    _assert_valid_and_populated(data)
+
+
 def test_end_to_end_is_deterministic(tmp_path):
     a = _run(tmp_path / "a", "Matthew 5:17")
     b = _run(tmp_path / "b", "Matthew 5:17")
