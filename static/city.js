@@ -1,5 +1,5 @@
 /* Dependency-free Neon Grid 3D renderer. The synthwave city scene, camera and
-   ceremony effects never mutate tournament scoring. */
+   visual effects never mutate tournament scoring. */
 (function(){
  'use strict';
  const canvas=document.getElementById('city-canvas');
@@ -46,7 +46,7 @@
    for(let i=0;i<seg;i++){const t0=i*TAU/seg,t1=(i+1)*TAU/seg;this.oquad(at(t0,r),at(t1,r),at(t1,r-width),at(t0,r-width),want,col,kind);}
   }
  }
- let tournament=[],unlocks={},routeTime=0,ceremony=null,ceremonyGeneration=0;
+ let tournament=[],unlocks={},routeTime=0;
  let monuments=null,podiumSites=[],podiumTime=0,riseAt=null;
  const roomKeys=['settings','round1','round2','final','overview'];
  // Neon node palette: registration, introspection, adaptation, final, leaderboard.
@@ -65,7 +65,7 @@
  let elapsed=0,lastFrame=0,lastSample=0,paused=false,suspended=false,inside=false,transition=null,lastBuild='',needsLayout=true;
  let dusk=0,duskTarget=0;
  let surgeAt=null,surgeBig=false,surgeEnv=0;
- let partTris={},rebuilds=0,dynamicTriangles=0,ceremonyRange=[0,0],lastDynamic=[];
+ let partTris={},rebuilds=0,dynamicTriangles=0,lastDynamic=[];
  // Elevated first-person overview above the neon grid avenues.
  const baseCamera={eye:[0,56,25],target:[0,2,-54]};
  let sceneView='street',returnRoute=[];
@@ -192,7 +192,7 @@ void main(){
  function gateState(key){
   const stage=tournament.find(t=>t.key===key);
   if(stage?.status==='sealed')return 'sealed';
-  if(['round1','round2','final'].includes(key)&&stage?.status==='complete'&&!(ceremony?.key===key&&ceremony.phase!=='crowned'))return 'crowned';
+  if(['round1','round2','final'].includes(key)&&stage?.status==='complete')return 'crowned';
   return 'open';
  }
  function rebuildGrid(){
@@ -389,22 +389,6 @@ void main(){
    m.box(x,h+.07,z,w*1.75,.15,w*1.45,[.70,.90,1.0],3);
    if(monuments.complete)m.loop([x,h+.2,z],[1,0,0],[0,0,-1],w*.62,.15,[.98,.78,.30],3);
   }
-  // Node-online ceremony ignites a halo of neon sparks around the energized node.
-  const ceremonyStart=m.data.length;
-  if(ceremony&&ceremony.at!==null){
-   const g=rooms.find(r=>r.key===ceremony.key);
-   if(g){
-    const age=(performance.now()-ceremony.at)/1000,[x,,z]=g.pos;
-    const spread=ceremony.phase==='crowned'?clamp((age-1.4)/3.6):0;
-    m.loop([x,.13,z],[1,0,0],[0,0,-1],g.size*(.5+2*spread),.21,[.40,.95,1.0],3);
-    for(let i=0;i<24;i++){
-     const angle=i*TAU/24,r=g.size*(.16+spread*1.5);
-     const h=ceremony.phase==='crowned'?Math.max(.5,8*(1-spread)):10*(1-clamp(age/1.4))+3;
-     m.gem(x+Math.cos(angle)*r,h+Math.sin(angle*2+age)*.7,z+Math.sin(angle)*r,.31,SPARKS[i%SPARKS.length],3,.5);
-    }
-   }
-  }
-  ceremonyRange=[ceremonyStart,m.data.length];
   return m;
  }
  function bindMesh(buffer,array){
@@ -490,12 +474,6 @@ void main(){
    if(u===1){const done=transition.done;transition=null;done();}
    return;
   }
-  if(ceremony&&ceremony.at!==null&&!media.matches&&mode==='webgl'){
-   const age=(now-ceremony.at)/1000;camera={eye:ceremony.camera.eye.slice(),target:ceremony.camera.target.slice()};
-   // Power-surge rumble at the online moment; paused grid and reduced motion keep the camera still.
-   if(!paused&&age>=1.4&&age<3){const k=1-(age-1.4)/1.6;camera.eye[0]+=Math.sin(age*43)*.08*k;camera.eye[1]+=Math.cos(age*37)*.05*k;}
-   return;
-  }
   if(inside||sceneView!=='street')return;
   camera={eye:baseCamera.eye.slice(),target:baseCamera.target.slice()};
   // Hovering aerial camera. The tiny motion suggests flight above the neon skyline.
@@ -516,13 +494,6 @@ void main(){
   // The sun lowers smoothly while the arena moves and snaps when it is still. Uniforms only, no rebuild.
   if(dusk!==duskTarget){dusk=moving?(dusk<duskTarget?Math.min(duskTarget,dusk+.3*dt):Math.max(duskTarget,dusk-.3*dt)):duskTarget;dirty=true;}
   surgeEnv=surgeAt===null?0:clamp(1-(elapsed-surgeAt)/1.6);
-  if(ceremony&&ceremony.at!==null){
-   const age=(now-ceremony.at)/1000;
-   if(age>=1.4&&ceremony.phase!=='crowned'){ceremony.phase='crowned';geometryDirty=true;ceremony.onCrown?.();}
-   const hud=document.getElementById('ceremony-status');if(hud)hud.textContent=age<1.4?'NODE POWERING ON':'THE NODE IS ONLINE';
-   if(age>=5){const done=ceremony.done;ceremony=null;done?.();}
-   dirty=true;
-  }
   if(needsLayout)layout();
   if(geometryDirty||lastBuild!==state.progress+'|'+duskTarget+'|'+bloomLevel)rebuildGrid();
   if(!moving&&!transition&&!dirty)return;
@@ -541,27 +512,8 @@ void main(){
   return new Promise(done=>{transition={at:performance.now(),duration:Math.min(4200,route.length*680),nodes:route,done};});
  }
  function home(){sceneView='street';return travel([{eye:[camera.eye[0],Math.max(camera.eye[1],30),camera.eye[2]+6],target:[0,0,GARDEN_CENTER[1]]},baseCamera],false);}
- function cancelCeremony(){
-  ceremonyGeneration++;const done=ceremony?.done;ceremony=null;
-  if(transition){const finish=transition.done;transition=null;finish();}
-  done?.();document.body.classList.remove('gate-ceremony');resize();geometryDirty=true;dirty=true;
-  if(sceneView==='ceremony')home();
- }
  const lifted=(p,y)=>[p[0],p[1]+y,p[2]];
  window.CityWorld={
-  async crownGate(key,label,onCrown){
-   label=String(label||'');
-   if(needsLayout)layout();
-   const gate=rooms.find(r=>r.key===key);if(!gate)return;
-   const generation=++ceremonyGeneration;ceremony={key,phase:'approach',at:null};
-   sceneView='ceremony';document.body.classList.add('gate-ceremony');resize();
-   const hud=document.getElementById('ceremony-status');if(hud)hud.textContent='RETURNING TO THE GRID'+(label?': '+label.toUpperCase():'');
-   const {front,N,size}=gate,gx=gate.pos[0];
-   await travel([{eye:[gx*.25,32,-12],target:lifted(front,6)},{eye:lifted(add(front,mul(N,18)),12),target:lifted(front,size*.8)}],false);
-   if(generation!==ceremonyGeneration)return;
-   await new Promise(done=>{ceremony={key,phase:'descend',at:performance.now(),camera:{eye:camera.eye.slice(),target:camera.target.slice()},onCrown,done};dirty=true;});
-  },
-  cancelCeremony,
   setMonuments(value){
    if(monuments){
     if(value.complete&&!monuments.complete)riseAt=podiumTime;
@@ -603,8 +555,7 @@ void main(){
   getStatus(){
    return {mode,progress:state.progress,phase:state.phase,dusk,duskTarget,bloomLevel,gardenFlowers,gardenHedges,rooms:rooms.length,
     gates:gates.map(g=>({key:g.key,state:gateState(g.key)})),paused,inside,sceneView,cameraEye:camera.eye.slice(),traveling:!!transition,
-    ceremony:ceremony?{key:ceremony.key,phase:ceremony.phase}:null,
-    debug:{staticTriangles:staticArray.length/30,dynamicTriangles,rebuilds,parts:{...partTris},ceremonyRange:ceremonyRange.slice()}};
+        debug:{staticTriangles:staticArray.length/30,dynamicTriangles,rebuilds,parts:{...partTris}}};
   },
   // Read-only test hooks (deep copies); app.js never uses them.
   _debugLayout(){

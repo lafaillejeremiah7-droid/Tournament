@@ -39,7 +39,7 @@ const document={querySelector:s=>elements[s]??=(element()),querySelectorAll:()=>
 const context={document,window:{addEventListener(){},matchMedia:()=>({matches:true})},fetch:()=>new Promise(()=>{}),setTimeout:()=>1,clearTimeout(){},setInterval(){},console,fx,confirm:()=>true};
 vm.createContext(context);vm.runInContext(fs.readFileSync(path.join(root,'static/app.js'),'utf8'),context);
 // Count every cutscene start (internal callers resolve the global binding).
-vm.runInContext('var plays=[];const realPlay=playCutscene;playCutscene=(...a)=>{plays.push(a);return realPlay(...a);};token="t";',context);
+vm.runInContext('var plays=[];const realPlay=playDivineCutscene;playDivineCutscene=(...a)=>{plays.push(a);return realPlay(...a);};token="t";',context);
 const run=s=>vm.runInContext(s,context);
 const $=s=>document.querySelector(s);
 const click=dataset=>events.click({target:{closest:()=>({dataset,disabled:false})}});
@@ -63,7 +63,7 @@ const cutOf=(p,key)=>p.view[key].rows.filter(r=>r.status==='CUT').map(r=>r.name)
  const cuts=cutOf(fx.settled,'round2');assert.equal(cuts.length,2);
  const advancing=click({action:'advance-stage',stage:'round2'});await flushMicro();
  assert.equal(run('cutsceneActive'),true,'Continue triggers a cinematic judgement');
- assert.equal(run("ceremonyStage"),'round2');
+ assert($('#cutscene-stage').innerHTML.includes('data-stage="round2"'),'correct round is shown');
  let html=$('#cutscene-stage').innerHTML;
  assert(html.includes('divine-hand-art')&&html.includes('divine-shears'),'divine shears visible');
  assert.equal((html.match(/class="divine-plant /g)||[]).length,10,'all ten plants appear');
@@ -101,8 +101,8 @@ const cutOf=(p,key)=>p.view[key].rows.filter(r=>r.status==='CUT').map(r=>r.name)
  assert.equal(expected.length,5);
  const fin=click({action:'submit-match',stage:'final',match:'7'});await flushMicro();
  assert.equal(run('cutsceneActive'),true);
- assert.equal(run('ceremonyStage'),'final');
- assert.equal(run('plays.length'),0,'old stick-figure verdict is not called');
+ assert($('#cutscene-stage').innerHTML.includes('data-stage="final"'),'the final 3D cutscene is shown');
+ assert.equal(run('plays.length'),1,'active Divine3D cutscene starts once');
  assert.deepEqual(JSON.parse(run("JSON.stringify(divineCuts('final'))")),expected);
  assert($('#cutscene-stage').innerHTML.includes('divine-canvas'));
  assert.equal((($('#cutscene-stage').innerHTML).match(/class="divine-plant /g)||[]).length,10);

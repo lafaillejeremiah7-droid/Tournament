@@ -24,7 +24,6 @@ jobs:
         run: |
           node tests/test_ui.cjs
           node tests/test_sound.cjs
-          node tests/test_verdict_cutscene.cjs
           node tests/test_round_cutscenes.cjs
           node tests/test_divine_timing.cjs
           node tests/test_divine_webgl.cjs

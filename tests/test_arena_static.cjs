@@ -133,20 +133,6 @@ function makeWorld({gl=null}={}){
  S.W.setTournament(stages('complete','complete','complete'));await S.step(301);
  assert.equal(S.status().gates.find(g=>g.key==='round1').state,'crowned');
 
- // A settled round still calls the 3D pavilion ceremony once.
- let bloomCalls=0;
- const ceremony=S.W.crownGate('round1','Know Your Code',()=>bloomCalls++);
- assert.equal(S.status().ceremony.phase,'approach');
- await flush();
- assert.equal(S.status().ceremony.phase,'descend');
- await S.step(1600);
- assert.equal(bloomCalls,1);
- assert.equal(S.status().ceremony.phase,'crowned');
- assert.equal(S.elements['ceremony-status'].textContent,'THE NODE IS ONLINE');
- await S.step(3900);await ceremony;
- assert.equal(S.status().ceremony,null,'ceremony resolves');
- S.W.cancelCeremony();
-
  // Fake WebGL path: two shader programs, draws, mesh and live bloom.
  const {gl,rec}=fakeGL(),G=makeWorld({gl});
  G.W.setTournament(stages('complete','current','sealed'));
@@ -176,5 +162,5 @@ function makeWorld({gl=null}={}){
  assert.equal(G.status().debug.rebuilds,oldBuilds+1,'bloom transition rebuilds flowers');
  assert.equal(G.status().gardenFlowers,112);
  assert.deepEqual(G.warnings,[]);
- console.log('Neon Grid renderer passed: countdown charge, exact arrival, no early 100%, huge full-charge node surge, pause, resets, scoring independence, 2D/WebGL, camera and ceremony.');
+ console.log('Neon Grid renderer passed: countdown charge, exact arrival, no early 100%, huge full-charge node surge, pause, resets, scoring independence, 2D/WebGL, camera and podium navigation.');
 })().catch(e=>{console.error(e);process.exit(1);});
