@@ -1,4 +1,4 @@
-/* Dependency-free Neon Grid 3D renderer. The synthwave city scene, camera and
+/* Dependency-free Deep Sea 3D renderer. The submerged coral-reef scene, camera and
    visual effects never mutate tournament scoring. */
 (function(){
  'use strict';
@@ -50,16 +50,16 @@
  let monuments=null,podiumSites=[],podiumTime=0,riseAt=null;
  const roomKeys=['settings','round1','round2','final','overview'];
  // Neon node palette: registration, introspection, adaptation, final, leaderboard.
- const roomColors=[[.25,.95,.90],[.98,.30,.72],[.55,.45,1.0],[.99,.72,.25],[.35,.90,.78]];
+ const roomColors=[[.30,.89,.78],[.27,.73,.94],[.51,.88,.67],[.96,.78,.40],[.33,.79,.88]];
  const ROMAN=['I','II','III','IV','V'];
  // Data-mote spark colors (cyan / magenta / amber) for the drifting dynamic mesh.
- const SPARKS=[[.30,.95,1.0],[.98,.25,.70],[1,.72,.30]];
+ const SPARKS=[[.30,.90,.78],[.24,.67,.96],[.75,.91,.56]];
  const media=window.matchMedia('(prefers-reduced-motion: reduce)');
  // Calm-morning ambience: birds are fully present near progress 0 and gone by this
  // threshold. The audio chirps in BrawlAudio use the same cutoff so the sky birds and
  // their song appear and disappear together.
  const BIRD_THRESHOLD=.2;
- let settings={},state={progress:0,phase:'GRID WAITING'},width=1,height=1,rooms=[],gates=[],dirty=true,geometryDirty=true;
+ let settings={},state={progress:0,phase:'DEPTHS DORMANT'},width=1,height=1,rooms=[],gates=[],dirty=true,geometryDirty=true;
  let bloomLevel=0,gardenFlowers=0,gardenHedges=0;
  let staticMesh=new Mesh(),staticArray=new Float32Array();
  let elapsed=0,lastFrame=0,lastSample=0,paused=false,suspended=false,inside=false,transition=null,lastBuild='',needsLayout=true;
@@ -75,10 +75,8 @@
  // Synthwave night-sky colors shared by the sky shader, the fog and the static
  // fallback gradient: near-black indigo at the top, a hot magenta/orange sunset
  // band along the horizon that deepens as dusk settles.
- const skyStops=d=>({
-  top:color([.04,.02,.10],[.02,.01,.06],d),
-  bottom:d<=.7?color([.70,.14,.55],[.98,.30,.42],d/.7):color([.98,.30,.42],[.55,.10,.42],(d-.7)/.3)});
- const fogColor=(d,p)=>color(skyStops(d).bottom,[.08,.40,.52],p*.4);
+ const skyStops=d=>({top:color([.014,.17,.24],[.008,.08,.15],d),bottom:color([.004,.035,.084],[.003,.025,.062],d)});
+ const fogColor=(d,p)=>color(skyStops(d).bottom,[.018,.17,.23],p*.55);
  function shader(type,code){
   const s=gl.createShader(type);gl.shaderSource(s,code);gl.compileShader(s);
   if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(s));return s;
@@ -100,8 +98,8 @@ void main(){
  vec3 n=normalize(v_normal);
  float sun=max(dot(n,normalize(vec3(-.4,.85,.45))),0.);
  float band=floor((.43+sun*.59)*7.+.5)/7.;
- vec3 daylight=mix(vec3(.74,.84,1.03),vec3(1.08,1.02,.88),sun*.72+.18);
- vec3 c=v_color*daylight*band*mix(vec3(1.),vec3(1.,.73,.52),u_dusk*.75);
+ vec3 daylight=mix(vec3(.54,.84,.93),vec3(.82,1.07,.94),sun*.72+.18);
+ vec3 c=v_color*daylight*band*mix(vec3(1.),vec3(.72,.93,1.04),u_dusk*.75);
  float noise=grit(floor(v_pos.xz*3.5))*.63+grit(floor(v_pos.xz*1.6))*.37;
  if(v_kind<.5){
   c*=.78+noise*.36;
@@ -132,7 +130,7 @@ void main(){
    float width=(1.-uv.y)*.4+.05;
    float core=clamp(1.-abs(uv.x+sway)/width,0.,1.);
    alpha=core*(1.-smoothstep(.3,1.,uv.y))*smoothstep(-1.,-.6,uv.y);
-   c=mix(vec3(1.,.12,.015),vec3(1.,.84,.22),pow(core,2.)*(1.-uv.y)*.65);
+   c=mix(vec3(.03,.36,.43),vec3(.48,1.,.78),pow(core,2.)*(1.-uv.y)*.65);
   }
   if(alpha<.01)discard;
  }
@@ -143,10 +141,24 @@ void main(){
  gl_FragColor=vec4(c,alpha);
 }`;
  const SKY_VERTEX_SRC='attribute vec2 a_pos;varying vec2 v_uv;void main(){v_uv=a_pos*.5+.5;gl_Position=vec4(a_pos,0.,1.);}';
- // Synthwave nightscape: near-black indigo top, a hot magenta/orange sunset band,
- // a big banded retro sun low on the horizon and a faint neon grid glow that
- // brightens as the grid charges (u_heat). Scanlines and a star speckle sell CRT.
- const SKY_FRAGMENT_SRC='precision mediump float;varying vec2 v_uv;uniform float u_heat,u_dusk,u_time;float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5);}float noise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(hash(i),hash(i+vec2(1,0)),f.x),mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),f.x),f.y);}void main(){vec2 uv=v_uv;vec3 top=mix(vec3(.04,.02,.10),vec3(.02,.01,.06),u_dusk);vec3 bottom=u_dusk<=.7?mix(vec3(.70,.14,.55),vec3(.98,.30,.42),u_dusk/.7):mix(vec3(.98,.30,.42),vec3(.55,.10,.42),(u_dusk-.7)/.3);vec3 c=mix(bottom,top,smoothstep(.12,.72,uv.y));float sy=mix(.46,.30,u_dusk);float sun=exp(-length((uv-vec2(.5,sy))*vec2(1.,1.9))*18.);float band=step(.5,fract((uv.y-sy)*26.));sun*=mix(1.,band,smoothstep(sy,sy-.14,uv.y));c+=mix(vec3(1.,.86,.35),vec3(1.,.32,.55),u_dusk)*sun*1.3;float horizon=smoothstep(.34,.3,uv.y)*smoothstep(.0,.14,uv.y);float gl=noise(vec2(uv.x*24.,0.))*.5+.5;c+=vec3(.10,.95,1.0)*horizon*(.18+u_heat*.5)*gl;float stars=step(.9975,hash(floor(uv*vec2(260.,150.))));c+=vec3(.65,.75,1.0)*stars*smoothstep(.5,1.,uv.y)*(.5+u_heat*.3);float scan=.5+.5*sin(uv.y*620.+u_time*.6);c*=1.-.05*scan;c+=vec3(.08,.40,.52)*u_heat*.10*(1.-uv.y);gl_FragColor=vec4(c,1.);}';
+ // Dark underwater water column with light shafts and marine snow.
+ const SKY_FRAGMENT_SRC=`precision mediump float;varying vec2 v_uv;uniform float u_heat,u_dusk,u_time;
+ float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5);}
+ void main(){
+ vec2 uv=v_uv;
+ vec3 c=mix(vec3(.002,.021,.053),mix(vec3(.014,.17,.24),vec3(.008,.075,.144),u_dusk),smoothstep(.04,1.,uv.y));
+ float shafts=0.;
+ for(int k=0;k<6;k++){
+ float center=(float(k)+.30)/6.+sin(u_time*.085+float(k)*2.1)*.014;
+ shafts+=exp(-abs(uv.x-center-uv.y*.14)*48.)*pow(uv.y,1.65);
+ }
+ c+=vec3(.016,.14,.155)*shafts*(.22+u_heat*.48);
+ float snow=step(.997,hash(floor(uv*vec2(270.,170.)+vec2(u_time*.18,-u_time*.32))));
+ c+=vec3(.32,.88,.73)*snow*(.26+u_heat*.55);
+ float ripple=.5+.5*sin(uv.x*62.+sin(uv.y*39.+u_time*.27)*3.);
+ c+=vec3(.008,.052,.056)*ripple*uv.y*(.3+u_heat*.35);
+ gl_FragColor=vec4(c,1.);
+ }`;
  function initGL(){
   gl=canvas.getContext('webgl',{alpha:false,antialias:true,powerPreference:'low-power'});
   if(!gl)return false;
@@ -159,7 +171,7 @@ void main(){
   return true;
  }
  let mode='webgl';
- try{if(!initGL())mode='static';}catch(error){console.warn('Neon Grid renderer uses static projection:',error.message);mode='static';}
+ try{if(!initGL())mode='static';}catch(error){console.warn('Deep Sea renderer uses static projection:',error.message);mode='static';}
  if(mode==='static'){
   // A fresh canvas can obtain 2D even if an attempted WebGL setup already claimed one.
   const fallback=document.createElement('canvas');fallback.id=canvas.id;fallback.setAttribute('aria-hidden','true');canvas.replaceWith(fallback);ctx=fallback.getContext('2d');
@@ -200,158 +212,108 @@ void main(){
   // full-viewport synthwave city scene.
   const m=new Mesh(),still=mode==='static';partTris={};rebuilds++;
   const part=(name,fn)=>{const before=m.data.length;fn();partTris[name]=(m.data.length-before)/30;};
-  const slab=[.06,.07,.13],floor=[.03,.05,.11],tower=[.05,.10,.20],towerTop=[.10,.55,.70],chrome=[.70,.60,.95];
+  const seabed=[.04,.10,.12];
   const litNodes=Math.floor(bloomLevel*112);
-  const nodeColors=[[.25,.95,1.0],[.98,.25,.70],[.60,.45,1.0],[1,.78,.30]];
+  const nodeColors=[[.22,.91,.78],[.36,.74,.96],[.59,.93,.64],[.95,.82,.51]];
   gardenFlowers=0;gardenHedges=0;
   part('grid-floor',()=>{
-   m.box(0,-.6,-61,180,1.2,182,floor);
-   m.box(0,-.03,-61,111,.12,138,[.04,.07,.15]);
-   // Glowing neon avenues laid out as a Tron-style grid between the tower blocks.
-   m.box(0,.035,-50,7,.08,120,towerTop);
-   for(const z of [-30,-48,-66,-84,-101])m.box(0,.05,z,78,.08,5,towerTop);
-   for(const x of [-34,-17,17,34])m.box(x,.045,-61,4,.08,100,[.60,.20,.60]);
-   // Raised data-terrace steps leading up to the central megastructure.
-   for(let k=0;k<6;k++)m.box(0,.15+k*.25,-127-k*1.7,78-k*2,.3,10,slab);
-  });
-  part('skyline',()=>{
-   // Rows of wireframe skyscraper slabs lining the avenues. Each block is a dark
-   // tower body capped with a glowing neon cornice; counted as gardenHedges so the
-   // scene still reports its structural density (>40 towers) to the tests.
-   const walls=[
-    [-39,-58,3,78],[-29,-46,3,40],[-29,-88,3,40],
-    [39,-58,3,78],[29,-46,3,40],[29,-88,3,40],
-    [-9,-24,32,3],[9,-24,32,3],[-9,-38,31,3],[9,-53,31,3],
-    [-9,-66,31,3],[9,-78,31,3],[-9,-92,31,3],[9,-106,31,3],
-    [-19,-46,3,22],[19,-65,3,23],[-20,-84,3,20],[20,-92,3,24],
-    [-47,-98,3,65],[47,-98,3,65],
-    [-44,-126,92,3]
-   ];
-   for(const [x,z,w,d] of walls){
-    const segments=Math.ceil(Math.max(w,d)/8),alongX=w>d;
-    for(let i=0;i<segments;i++){
-     const length=(alongX?w:d)/segments;
-     const px=x+(alongX?(i-(segments-1)/2)*length:0);
-     const pz=z+(alongX?0:(i-(segments-1)/2)*length);
-     m.box(px,1.7,pz,alongX?length+.05:w,3.4,alongX?d:length+.05,tower);
-     m.box(px,3.35,pz,alongX?length+.04:w+.02,.55,alongX?d+.02:length+.04,towerTop);
-     gardenHedges++;
-    }
-   }
-   // Scattered standalone high-rises break up the grid and read as a skyline from above.
-   for(let k=0;k<14;k++){const x=(k%7-3)*12,z=-35-Math.floor(k/7)*49;
-    if(Math.abs(x)<10)continue;m.box(x,1.2,z,4,2.4,5,[.06,.12,.24]);}
-  });
-  part('charge-nodes',()=>{
-   // The countdown charges the grid: a field of vertical data-towers powers up one by
-   // one. Each node is a flat holo data-pad flush to the floor carrying a thin dark
-   // pylon; as it lights, a stack of glowing window quads climbs its face. A stable
-   // permutation scatters the towers between the city blocks and keeps their positions
-   // across reloads. As charge approaches 1 the lit towers surge into a dramatic, HUGE
-   // power-up: the ramp starts around 55% charge and peaks ~3.4x at full charge, when
-   // extra window rows, a rooftop beacon + antenna and a neon cornice ring crown each.
-   const chargeScale=1+smooth(clamp((bloomLevel-.55)/.45))*2.4;
-   const towH=k=>2.1+(k-1)*1.3;// pylon height ramps with charge so the tower rises
-   for(let i=0;i<112;i++){
-    const lane=i%8,rank=Math.floor(i/8),side=lane<4?-1:1;
-    const x=side*(5+(lane%4)*8)+Math.sin(i*13.1)*1.4,z=-19-rank*7.3;
-    const col=nodeColors[i%nodeColors.length];
-    const lit=(i*37)%112<litNodes;
-    // Flat holo data-pad tile flush to the grid floor, in a dim tint of the node color.
-    m.box(x,.05,z,2.1,.1,2.1,lit?color(col,[.02,.03,.08],.72):[.05,.07,.14]);
-    // Thin dark pylon body rising from the pad; it grows taller as the node charges.
-    const h=lit?towH(chargeScale):2.1;
-    m.box(x,h/2,z,.5,h,.5,[.07,.10,.20]);
-    if(lit){
-     gardenFlowers++;
-     // Stacked glowing window quads up the pylon face read as a tower powering up. The
-     // windows alternate left/right columns so the stack stays angular, never radial.
-     const rows=3,step=h/(rows+1);
-     for(let k=0;k<rows;k++){const wy=step*(k+1),wx=x+(k%2?.26:-.26);
-      m.box(wx,wy,z+.26,.3,step*.62,.06,color(col,[.9,.97,1.0],.12),3);}
-     // Full charge only: extra lit window rows across the whole face, a rooftop beacon
-     // box with an antenna finial and a neon cornice ring crown each tower. Gated on
-     // bloomLevel>=1 so partial charge never inflates the triangle budget (the
-     // full-vs-partial tri delta is the revert-sensitive pin).
-     if(bloomLevel>=1){
-      m.box(x,h+.35,z,.72,.5,.72,color(col,[.95,.98,1.0],.5),3);// rooftop beacon block
-      m.box(x,h+1.1,z,.12,1,.12,[.95,.98,1.0],3);// white-hot antenna finial
-      m.loop([x,h+.08,z],[1,0,0],[0,0,-1],.62,.14,color(col,[.9,.98,1.0],.3),3,4);// cornice ring
+   // Basalt sea floor, scattered stones and pale silt winding into the trench.
+   m.box(0,-.7,-61,180,1.4,182,[.013,.047,.064]);
+   m.box(0,.03,-62,70,.12,137,[.036,.092,.093]);
+   for(let k=0;k<44;k++){const x=(rand(k+90)-.5)*158,z=-12-rand(k+133)*126;
+     m.gem(x,.12,z,1+rand(k+53)*2.8,[.06,.14,.14],0,.28);}
+ });
+ part('skyline',()=>{
+   // Two walls of jagged coral, sponge towers and anemone-like branching growth.
+   for(const side of [-1,1])for(let k=0;k<45;k++){
+     const x=side*(21+rand(k*7+side*13)*32),z=-10-k*2.91+rand(k*19+3)*2;
+     const h=2.4+rand(k*17+7)*6.6;
+     const dark=k%3===0?[.12,.33,.35]:k%3===1?[.10,.39,.31]:[.24,.29,.36];
+     m.gem(x,.60,z,1.6+rand(k+31),[.06,.14,.15],0,.47);
+     m.box(x,h*.44,z,.56,h*.88,.62,dark,0,(rand(k+8)-.5)*.6);
+     for(const dir of [-1,1]){
+       const ax=x+dir*1.45,ay=h*.63;
+       m.box(ax,ay,z,.54,h*.40,.5,dark,0,dir*.55);
+       m.gem(ax+dir*.5,ay+h*.21,z,.54,[.38,.84,.67],3,1.2);
      }
-    }
+     m.gem(x,h,z,.8,[.26,.77,.66],3,1.1);gardenHedges++;
    }
-  });
-  part('nodes',()=>{
-   // The five interactive entrance nodes: neon kiosks with chrome pylons, a glowing
-   // header prism and a holo-ring doorway you jack into. Sealed nodes go dark.
+ });
+ part('charge-nodes',()=>{
+   // 112 soft-bodied bioluminescent polyps awaken ONLY from countdown progress.
+   for(let i=0;i<112;i++){
+     const lane=i%8,rank=Math.floor(i/8),side=lane<4?-1:1;
+     const x=side*(5+(lane%4)*8)+Math.sin(i*13.1)*1.4,z=-19-rank*7.3;
+     const col=nodeColors[i%4],lit=(i*37)%112<litNodes;
+     m.gem(x,.06,z,1.2,[.055,.12,.14],0,.25);
+     const h=lit?1.5+bloomLevel*3.6:1;
+     m.box(x,h*.5,z,.28,h,.28,lit?[.10,.38,.39]:[.05,.12,.14]);
+     if(lit){
+       gardenFlowers++;
+       for(let p=0;p<5;p++){const angle=p*TAU/5;
+         m.gem(x+Math.cos(angle)*.64,h*.75,z+Math.sin(angle)*.64,.44,col,3,1.45);}
+       m.gem(x,h+.25,z,.67,[.61,.95,.80],3,1.5);
+       if(bloomLevel>=1){
+         for(let p=0;p<5;p++){const angle=p*TAU/5+.3;
+           m.gem(x+Math.cos(angle)*1.23,h+.25,z+Math.sin(angle)*1.23,.56,[.64,.98,.78],3,1.55);}
+         m.loop([x,h+.5,z],[1,0,0],[0,0,-1],1,.16,[.64,.98,.78],3,6);
+       }
+     }
+   }
+ });
+ part('nodes',()=>{
+   // Five active expedition chambers marked by pearl beacons.
    for(const g of rooms){
-    const [x,,z]=g.pos,r=g.size,colorTop=g.color,stateGate=gateState(g.key),sealed=stateGate==='sealed';
-    m.box(x,.2,z,r*2.1,.4,r*1.8,[.07,.09,.17]);
-    for(const dx of [-r*.7,r*.7])for(const dz of [-r*.58,r*.58]){
-     m.box(x+dx,3.3,z+dz,.46,6.2,.46,chrome);
-     m.box(x+dx,6.52,z+dz,.88,.34,.88,towerTop);
-    }
-    // A glowing header prism, floating beacon and antenna finial.
-    m.box(x,6.85,z,r*2.1,.7,r*1.78,sealed?[.12,.13,.18]:colorTop);
-    m.gem(x,8.8,z,r*.75,sealed?[.11,.12,.17]:colorTop,0,.48);
-    m.box(x,9.5,z,.2,2,.2,chrome);
-    m.gem(x,10.65,z,.35,sealed?[.20,.22,.30]:[.90,.98,1.0],3,1.7);
-    if(sealed)for(let k=0;k<5;k++)m.box(x+(k-2)*r*.34,2.7,z+r*.77,.16,5.2,.17,[.14,.15,.20]);
-    else{
-     m.box(x,1,z+r*.7,r*.6,1.7,.14,[.08,.20,.26]);
-     m.loop([x,.55,z+r*1.02],[1,0,0],[0,0,-1],r*.55,.18,g.color,3);
-    }
+     const [x,,z]=g.pos,r=g.size,sealed=gateState(g.key)==='sealed';
+     m.box(x,.20,z,r*2,.4,r*1.75,[.04,.10,.14]);
+     m.loop([x,.5,z],[1,0,0],[0,0,-1],r*.77,.35,sealed?[.08,.19,.21]:g.color,3,16);
+     for(const dx of [-r*.6,r*.6])for(const dz of [-r*.5,r*.5]){
+       m.gem(x+dx,2.7,z+dz,.74,[.09,.30,.31],0,3.4);
+       m.gem(x+dx,5.2,z+dz,.6,sealed?[.06,.17,.19]:g.color,3,1.8);
+     }
+     m.gem(x,7.5,z,r*.63,sealed?[.09,.16,.19]:g.color,3,.70);
+     m.gem(x,9,z,.5,sealed?[.07,.11,.14]:[.79,1,.81],3,1.2);
+     if(sealed)for(let k=0;k<5;k++)m.box(x+(k-2)*r*.27,2.5,z+r*.68,.16,4.8,.17,[.07,.15,.19]);
+     else m.loop([x,2.5,z+r*.7],[1,0,0],[0,1,0],r*.61,.21,g.color,3,16);
    }
-  });
-  part('megastructure',()=>{
-   // The central megastructure terminating the grand avenue: a boxy cyberpunk
-   // mainframe / data-tower - monolithic base slab, a ziggurat of rectangular blocks
-   // stepping inward and up to a tall rectangular data-mast, lit cyan/magenta window
-   // bands, a glowing emissive core and an antenna finial. No spires, no turrets.
-   const z=-133,cyan=[.25,.95,1.0],mag=[.98,.30,.72];
-   m.box(0,9,z-1,56,18,18,[.07,.11,.22]);// dark monolithic base slab
-   m.box(0,19,z-1,60,2,21,towerTop);// cornice ledge
-   // Stacked rectangular blocks stepping inward and up (boxy ziggurat, flat tops).
-   const steps=[[40,6,14,22],[28,6,11,28],[18,6,8,34]];
-   for(let s=0;s<steps.length;s++){const [w,h,d,y]=steps[s];m.box(0,y,z-1,w,h,d,[.09,.14,.27]);
-    // lit horizontal data-panel window bands on the front face, alternating neon.
-    for(let b=0;b<3;b++)m.box(0,y-h/2+1.6+b*(h-2)/2,z+d/2-.4,w-4,.9,.3,b%2?mag:cyan,3);}
-   // Glowing emissive core nested in the stack.
-   m.box(0,20,z-1,6,6,6,[.90,.98,1.0],3);
-   // Tall rectangular central data-mast (flat top, NOT a cone) with vertical neon ribs.
-   m.box(0,42,z-1,5,20,5,[.09,.14,.27]);
-   for(const sx of [-1,1])m.box(sx*2.4,42,z-1,.5,18,.5,cyan,3);
-   m.box(0,42,z+1.4,2.4,16,.3,mag,3);
-   // Horizontal cornice rings around the mast.
-   for(const ry of [34,52])m.loop([0,ry,z-1],[1,0,0],[0,0,-1],3.6,.4,cyan,3,8);
-   // Thin antenna / data-mast finial on top.
-   m.box(0,55,z-1,.4,6,.4,[.95,.98,1.0],3);
-   m.box(0,58.6,z-1,1.4,.5,1.4,mag,3);
-   // Boxy flanking data-pylons (flat tops, neon accents) to hold the silhouette width.
-   for(const x of [-26,26]){m.box(x,14,z,5,28,5,[.06,.10,.20]);
-    m.box(x,27.4,z,5.6,1,5.6,towerTop);
-    for(let b=0;b<4;b++)m.box(x,6+b*6,z+2.6,3.6,1.4,.3,b%2?cyan:mag,3);}
-  });
-  part('holo-signs',()=>{
-   // Floating holo-signage pads scattered through the plazas, each projecting a
-   // bright neon glyph up into the night.
+ });
+ part('megastructure',()=>{
+   // Ancient, half-buried stone temple with a great luminous pearl at its heart.
+   const z=-133,stone=[.07,.17,.19],shell=[.13,.34,.31],light=[.53,.94,.75];
+   for(let step=0;step<6;step++)m.box(0,1.1+step*.9,z-step*.7,55-step*5,2,20-step*1.5,stone);
+   for(const x of [-18,-12,-6,0,6,12,18]){
+     const h=10+5*(1-Math.abs(x)/22);
+     m.box(x,6+h*.5,z-4,1.8,h,2,shell);
+     m.gem(x,6+h,z-4,1.4,light,3,.65);
+   }
+   m.loop([0,14,z+3],[1,0,0],[0,1,0],12,1.2,[.31,.79,.68],3,24);
+   m.gem(0,14,z+3,9,[.045,.14,.17],0,.85);
+   m.gem(0,16,z+4,5,[.55,.97,.78],3,.72);
+   for(const x of [-26,26]){
+     m.gem(x,9,z,4,[.12,.27,.29],0,3.1);
+     for(let p=0;p<5;p++)m.gem(x+(p-2)*1.4,13+Math.abs(p-2),z,1.1,[.23,.68,.54],3,1.5);
+   }
+ });
+ part('holo-signs',()=>{
+   // Hydrothermal vents breathe luminous plumes beside the coral path.
    for(const [x,z,r] of [[0,-22,5],[0,-113,6],[-46,-66,4],[46,-66,4]]){
-    m.loop([x,.18,z],[1,0,0],[0,0,-1],r,.8,[.25,.95,1.0],3);
-    m.box(x,.14,z,r*1.28,.28,r*1.28,[.12,.10,.34]);
-    m.gem(x,1.3,z,.7,[.60,.85,1.0]);
-    m.gem(x,3,z,.3,[.98,.30,.72],3,3);
+     m.gem(x,.42,z,r*.7,[.035,.105,.13],0,.47);
+     for(let v=0;v<5;v++){const xx=x+(v-2)*r*.2,h=1.2+(v%3)*.7;
+       m.box(xx,h*.5,z,.6,h,.7,[.10,.25,.25]);m.gem(xx,h+.5,z,.32,[.33,.86,.75],3,1.3);}
    }
-  });
-  part('neon-arches',()=>{
-   // A procession of neon gateway arches spanning the main avenue; their keystone
-   // lamp ignites as the grid charge sweeps past each arch.
+ });
+ part('neon-arches',()=>{
+   // Organic coral arches frame the seven transitions into the abyss.
    for(let n=0;n<7;n++){
-    const z=-19-n*15,x=n%2?-2:2;
-    for(const off of [-4.7,4.7])m.box(x+off,2.5,z,.45,5,.45,chrome);
-    m.box(x,5.1,z,10,.5,.65,[.08,.40,.52]);
-    m.gem(x,6.1,z,.8,bloomLevel>(n%3)/3?nodeColors[n%4]:[.10,.14,.26],3,1.1);
+     const z=-19-n*15,x=n%2?-2:2;
+     for(const side of [-1,1]){
+       m.box(x+side*5,3,z,.55,6,.67,[.13,.35,.32],0,side*.35);
+       m.gem(x+side*3.1,6,z,1.3,[.31,.73,.60],3,1.2);
+     }
+     m.loop([x,4.7,z],[1,0,0],[0,1,0],4.4,.33,[.21,.62,.53],3,14);
+     m.gem(x,7.4,z,.75,bloomLevel>(n%3)/3?nodeColors[n%4]:[.09,.18,.20],3,1.4);
    }
-  });
+ });
   staticMesh=m;staticArray=new Float32Array(m.data);
   if(mode==='webgl'){gl.bindBuffer(gl.ARRAY_BUFFER,staticBuffer);gl.bufferData(gl.ARRAY_BUFFER,staticArray,gl.STATIC_DRAW);}
   geometryDirty=false;lastBuild=state.progress+'|'+duskTarget+'|'+bloomLevel;dirty=true;
@@ -432,7 +394,7 @@ void main(){
  }
  function positionLabels(){
   const host=document.getElementById('door-labels');if(!host||!vp)return;
-  const names=['Players & rules','Know Your Code','Adapt or Delete','Last Node Standing','Leaderboard'];
+  const names=['Players & rules','Know Your Depth','Adapt or Sink','The Abyssal Crown','Leaderboard'];
   const labelAt=g=>add(add(g.pos,[0,g.size*1.05+.6,0]),mul(g.N,.4));
   const items=sceneView==='podium'&&monuments?podiumSites.map(site=>({id:'place'+site.place,pos:add(site.pos,[0,6,0]),label:site.place+'. '+(monuments.slots.find(s=>s.place===site.place)?.names.join(' · ')||'Awaiting finalist')})):
    [...rooms.map((g,i)=>({id:g.key,pos:labelAt(g),label:ROMAN[i]+' / '+names[i],locked:gateState(g.key)==='sealed'})),
@@ -446,8 +408,8 @@ void main(){
  }
  function updateBloomHud(){
   const label=document.getElementById('city-status'),pct=document.getElementById('city-damage'),bar=document.getElementById('city-progress');
-  if(label)label.textContent=bloomLevel>=1?'THE GRID IS FULLY CHARGED':bloomLevel>0?'THE GRID IS POWERING UP':state.phase;
-  if(pct)pct.textContent=Math.floor(bloomLevel*100)+'% CHARGE';
+  if(label)label.textContent=bloomLevel>=1?'THE REEF IS FULLY AWAKE':bloomLevel>0?'BIOLUMINESCENCE RISING':state.phase;
+  if(pct)pct.textContent=Math.floor(bloomLevel*100)+'% AWAKE';
   if(bar)bar.style.width=(bloomLevel*100)+'%';
  }
  function sample(now){
