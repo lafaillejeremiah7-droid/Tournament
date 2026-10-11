@@ -106,14 +106,14 @@
  // The same geometry style as the 3D grid city, rebuilt into a layered neon
  // skyline. Structural meshes are cached: dynamic action remains only the 10
  // living competitors, the vortex, drifting data-motes and the giant mech arm.
- function wall(m,x,y,z,w,d,h=2.1){
-  // Low neon barrier bar: dark base rail with a glowing emissive cap stripe.
-  m.box(x,y+h/2,z,w,h,d,[.05,.07,.12],5);
-  m.box(x,y+h-.17,z,w+.15,.45,d+.15,[.14,.72,.86],5);
-  const n=Math.ceil((w>d?w:d)/2.1);
-  for(let i=0;i<n;i++){
-   const alongX=w>d,t=(i+.5)/n-.5,px=x+(alongX?t*w:0),pz=z+(alongX?0:t*d);
-   m.gem(px,y+h+.14,pz,.31,[.95,.24,.72],2,.55);
+ function wall(m,x,y,z,w,d,h){
+  // Basalt reef walls grow coral branches instead of masonry panels.
+  const count=Math.ceil(Math.max(w,d)/2.5);
+  for(let i=0;i<count;i++){
+    const t=(i+.5)/count-.5,px=x+(w>d?t*w:0),pz=z+(w>d?0:t*d);
+    const ht=h*(.75+pseudoRand(i*17+Math.abs(x)*5)*.5);
+    m.gem(px,.35,pz,Math.max(.7,Math.min(1.35,w>d?d*.6:w*.6)),[.07,.17,.19],1,ht*.62);
+    m.gem(px,ht*.72,pz,.46,[.20,.58,.51],2,1.35);
   }
  }
  function holoSign(m,x,y,z,tier=3,palette=0){
@@ -137,17 +137,13 @@
   m.gem(x,3.9*scale,z,.32*scale,[.40,.95,1],2,1.4);
  }
  function neonArch(m,x,z,wide=5.0){
-  // Glowing TRON gateway arch straddling the grid avenue.
-  const frame=[.08,.12,.20],trim=[.18,.86,.92];
-  m.box(x-wide/2,3.0,z,.62,6,.72,frame,1);
-  m.box(x+wide/2,3.0,z,.62,6,.72,frame,1);
-  m.box(x,6.1,z,wide+.8,.65,.95,frame,1);
-  m.box(x,6.58,z,wide+.9,.24,1.04,trim,2);
-  for(let k=0;k<8;k++){
-   const a=k*Math.PI/7,r=wide*.55;
-   m.gem(x-r*Math.cos(a),6+Math.sin(a)*2.0,z+.22,.40,[.95,.26,.74],2,1.3);
+  // Fossilized coral arches frame the entrance to the underwater arena.
+  for(const side of [-1,1]){
+    const xx=x+side*wide*.51;
+    m.cylinder([xx,0,z],[xx-side*.45,5.6,z],.37,[.12,.35,.34],.22,7,1);
+    for(let i=0;i<5;i++)m.gem(xx-side*(.3+i*.16),1.5+i*.89,z,.42,[.32,.82,.72],2,1.3);
   }
-  for(let k=0;k<5;k++)holoSign(m,x+(k-2)*wide/5,6.43,z+.35,3,k);
+  m.ring([x,5.7,z],wide*.5,.21,[.32,.82,.72],'xy',2);
  }
  function dataSpire(m,x,z,height=7){
   // Clustered emissive data-node obelisk, a stand-in for a wireframe tree.
@@ -292,16 +288,19 @@
      [nx+wNear,.15,nz],[nx-wNear,.15,nz],stream,2);
    riverX=nx;riverZ=nz;
   }
-  // Megastructure backdrop: a long dark server wall, light parapet and towers.
-  m.box(0,5.8,-33.8,52,11.6,3.0,[.06,.09,.16],1);
-  m.box(0,12.3,-34.2,54,1.1,4.0,[.16,.80,.90],2);
-  for(let x=-25;x<=25;x+=5){
-   m.box(x,9.0,-31.8,.63,5.7,.55,[.20,.84,.94],2);
-   m.gem(x,13.1,-34,.59,[.95,.28,.72],2,.9);
+  // Half-buried temple columns, sponge towers and shoals replace server towers.
+  for(const x of [-25,-17,-9,-1,7,15,23]){
+    const height=9+3*pseudoRand(x+57);
+    m.cylinder([x,0,-34],[x,height,-34],1.1,[.09,.22,.23],.64,10,1);
+    m.gem(x,height+.3,-34,1.7,[.27,.75,.64],2,.70);
   }
   for(const x of [-25,25]){
-   m.box(x,12,-34,4.2,24,4.1,slab,1);
-   m.gem(x,25,-34,3.5,[.98,.32,.76],2,1.55);
+    m.sphere([x,7,-40],5,9,4,[.10,.28,.30],1,8,12);
+    m.gem(x,15,-40,3,[.30,.84,.69],2,1.1);
+  }
+  for(let i=0;i<18;i++){const x=-26+i*3.1,z=-28-(i%5)*.65,y=8+(i%4)*2.1;
+    m.gem(x,y,z,.38,[.27,.66,.67],2,.52);
+    m.tri([x-.45,y,z],[x-.98,y+.4,z],[x-.98,y-.4,z],[.19,.52,.53],2);
   }
   return m;
  }
@@ -682,21 +681,17 @@ float cloudNoise(vec2 p){
 }
 void main(){
  if(v_kind>9.0){
-  // Synthwave night sky: a near-black indigo base deepening into magenta at
-  // the horizon, with a neon grid-sun and scanning data-beams instead of sun.
-  vec2 uv=v_pos.xy*.5+.5;
-  float t=smoothstep(.04,.94,uv.y);
-  vec3 sky=mix(vec3(.28,.05,.34),vec3(.04,.05,.22),t);
-  float clouds=cloudNoise(uv*vec2(13.,7.))*.66+cloudNoise(uv*vec2(34.,17.))*.34;
-  float veil=smoothstep(.46,.8,clouds)*(1.-t)*.24;
-  sky=mix(sky,vec3(.40,.08,.44),veil);
-  // Neon grid-sun low on the horizon with angled scanning beams.
-  vec2 sunPos=vec2(.60,.30);
-  float sun=exp(-length((uv-sunPos)*vec2(1.,1.4))*21.);
-  float ang=atan(uv.y-sunPos.y,uv.x-sunPos.x);
-  float shafts=smoothstep(.3,1.,.5+.5*sin(ang*9.))*smoothstep(.55,1.,uv.y)*.14;
-  float stars=step(.997,hash2(floor(uv*vec2(140.,90.))))*smoothstep(.4,1.,uv.y);
-  sky+=vec3(.42,.14,.30)*sun+vec3(.10,.26,.30)*shafts+vec3(.5,.7,.8)*stars;
+  // Deep ocean water with filtered shafts and suspended marine snow.
+  vec2 uv=v_pos.xy*.5+.5;float t=smoothstep(.02,.98,uv.y);
+  vec3 sky=mix(vec3(.003,.027,.068),vec3(.014,.17,.23),t);
+  float waves=cloudNoise(uv*vec2(15.,7.))*.60+cloudNoise(uv*vec2(32.,18.))*.40;
+  sky+=vec3(.03,.22,.18)*waves*t*.18;
+  float shafts=0.;
+  for(int k=0;k<7;k++){float x=(float(k)+.23)/7.;
+    shafts+=exp(-abs(uv.x-x-uv.y*.17)*39.)*t*t;}
+  sky+=vec3(.045,.22,.22)*shafts*.39;
+  float snow=step(.997,hash2(floor(uv*vec2(140.,90.))));
+  sky+=vec3(.31,.80,.74)*snow*.36;
   gl_FragColor=vec4(floor(sky*63.+.5)/63.,1.);return;
  }
  if(v_kind>6.5&&v_kind<8.5&&v_pos.y>44.0)discard;
