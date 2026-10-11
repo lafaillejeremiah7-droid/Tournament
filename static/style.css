@@ -266,155 +266,26 @@ table{border-spacing:0 5px}td{box-shadow:inset 0 1px #f7efe20b}td.calc{backgroun
 @keyframes fc-rays{to{transform:rotate(360deg)}}
 @media(max-width:640px){#cutscene.final-mode .cutscene-stage{height:min(430px,54vh)}.fc-podium{left:3%;right:3%;gap:2%}.fc-medal{width:31%}}
 @media(prefers-reduced-motion:reduce){#cutscene.final-mode *,#cutscene.final-mode *:before,#cutscene.final-mode *:after{animation:none!important}.fc-medal{transform:none}}
-.arena-verdict{position:relative;width:100%;height:100%;min-height:240px;overflow:hidden;background:#173a29}
-#cutscene .av-player{position:absolute;left:46%;bottom:12%;width:7%;z-index:3}
-#cutscene .av-stickman{display:block;width:100%;height:auto;overflow:visible}
-#cutscene .av-stickman line,#cutscene .av-stickman circle{fill:none;stroke:#5fe6ff;stroke-width:5;stroke-linecap:round}
-#cutscene .av-stickman .av-head{fill:#0b2436}
-#cutscene .av-arm{transform-origin:30px 36px}
-#cutscene .av-leg{transform-origin:30px 70px}
-#cutscene .av-name{position:absolute;top:100%;left:50%;width:max-content;max-width:180px;margin-top:4px;transform:translateX(-50%);text-align:center;overflow-wrap:anywhere;color:#d8f6ff;font:700 clamp(10px,1.6vw,16px)/1.1 monospace;text-shadow:0 2px 6px #000;transition:opacity .4s}
-#cutscene.verdict-enter .av-player{animation:av-walk-in .9s ease-out both}
-#cutscene.verdict-enter .av-leg-l,#cutscene.verdict-enter .av-arm-r{animation:av-swing .3s ease-in-out infinite alternate}
-#cutscene.verdict-enter .av-leg-r,#cutscene.verdict-enter .av-arm-l{animation:av-swing .3s ease-in-out infinite alternate-reverse}
-#cutscene.verdict-drag .av-player,#cutscene.verdict-gone .av-player{transform:translateX(-520%) rotate(-14deg);transition:transform .8s cubic-bezier(.6,0,.85,.4)}
-#cutscene.verdict-drag .av-leg,#cutscene.verdict-drag .av-arm{animation:av-flail .12s linear infinite alternate}
-#cutscene.verdict-drag .av-name{opacity:.5}
-#cutscene.verdict-gone .av-name{opacity:0}
-#cutscene .av-lineup .av-player{position:relative;left:auto;bottom:auto;flex:0 1 9%;width:auto}
 /* Champions: laurels over the plinths and falling neon shards. */
 #cutscene .fc-victory{background:radial-gradient(ellipse at 50% 120%,#1b6a8e 0%,#15204a 45%,#05030f 100%)}
 #cutscene .fc-medal .fc-laurel{position:absolute;bottom:calc(100% + 30px);left:50%;width:min(90px,70%);height:auto;transform:translateX(-50%)}
-#cutscene .fc-laurel path,#cutscene .crown-laurel path{fill:none;stroke:#39c6e8;stroke-width:4;stroke-linecap:round}
-#cutscene .fc-laurel ellipse,#cutscene .crown-laurel ellipse{fill:#4fd8ea;stroke:#1685ad;stroke-width:1}
+#cutscene .fc-laurel path{fill:none;stroke:#39c6e8;stroke-width:4;stroke-linecap:round}
+#cutscene .fc-laurel ellipse{fill:#4fd8ea;stroke:#1685ad;stroke-width:1}
 #cutscene .fc-medal.gold .fc-laurel ellipse{fill:#39e3ff;stroke:#1f9fd0}
 #cutscene .fc-petal{position:absolute;top:var(--y);left:var(--x);width:9px;height:6px;border-radius:60% 0;background:#39e3ff;opacity:0;animation:fc-petal-fall 3.2s linear infinite;animation-delay:var(--delay)}
 #cutscene .fc-petal:nth-child(odd){background:#ff6cc9}
-/* Node ceremony fallback when the WebGL grid is unavailable. */
-#cutscene .crown-card{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:radial-gradient(#15204a,#05030f)}
-#cutscene .crown-card .crown-laurel{width:min(240px,40%);height:auto;animation:crown-drop 1s cubic-bezier(.2,.9,.3,1.2) both}
-#cutscene .crown-label{color:#4fe6ff;font:700 clamp(18px,3vw,32px)/1.2 monospace;letter-spacing:3px;text-align:center;overflow-wrap:anywhere;max-width:90%}
-@keyframes av-walk-in{from{transform:translateX(520%)}to{transform:none}}
-@keyframes av-swing{from{transform:rotate(-18deg)}to{transform:rotate(18deg)}}
-@keyframes av-flail{from{transform:rotate(-35deg)}to{transform:rotate(35deg)}}
 @keyframes fc-petal-fall{0%{opacity:0;transform:translateY(-30px) rotate(0)}15%{opacity:.9}100%{opacity:0;transform:translateY(80px) rotate(220deg)}}
-@keyframes crown-drop{from{opacity:0;transform:translateY(-40%) scale(.6)}to{opacity:1;transform:none}}
-@media(max-width:600px){#cutscene.verdict-mode .cutscene-stage,#cutscene.crown-mode .cutscene-stage{aspect-ratio:1.6}#cutscene .av-player{width:10%}}
 /* Cutscene column: nothing shrinks below its content, so the two-line caption can never spill
    onto Skip. The stage is sized from the height left over, keeping its aspect ratio. */
 #cutscene{--cs-room:max(100dvh - 330px,180px);justify-content:safe center}
 #cutscene>*{flex-shrink:0}
 #cutscene .cutscene-caption{min-height:2.8em;overflow-wrap:anywhere}
 #cutscene .cutscene-stage{width:min(1400px,96vw,var(--cs-room) * 2.84)}
-#cutscene.verdict-mode .cutscene-stage{width:min(1400px,96vw,var(--cs-room) * 900 / 420)}
-#cutscene.crown-mode .cutscene-stage{width:min(1400px,96vw,var(--cs-room) * 2.4)}
 #cutscene.final-mode .cutscene-stage{height:min(510px,61vh,var(--cs-room))}
-#cutscene .arena-verdict,#cutscene .fc-victory{min-height:0}
+#cutscene .fc-victory{min-height:0}
 @media(max-width:640px){#cutscene.final-mode .cutscene-stage{height:min(430px,54vh,var(--cs-room))}}
-@media(max-width:600px){#cutscene{--cs-room:max(100dvh - 430px,180px)}#cutscene .cutscene-stage{width:min(1400px,96vw,var(--cs-room) * 1.8)}#cutscene.verdict-mode .cutscene-stage,#cutscene.crown-mode .cutscene-stage{width:min(1400px,96vw,var(--cs-room) * 1.6)}}
-@media (prefers-reduced-motion: reduce){.arena-verdict *,.crown-card *,.fc-victory *{animation:none!important;transition:none!important}#cutscene .fc-petal{opacity:.8}}
-
-/* NEON GRID / MECH-ARM PURGE VERDICT. Stage is drawn entirely in CSS/SVG. */
-:root{--ink:#f3f7eb;--pink:#b97088;--bg:#0e231b;--panel:#102a20;--line:#52735c;--muted:#b9d1b7;--text:#eef5e8;--yellow:#e6c77c;--green:#99d69d;--red:#e88291;--gray:#354e41;--blue:#b7e3cb;color-scheme:dark}
-body{background:#10271e}
-.room-header{background:linear-gradient(180deg,#091d16db,transparent);border-color:#d6e7bc30}
-.brand .brand-mark{background:#20463099;border-color:#c5dfab;color:#d7f0c7}
-.room-intro{background:linear-gradient(110deg,#0b251bdc,#123d29b5 76%,transparent)}
-.room-intro h1 em{color:#e7bfd0}
-.games-clock{background:linear-gradient(135deg,#18432fdb,#0c251ddb);border:1px solid #95c79f55}
-.room-label{background:linear-gradient(180deg,transparent,#092419f2)}
-.route-stop{background:#112d23ea;border-color:#89ac83}
-.city-room{background:linear-gradient(135deg,#28533bbb,#09291deb);border-color:#c4dbb45e}
-#cutscene,#cutscene.final-mode{
- background:radial-gradient(ellipse at 50% 55%,#295239,#102b23 62%,#06150f 100%);color:#f3f5e9
-}
-#cutscene .cutscene-head .eyebrow,#cutscene.final-mode .cutscene-head .eyebrow{color:#e8ce92}
-#cutscene .cutscene-head h2,#cutscene.final-mode .cutscene-head h2{color:#f4f9e9}
-#cutscene .cutscene-stage,#cutscene.final-mode .cutscene-stage{
- background:#204c32;border:1px solid #bdd99b80;box-shadow:0 0 85px #82b87b26,inset 0 0 55px #04120a6b
-}
-#cutscene .cutscene-caption strong,#cutscene.final-mode .cutscene-caption strong{color:#f1c883}
-#cutscene .cutscene-skip{background:#17392b;border-color:#aacb98;color:#f0f6e6}
-#cutscene .garden-verdict{background:linear-gradient(#241048 0 40%,#13113a 40% 59%,#070618 59% 100%);isolation:isolate}
-#cutscene .gv-sky{position:absolute;inset:0 0 45%;background:linear-gradient(#2a0a46,#0a0922)}
-#cutscene .gv-palace{position:absolute;width:46%;height:38%;left:27%;top:17%;border:9px solid #1a7fa6;border-top:18px solid #39d6ff;background:repeating-linear-gradient(90deg,#0e2740 0 14%,#164a66 14% 18%,#0b2033 18% 26%);clip-path:polygon(0 34%,18% 34%,18% 12%,50% 0,82% 12%,82% 34%,100% 34%,100% 100%,0 100%);box-shadow:0 8px 0 #0b3350}
-#cutscene .gv-hedge{position:absolute;bottom:15%;width:24%;height:56%;z-index:1;background:repeating-linear-gradient(30deg,#102a46 0 12px,#15466a 12px 26px,#0f3550 26px 34px);border:7px solid #0a2238;border-radius:20% 20% 3% 3%}
-#cutscene .gv-hedge-left{left:-2%}#cutscene .gv-hedge-right{right:-2%}
-#cutscene .gv-path{position:absolute;inset:58% 12% 0;background:linear-gradient(105deg,#123a52,#2fb4df 44%,#13405c 100%);clip-path:polygon(31% 0,69% 0,100% 100%,0 100%)}
-#cutscene .gv-rose-arch{position:absolute;left:30%;right:30%;top:13%;height:44%;border:18px solid #1685ad;border-bottom:0;border-radius:47% 47% 0 0;box-shadow:0 0 0 6px #39e3ff66,inset 0 0 0 6px #ff6cc966;z-index:2}
-#cutscene .gv-rose-arch:after{content:'◆  ◆  ◆  ◆  ◆';position:absolute;inset:-16px -14px auto;color:#ff8fd6;font-size:clamp(12px,2.2vw,29px);text-align:center;text-shadow:0 2px #c3368c}
-#cutscene .gv-compost{position:absolute;left:4%;bottom:5%;width:24%;height:24%;z-index:6;border-radius:50% 50% 8% 8%;background:radial-gradient(ellipse at 50% 40%,#2a1150,#0a0820 70%);border-bottom:12px solid #0a0820;box-shadow:0 6px 20px #1a0a3080}
-#cutscene .gv-compost b{position:absolute;left:0;right:0;top:22%;color:#9ff2ff;text-shadow:0 2px 4px #000;font:900 clamp(9px,1.2vw,17px)/1.1 monospace}
-#cutscene .gv-compost i{position:absolute;top:7%;width:18px;height:8px;left:18%;background:#2fb4df;border-radius:100%;transform:rotate(25deg)}
-#cutscene .gv-compost i:nth-of-type(2){left:61%;transform:rotate(-55deg)}
-#cutscene .gv-compost i:nth-of-type(3){left:40%;top:47%;transform:rotate(85deg)}
-#cutscene .gv-gardener{position:absolute;right:18%;bottom:14%;width:18%;max-width:220px;z-index:5;filter:drop-shadow(0 6px 8px #04142baa);transform-origin:50% 100%}
-#cutscene .gv-gardener svg{width:100%;height:auto}
-#cutscene .gv-gardener circle{fill:#2a5c86;stroke:#39d6ff;stroke-width:3}
-#cutscene .gv-hat{fill:#163a56;stroke:#0c2338;stroke-width:4}
-#cutscene .gv-coat{fill:#123a52;stroke:#0a2338;stroke-width:4}
-#cutscene .gv-body{fill:none;stroke:#4fd8ea;stroke-width:13;stroke-linecap:round}
-#cutscene .gv-shears{position:absolute;right:14%;bottom:33%;height:43%;width:25%;z-index:7;overflow:visible;transform-origin:60% 85%;transform:translateY(60%) rotate(-34deg);filter:drop-shadow(1px 4px 3px #0a1c2caa)}
-#cutscene .gv-blade{fill:#cdeeff;stroke:#2a8fb8;stroke-width:3;transform-origin:84px 102px}
-#cutscene .gv-blade-b{transform:rotate(35deg)}
-#cutscene .gv-handle{fill:none;stroke:#1f9fd0;stroke-width:12}
-#cutscene .gv-pivot{fill:#39e3ff}
-#cutscene .gv-handle-bar{fill:none;stroke:#2bc3ef;stroke-width:12}
-#cutscene .gv-snip,#cutscene .gv-pruned{position:absolute;z-index:12;opacity:0;pointer-events:none;font:900 clamp(24px,5.5vw,88px)/1 monospace;color:#9ff2ff;text-shadow:3px 6px #0d2b4b,0 0 26px #39e3ff}
-#cutscene .gv-snip{left:42%;top:22%;transform:translate(-50%,-50%) scale(.2) rotate(-12deg)}
-#cutscene .gv-pruned{left:50%;top:40%;transform:translate(-50%,-50%) scale(.6);color:#ff8fd6;text-shadow:2px 5px #43264a,0 0 24px #ff6cc9}
-#cutscene .garden-verdict .av-player{left:45%;bottom:15%;width:7.5%;z-index:5;transform-origin:center 88%;transition:none}
-#cutscene .garden-verdict .av-name{color:#eafaff}
-#cutscene.verdict-enter .garden-verdict .av-player{animation:av-walk-in .9s ease-out both}
-#cutscene.verdict-judge .gv-gardener{animation:gv-gardener-raise .5s both}
-#cutscene.verdict-judge .gv-shears{animation:gv-raise .7s cubic-bezier(.1,.85,.2,1.25) forwards}
-#cutscene.verdict-down .gv-shears,#cutscene.verdict-hook .gv-shears,#cutscene.verdict-drag .gv-shears,#cutscene.verdict-gone .gv-shears{transform:translateY(-5%) rotate(8deg)}
-#cutscene.verdict-down .gv-blade-b{animation:gv-snip-blade .19s linear both}
-#cutscene.verdict-down .gv-snip,#cutscene.verdict-hook .gv-snip{animation:gv-snap .4s cubic-bezier(.1,1.2,.1,1) both}
-#cutscene.verdict-down .garden-verdict{animation:gv-impact .27s ease-in-out}
-#cutscene.verdict-hook .garden-verdict .av-player,#cutscene.verdict-drag .garden-verdict .av-player,#cutscene.verdict-gone .garden-verdict .av-player{animation:gv-fling 1.12s cubic-bezier(.15,.5,.65,1) forwards}
-#cutscene.verdict-drag .gv-compost{animation:gv-compost-hit .7s ease-in-out}
-#cutscene.verdict-drag .gv-compost:after{content:'✦  ✦  ✦';position:absolute;inset:-25px 0 auto;color:#d2bb7e;font-size:26px;animation:gv-compost-hit .5s ease-out}
-#cutscene.verdict-gone .gv-pruned{animation:gv-pruned .6s ease-out forwards}
-#cutscene.verdict-summary .garden-verdict .av-lineup{z-index:8;left:24%;right:16%;bottom:18%}
-#cutscene.verdict-summary .gv-pruned{opacity:1}
-#cutscene .gv-summary .av-lineup{position:absolute;display:flex;justify-content:space-around;align-items:flex-end;gap:14px}
-#cutscene .gv-summary .av-lineup .av-player{position:relative;left:auto;bottom:auto;width:clamp(24px,12%,75px);flex:0 0 auto;transform:rotate(-21deg);opacity:.6}
-@keyframes gv-raise{from{transform:translateY(60%) rotate(-34deg)}to{transform:translateY(-5%) rotate(8deg)}}
-@keyframes gv-gardener-raise{from{transform:rotate(7deg)}to{transform:rotate(-8deg)}}
-@keyframes gv-snip-blade{0%{transform:rotate(35deg)}100%{transform:rotate(-4deg)}}
-@keyframes gv-snap{0%{opacity:0;transform:translate(-50%,-50%) scale(.15) rotate(-12deg)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.2)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.8)}}
-@keyframes gv-impact{0%,100%{transform:translate(0,0)}15%{transform:translate(9px,-5px)}33%{transform:translate(-11px,4px)}55%{transform:translate(7px,5px)}75%{transform:translate(-3px,-3px)}}
-@keyframes gv-fling{0%{transform:translate(0,0) rotate(0deg) scale(1);opacity:1}25%{transform:translate(-80%,-130%) rotate(-45deg) scale(.9);opacity:1}70%{transform:translate(-315%,-90%) rotate(-310deg) scale(.64);opacity:1}100%{transform:translate(-395%,55%) rotate(-560deg) scale(.4);opacity:0}}
-@keyframes gv-compost-hit{0%,100%{transform:scale(1)}50%{transform:scale(1.2, .77)}}
-@keyframes gv-pruned{from{opacity:0;transform:translate(-50%,-50%) scale(.4)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
-@media(max-width:600px){
- #cutscene .gv-gardener{right:9%;width:22%}
- #cutscene .gv-shears{right:3%;width:32%}
- #cutscene .gv-compost{left:1%;width:32%}
- #cutscene .garden-verdict .av-player{left:46%;width:12%}
- #cutscene .gv-rose-arch{left:21%;right:21%}
-}
-@media(prefers-reduced-motion:reduce){
- #cutscene .gv-shears{transform:translateY(-5%) rotate(8deg)}
- #cutscene.verdict-down .gv-snip,#cutscene.verdict-gone .gv-pruned{animation:none;opacity:1}
- #cutscene .garden-verdict .av-player{animation:none!important}
-}
-
-/* Keep the airborne player inside the compost heap on narrower screens. */
-@keyframes gv-fling-mobile{
-  0%{transform:translate(0,0) rotate(0deg) scale(1);opacity:1}
-  25%{transform:translate(-50%,-140%) rotate(-55deg) scale(.9);opacity:1}
-  70%{transform:translate(-180%,-95%) rotate(-310deg) scale(.65);opacity:1}
-  100%{transform:translate(-240%,58%) rotate(-550deg) scale(.4);opacity:0}
-}
-@media(max-width:600px){
-  #cutscene.verdict-hook .garden-verdict .av-player,
-  #cutscene.verdict-drag .garden-verdict .av-player,
-  #cutscene.verdict-gone .garden-verdict .av-player{
-    animation:gv-fling-mobile 1.12s cubic-bezier(.15,.5,.65,1) forwards;
-  }
-}
+@media(max-width:600px){#cutscene{--cs-room:max(100dvh - 430px,180px)}#cutscene .cutscene-stage{width:min(1400px,96vw,var(--cs-room) * 1.8)}}
+@media (prefers-reduced-motion: reduce){.fc-victory *{animation:none!important;transition:none!important}#cutscene .fc-petal{opacity:.8}}
 
 /* Last Node Standing: one trophy pedestal, no silver or bronze winners. */
 #city-podium .monument-podium,
@@ -432,37 +303,6 @@ body{background:#10271e}
  #city-podium .podium-place,#screen-podium .podium-place{flex:0 1 250px}
  #cutscene .fc-medal.gold{width:min(75%,250px)}
 }
-
-/* One-at-a-time pruning counter and continuous single-flight elimination. */
-#cutscene .gv-pruning-count{
- position:absolute;top:3%;left:3%;z-index:12;
- padding:7px 12px;background:#133323dd;border:1px solid #d3deb38c;
- color:#f6efd4;font:800 clamp(10px,1.5vw,17px)/1.3 monospace;
- letter-spacing:1.8px;text-shadow:0 1px 5px #000;
-}
-#cutscene.verdict-drag .garden-verdict .av-player,
-#cutscene.verdict-gone .garden-verdict .av-player{
- animation:none;transform:translate(-395%,55%) rotate(-560deg) scale(.4);
- opacity:0;
-}
-@media(max-width:600px){
- #cutscene .gv-pruning-count{top:2%;left:2%;padding:5px 7px;font-size:10px}
- #cutscene.verdict-drag .garden-verdict .av-player,
- #cutscene.verdict-gone .garden-verdict .av-player{
-  animation:none;transform:translate(-240%,58%) rotate(-550deg) scale(.4);opacity:0;
- }
-}
-@media(prefers-reduced-motion:reduce){
- #cutscene.verdict-down .gv-blade-b,
- #cutscene.verdict-gone .gv-blade-b{animation:none;transform:rotate(-4deg)}
- #cutscene.verdict-down .garden-verdict .av-player{
-  opacity:1;transform:none;
- }
- #cutscene.verdict-gone .garden-verdict .av-player{
-  opacity:0;transform:none;
- }
-}
-
 
 /* Node roster: exactly ten original neon avatars in every round, independent of the opening grid charge. */
 .node-roster{margin:20px 0 26px;padding:20px;border:1px solid #8c7654;background:linear-gradient(165deg,#203b2b,#223025 56%,#382923);border-radius:10px}

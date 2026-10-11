@@ -526,10 +526,10 @@ function playDivineCutscene(stage){
   const cuts=divineCuts(stage);
   if(!['round1','round2','final'].includes(stage)||!view[stage]?.complete||cuts.length!==(stage==='final'?5:2)||cutsceneActive){resolve();return;}
   const overlay=$('#cutscene');if(!overlay){resolve();return;}
-  cutsceneRunId++;cutsceneTimers.forEach(t=>clearTimeout(t));cutsceneTimers=[];cutsceneReturnResult=false;
+  cutsceneRunId++;cutsceneTimers.forEach(t=>clearTimeout(t));cutsceneTimers=[];
   window.BrawlAudio?.unlock?.();cutsceneResolve=resolve;cutsceneActive=true;
   window.CityWorld?.setSuspended?.(true);
-  ceremonyLabel=stageMeta[stage].label;ceremonyStage=stage;
+
   overlay.classList.remove('divine-leaving');overlay.classList.add('divine-mode','open');
   overlay.hidden=false;overlay.setAttribute?.('aria-hidden','false');
   $('#cutscene .eyebrow').textContent='THE SYSTEM’S VERDICT';
@@ -1077,8 +1077,7 @@ $('#screen-dialog').addEventListener('cancel',e=>{e.preventDefault();closeScreen
 $('#result-dialog').addEventListener('cancel',e=>{e.preventDefault();closeResult();});
 $('#home-link').onclick=e=>{e.preventDefault();if($('#screen-dialog').open)closeScreen().catch(err=>error(err.message));};
 $('#retry-save').onclick=()=>save();
-// Ceremony HUD Skip, cutscene Skip and click-anywhere all route through the single endCutscene path.
-if($('#ceremony-skip'))$('#ceremony-skip').onclick=()=>endCutscene();
+// Skip, click-anywhere and Escape share the single active cutscene dismiss path.
 $('#cutscene-skip').onclick=e=>{e.stopPropagation();endCutscene();};
 $('#cutscene').onclick=()=>endCutscene();
 $('#cutscene').addEventListener('cancel',e=>{e.preventDefault();endCutscene();});
@@ -1153,119 +1152,22 @@ const worldClick=e=>{const b=e.target.closest('button');if(!b)return;if(b.id==='
 
 // Five seconds per eliminated player. Only engine-cut players are judged.
 let cutsceneTimers=[],cutsceneKeyHandler=null,cutsceneResolve=null;
-let ceremonyLabel="",ceremonyStage="",cutsceneRunId=0,cutsceneReturnResult=false;
-const titled=(label,suffix)=>(label?label+': ':'')+suffix;
+let cutsceneRunId=0;
 const schedule=(fn,ms)=>cutsceneTimers.push(setTimeout(()=>{if(cutsceneActive)fn();},ms));
-const verdictPhases=['enter','judge','down','hook','drag','gone','summary'];
-// Captions retheme to the neon purge; the 'PRUNED' token stays for the
-// verdict regression test and the preserved gv-* fallback art classes.
-const verdictCaptions={enter:'THE SYSTEM LOCKS YOUR NODE',judge:'THE BEAM CHARGES',down:'DELETE!',hook:'HURLED INTO THE VOID',drag:'PURGE IMPACT',gone:'PRUNED'};
-const verdictSounds={judge:a=>a.horn(),down:a=>a.shears(),hook:a=>a.hook(),drag:a=>a.compost(),gone:a=>a.slam()};
-function verdictBackdrop(){
- // Neon-city fallback art reusing the gv-* class hooks: dark grid, holo arch,
- // a mech-arm effector and a void bin instead of the old pastoral purge props.
- return '<div class="gv-sky"></div><div class="gv-palace"></div><div class="gv-hedge gv-hedge-left"></div><div class="gv-hedge gv-hedge-right"></div>'
-  +'<div class="gv-path"></div><div class="gv-rose-arch"></div><div class="gv-compost"><b>VOID BIN</b><i></i><i></i><i></i></div>'
-  +'<div class="gv-gardener"><svg viewBox="0 0 130 190" aria-hidden="true"><path class="gv-hat" d="M14 45L62 7L110 45Z M0 47H125V57H0Z"/><circle cx="63" cy="66" r="21"/><path class="gv-coat" d="M37 91L87 91L108 145L20 145Z"/><path class="gv-body" d="M43 144L36 189M83 144L91 189M38 103L17 134M87 103L112 131"/></svg></div>'
-  +'<svg class="gv-shears" viewBox="0 0 190 170" aria-hidden="true"><path class="gv-blade gv-blade-a" d="M84 102L22 4L95 80Z"/><path class="gv-blade gv-blade-b" d="M84 102L164 13L95 80Z"/><circle class="gv-pivot" cx="84" cy="102" r="8"/><circle class="gv-handle" cx="52" cy="139" r="19"/><circle class="gv-handle" cx="120" cy="140" r="19"/><path class="gv-handle-bar" d="M84 102L52 125M84 102L120 126"/></svg>'
-  +'<div class="gv-snip">DELETE!</div><div class="gv-pruned">PURGED</div>';
-}
-const stickman=name=>'<div class="av-player"><svg class="av-stickman" viewBox="0 0 60 120" aria-hidden="true"><circle class="av-head" cx="30" cy="14" r="10"/><line class="av-body" x1="30" y1="24" x2="30" y2="70"/><line class="av-arm av-arm-l" x1="30" y1="36" x2="12" y2="56"/><line class="av-arm av-arm-r" x1="30" y1="36" x2="48" y2="56"/><line class="av-leg av-leg-l" x1="30" y1="70" x2="16" y2="112"/><line class="av-leg av-leg-r" x1="30" y1="70" x2="44" y2="112"/></svg><span class="av-name">'+esc(name)+'</span></div>';
 const laurelSvg=cls=>'<svg class="'+cls+'" viewBox="0 0 120 80" aria-hidden="true"><path d="M60 74C30 70 14 48 18 14M60 74C90 70 106 48 102 14"/>'+
  [[20,56,-50],[16,40,-20],[20,24,10],[100,56,50],[104,40,20],[100,24,-10]].map(([x,y,r])=>
   '<ellipse cx="'+x+'" cy="'+y+'" rx="9" ry="4.5" transform="rotate('+r+' '+x+' '+y+')"/>'
  ).join('')+'</svg>';
-// Each scene contains exactly one contestant, one shears impact and its own index.
-function buildVerdictScene(name,index=0,total=1){
- const count='<div class="gv-pruning-count">PRUNING '+(index+1)+' / '+total+'</div>';
- $('#cutscene-stage').innerHTML='<div class="arena-verdict garden-verdict">'+verdictBackdrop()+stickman(name)+count+'</div>';
- if(ceremonyStage==='final')$('#cutscene-label').textContent='Last Node Standing · '+(index+1)+' OF '+total;
-}
-function setVerdictClass(phase){
- const overlay=$('#cutscene');
- overlay.classList.remove(...verdictPhases.map(p=>'verdict-'+p));
- if(phase)overlay.classList.add('verdict-'+phase);
-}
-function verdictPhase(phase,name){
- setVerdictClass(phase);
- $('#cutscene-caption').innerHTML='<strong>'+verdictCaptions[phase]+'</strong><br>'+esc(name);
- const audio=window.BrawlAudio;if(audio&&verdictSounds[phase])verdictSounds[phase](audio);
-}
-function runVerdictSequence(names,i=0){
- if(!cutsceneActive)return;if(i>=names.length){startGateCeremony();return;}
- const name=names[i];buildVerdictScene(name,i,names.length);verdictPhase('enter',name);
- schedule(()=>verdictPhase('judge',name),900);
- schedule(()=>verdictPhase('down',name),1900);
- schedule(()=>verdictPhase('hook',name),2200);
- schedule(()=>verdictPhase('drag',name),3400);
- schedule(()=>verdictPhase('gone',name),4300);
- schedule(()=>runVerdictSequence(names,i+1),5000);
-}
-// Reduced motion: keep a still frame for each finalist, individually snipped.
-function runReducedFinalPruning(names,i=0){
- if(!cutsceneActive)return;
- if(i>=names.length){startGateCeremony();return;}
- const name=names[i];buildVerdictScene(name,i,names.length);
- verdictPhase('down',name); // Static closed shears, with an audible snip.
- schedule(()=>{verdictPhase('gone',name);window.BrawlAudio?.compost?.();},600);
- schedule(()=>runReducedFinalPruning(names,i+1),1600);
-}
-// Early-round reduced motion keeps the accessible summary of both cut players.
-function buildVerdictSummary(names){
- if(!cutsceneActive)return;
- $('#cutscene-stage').innerHTML='<div class="arena-verdict garden-verdict gv-summary">'+verdictBackdrop()+'<div class="av-lineup">'+names.map(stickman).join('')+'</div></div>';
- setVerdictClass('summary');
- $('#cutscene-caption').innerHTML='<strong>PRUNED</strong><br>'+names.map(esc).join(' · ');
- window.BrawlAudio?.shears();
- schedule(startGateCeremony,3000);
-}
-async function startGateCeremony(){
- const run=cutsceneRunId,overlay=$('#cutscene');
- if(window.CityWorld?.crownGate){
-  cutsceneReturnResult=$('#result-dialog').open;
-  if(cutsceneReturnResult)$('#result-dialog').close();
-  if($('#screen-dialog').open)$('#screen-dialog').close();
-  document.body.classList.remove('inside-room');
-  if(overlay.open)overlay.close();overlay.hidden=true;
-  window.CityWorld.setSuspended(false);roomTransition=true;if($('#ceremony-hud'))$('#ceremony-hud').hidden=false;
-  try{await window.CityWorld.crownGate(ceremonyStage,ceremonyLabel,()=>{window.BrawlAudio?.fanfare();});}
-  finally{roomTransition=false;if(cutsceneActive&&run===cutsceneRunId){if(ceremonyStage==='final')revealFinalWinners(run);else endCutscene();}}
-  return;
- }
- setVerdictClass('');overlay.classList.remove('verdict-mode','final-mode');overlay.classList.add('crown-mode');
- $('#cutscene .eyebrow').textContent='ROUND COMPLETE';$('#cutscene-label').textContent=titled(ceremonyLabel,'The node comes online');
- runCrownFallback(ceremonyLabel);
-}
-// Used when the 3D grid is unavailable: a neon card represents the node ceremony.
-function runCrownFallback(label){
- if(!cutsceneActive)return;
- label=String(label||'');
- $('#cutscene-stage').innerHTML='<div class="crown-card">'+laurelSvg('crown-laurel')+'<strong class="crown-label">NODE ONLINE · '+esc(label)+'</strong></div>';
- $('#cutscene-caption').innerHTML='<strong>THE GRID CHARGES</strong><br>'+esc(label);
- window.BrawlAudio?.fanfare();
- schedule(endCutscene,reducedMotion()?1500:2500);
-}
-
-// Final verdict: the system deletes the five losing finalists; one $30 champion survives.
 let finalWinners=null;
 function finalRoster(){
  const rows=Array.isArray(view?.final?.rows)?view.final.rows:[];
  return [{rank:1,name:rows.find(x=>x.rank===1)?.name||'CHAMPION'}];
 }
 function finalTitle(a,b){$('#cutscene-caption').innerHTML='<strong>'+a+'</strong><br>'+esc(b);}
-function startFinalSequence(cuts){
- if(!cutsceneActive)return;
- finalWinners=finalRoster();
- // Five finalists are pruned. Only the first-place player survives to
- // claim the entire $30, with no runner-up payout.
- if(reducedMotion())runReducedFinalPruning(cuts);
- else runVerdictSequence(cuts);
-}
 function revealFinalWinners(run){
  if(!cutsceneActive||run!==cutsceneRunId)return;
  const overlay=$('#cutscene');
- setVerdictClass(''); // Clear the fifth player's PRUNED state before revealing the champion.
- overlay.classList.remove('crown-mode','divine-mode','divine-leaving');overlay.classList.add('final-mode','fc-winners');
+ overlay.classList.remove('divine-mode','divine-leaving');overlay.classList.add('final-mode','fc-winners');
  const name=rank=>finalWinners?.find(x=>x.rank===rank)?.name||'-';
  const block=(rank,cls)=>'<div class="fc-medal '+cls+'">'+laurelSvg('fc-laurel')+'<span class="fc-winner-name">'+esc(name(rank))+'</span><div class="fc-plinth">'+rank+'</div></div>';
  const petals=Array.from({length:25},(_,i)=>'<span class="fc-petal" style="--x:'+((i*41)%98+1)+'%;--y:'+((i*61)%87+5)+'%;--delay:'+(-(i%8)*.29)+'s"></span>').join('');
@@ -1278,46 +1180,19 @@ function revealFinalWinners(run){
  cutsceneTimers.push(setTimeout(()=>{if(cutsceneActive&&run===cutsceneRunId)endCutscene()},reducedMotion()?3000:6400));
 }
 
-// ONE dismiss path for Skip / click / Esc / natural completion. Stops audio, cancels the
-// gate ceremony, clears timers, hides the overlay and resolves so the standings can show.
-const cutsceneClasses=['open','verdict-mode',...verdictPhases.map(p=>'verdict-'+p),'final-mode','fc-winners','crown-mode','divine-mode','divine-leaving'];
+// One dismiss path for the active WebGL verdict (Skip, Escape and completion).
+const cutsceneClasses=['open','final-mode','fc-winners','divine-mode','divine-leaving'];
 function endCutscene(){
- if($('#ceremony-hud'))$('#ceremony-hud').hidden=true;
- cutsceneRunId++;window.BrawlAudio?.stop();window.CityWorld?.cancelCeremony?.();
+ cutsceneRunId++;window.BrawlAudio?.stop();
  cutsceneTimers.forEach(t=>clearTimeout(t));cutsceneTimers=[];
  if(cutsceneKeyHandler&&document.removeEventListener)document.removeEventListener('keydown',cutsceneKeyHandler,true);
  cutsceneKeyHandler=null;
  window.Divine3D?.stop?.();
  const overlay=$('#cutscene');
- if(overlay){if(overlay.open)overlay.close();overlay.hidden=true;if(overlay.setAttribute)overlay.setAttribute('aria-hidden','true');overlay.classList.remove(...cutsceneClasses);}
- cutsceneActive=false;
- window.CityWorld?.setSuspended(false);
- if(cutsceneReturnResult){cutsceneReturnResult=false;const dialog=$('#result-dialog');if(!dialog.open)dialog.showModal();renderResult();}
- const r=cutsceneResolve;cutsceneResolve=null;if(r)r();
+ if(overlay){if(overlay.open)overlay.close();overlay.hidden=true;overlay.setAttribute?.('aria-hidden','true');overlay.classList.remove(...cutsceneClasses);}
+ cutsceneActive=false;window.CityWorld?.setSuspended(false);
+ const resolve=cutsceneResolve;cutsceneResolve=null;if(resolve)resolve();
 }
-// Play the cutscene for `names`; resolves when it ends (naturally or via skip). If there
-// is nothing to show, resolves immediately so standings appear directly.
-function playCutscene(names,roundLabel='',stage=''){
- return new Promise(resolve=>{
-  if(cutsceneActive||!names||!names.length){resolve();return;}
-  const overlay=$('#cutscene');if(!overlay){resolve();return;}
-  cutsceneRunId++;cutsceneReturnResult=false;window.BrawlAudio?.unlock();cutsceneResolve=resolve;cutsceneActive=true;window.CityWorld?.setSuspended(true);
-  const verdict=stage==='round1'||stage==='round2',label=String(roundLabel||'');
-  ceremonyLabel=roundLabel||'Final';ceremonyStage=stage||'final';
-  overlay.classList.toggle('verdict-mode',verdict);overlay.classList.toggle('final-mode',stage==='final');
-  $('#cutscene .eyebrow').textContent=verdict?'THE SYSTEM HAS SPOKEN':stage==='final'?"THE SYSTEM'S VERDICT":'ROUND COMPLETE';
-  $('#cutscene-label').textContent=verdict?titled(label,'PURGED'):stage==='final'?titled(label,'The final purge'):titled(String(ceremonyLabel),'The node comes online');
-  overlay.hidden=false;if(overlay.setAttribute)overlay.setAttribute('aria-hidden','false');overlay.classList.add('open');
-  // Native top layer keeps the cutscene above both scoring and tie-result dialogs.
-  overlay.showModal();
-  if(overlay.focus)overlay.focus({preventScroll:true});
-  // Capture Esc so skipping does not also close the scoring/results window underneath.
-  cutsceneKeyHandler=e=>{if(e.key==='Escape'||e.key==='Esc'){if(e.preventDefault)e.preventDefault();if(e.stopPropagation)e.stopPropagation();endCutscene();}};
-  if(document.addEventListener)document.addEventListener('keydown',cutsceneKeyHandler,true);
-  if(verdict){if(reducedMotion())buildVerdictSummary(names);else runVerdictSequence(names);}else if(stage==='final')startFinalSequence(names);else startGateCeremony();
- });
-}
-
 fetch('/api/state').then(r=>r.json()).then(data=>{({state,view,revision,token}=data);round2Game=Math.min(view.round2.draw.completed,4);render();$('#save-status').textContent='All changes saved';}).catch(e=>error('Cannot reach the Python app. '+e.message));
 
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!cutsceneActive&&!roomTransition&&!$('#screen-dialog').open&&!$('#result-dialog').open){window.CityWorld?.home();}});
