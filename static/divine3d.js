@@ -2,7 +2,7 @@
  * approach as city.js, rendered into an independent cinematic canvas. All neon
  * avatars, the giant mech arm, and its articulated plasma grip-claw are genuine
  * 3D meshes with normals, lighting, depth testing and a perspective camera.
- * Retro-'80s synthwave / TRON: neon cyan + magenta on near-black, glowing
+ * Deep Sea: abyssal ruins, glowing coral and filtered ocean light with
  * wireframe, grid horizon, CRT scanline. The SYSTEM scans then DELETES. */
 (function(){
  'use strict';
@@ -118,7 +118,7 @@
  }
  function holoSign(m,x,y,z,tier=3,palette=0){
   // A tiny holographic sign post: emissive stalk crowned with a neon glyph.
-  const tints=[[.17,.95,.92],[.95,.26,.74],[.60,.42,.98],[.98,.80,.32]];
+  const tints=[[.17,.95,.92],[.31,.88,.78],[.60,.42,.98],[.98,.80,.32]];
   const col=tints[Math.floor(Math.abs(palette))%4];
   const height=.24+.11*tier;
   m.cylinder([x,y,z],[x,y+height,z],.065,[.20,.60,.80],.043,6);
@@ -132,7 +132,7 @@
  function pylon(m,x,z,scale=1){
   // Street grid light pylon with a magenta lamp halo.
   m.box(x,1.55*scale,z,.18*scale,3.1*scale,.18*scale,[.14,.18,.26]);
-  m.gem(x,3.15*scale,z,.48*scale,[.98,.30,.74],2,1.2);
+  m.gem(x,3.15*scale,z,.48*scale,[.36,.86,.75],2,1.2);
   m.box(x,3.64*scale,z,.77*scale,.15*scale,.77*scale,[.20,.72,.90],2);
   m.gem(x,3.9*scale,z,.32*scale,[.40,.95,1],2,1.4);
  }
@@ -154,18 +154,18 @@
    m.sphere([x,y,z],r,.85+j*.06,r,dark,5,5,9);
    m.gem(x,y+.66,z,r*.71,light,2,.54);
   }
-  m.gem(x,height+.55,z,.35,[.98,.32,.76],2,1.4);
+  m.gem(x,height+.55,z,.35,[.45,.92,.72],2,1.4);
  }
  function dataWell(m,x,z){
   // A circular holo-fountain: concentric neon rings over a dark basin, with
   // light jets of cyan data arcing outward like spraying water.
-  const base=[.06,.09,.16],ring=[.16,.80,.90],spray=[.55,.92,1];
+  const base=[.06,.09,.16],ring=[.20,.74,.72],spray=[.55,.92,1];
   m.cylinder([x,.05,z],[x,.50,z],3.6,base,3.9,20);
   m.cylinder([x,.54,z],[x,.62,z],3.15,ring,3.12,20,2);
   m.cylinder([x,.15,z],[x,1.52,z],.61,base,.64,12);
   m.cylinder([x,1.48,z],[x,1.70,z],1.63,base,1.72,14);
   m.cylinder([x,1.71,z],[x,1.75,z],1.34,ring,1.34,14,2);
-  m.gem(x,2.55,z,.49,[.98,.34,.78],2,1.45);
+  m.gem(x,2.55,z,.49,[.58,.93,.74],2,1.45);
   for(let j=0;j<12;j++){
    const a=j*TAU/12,u=x+2.45*Math.cos(a),v=z+2.45*Math.sin(a);
    m.gem(u,.77,v,.17,spray,2,1.9);
@@ -195,12 +195,12 @@
   m.tri([-1,-1,0],[3,-1,0],[-1,3,0],[.07,.05,.16],9.5);
   const deck=[.04,.06,.12],plaza=[.06,.09,.17],
       slab=[.09,.13,.22],neon=[.16,.84,.92];
-  m.box(0,-1.05,0,70,2.1,73,[.03,.04,.09],3);
+  m.box(0,-1.05,0,70,2.1,73,[.018,.08,.105],3);
   m.box(0,.012,0,64,.06,69,deck,3);
   // Glowing TRON grid floor: alternating dark tiles with emissive seam motes.
   for(let x=-30;x<=30;x+=5)for(let z=-30;z<=30;z+=5){
    const dark=(Math.round(x+z)/5)%2===0;
-   m.box(x,.057,z,4.85,.04,4.85,dark?[.05,.08,.15]:[.07,.11,.19],3);
+   m.box(x,.057,z,4.85,.04,4.85,dark?[.04,.12,.15]:[.05,.15,.17],3);
    const seed=(x+31)*571+(z+31)*43;
    for(let i=0;i<3;i++){
     const px=x+(pseudoRand(seed+i*3)-.5)*3.7,pz=z+(pseudoRand(seed+i*5+17)-.5)*3.8;
@@ -224,7 +224,7 @@
    m.cylinder([x,.57,z],[x,.70,z],1.80,slab,1.80,12,1);
    for(let j=0;j<6;j++){
     const a=j*TAU/6;
-    m.gem(x+Math.cos(a)*1.57,.78,z+Math.sin(a)*1.57,.11,[.98,.32,.76],2,.9);
+    m.gem(x+Math.cos(a)*1.57,.78,z+Math.sin(a)*1.57,.11,[.45,.92,.72],2,.9);
    }
   }
   // Symmetrical neon barrier lanes, raised data-rails and glowing edging.
@@ -255,7 +255,7 @@
   // Distant painted vista: layered neon-magenta skyline ridges, a glowing
   // data-tower band and a flowing light-stream threading toward the horizon.
   // Kept far back and low on screen so the foreground avatars stay the focus.
-  const ridgeTones=[[.30,.10,.42],[.22,.08,.38],[.14,.06,.30]];
+  const ridgeTones=[[.06,.28,.33],[.04,.21,.27],[.03,.15,.22]];
   for(let ridge=0;ridge<3;ridge++){
    const depth=-58-ridge*9,baseH=15+ridge*5,tone=ridgeTones[ridge];
    let prevX=-56,prevY=.4;
@@ -279,7 +279,7 @@
   }
   // Flowing light-stream: a chain of cyan data-river segments catching the
   // skyline glow as it threads out of the far grid toward the concourse.
-  const stream=[.22,.78,.92];
+  const stream=[.13,.57,.67];
   let riverX=-4,riverZ=-50;
   for(let bend=0;bend<10;bend++){
    const nz=riverZ+5.2,nx=riverX+Math.sin(bend*.9)*6.0;
@@ -329,7 +329,7 @@
    }
   }
   if(prime){
-   m.ring([x,y+.18,z],scale*1.34,.055,[.98,.34,.78],'xz',2);
+   m.ring([x,y+.18,z],scale*1.34,.055,[.58,.93,.74],'xz',2);
    for(let i=0;i<5;i++){
     const a=i*TAU/5;m.gem(x+Math.cos(a)*scale*1.26,y+.30,z+Math.sin(a)*scale*1.26,
       scale*.18,[.55,.95,1],2,1.65);
@@ -349,8 +349,8 @@
   const fall=prior?1:cutting?ease(clamp((age-(contact-.02))/.72)):0;
   const sway=prior?0:Math.sin(elapsed*1.4+index*1.31)*.055;
   const height=[.48,1.18,1.98,2.78,3.65,4.63,5.58][tier]*(prior?.64:1);
-  const limbColor=prior?[.22,.24,.30]:tier>3?[.28,.80,.92]:[.22,.68,.86];
-  const palette=[[.98,.30,.72],[.30,.92,.98],[.70,.46,.98],[.98,.74,.34]][index%4];
+  const limbColor=prior?[.17,.29,.33]:tier>3?[.36,.85,.72]:[.28,.70,.74];
+  const palette=[[.36,.86,.69],[.30,.92,.84],[.38,.70,.94],[.95,.80,.51]][index%4];
   // The avatar is split at `cutY`, just below the corona head. Anything below
   // stays an upright rooted base; anything at/above cutY is the deleted top
   // that tips, drops and drifts sideways as `fall` ramps 0->1 (power-down).
@@ -364,15 +364,15 @@
      .75+cutY+dy*Math.cos(t)-p[0]*Math.sin(t)*dir-drop,z+p[2]+fall*.6];
   };
   m.cylinder([x,.71,z],[x,.95,z],.89,[.10,.14,.22],1.04,10);
-  m.cylinder([x,.96,z],[x,1.01,z],1.05,[.16,.80,.90],1.05,10);
+  m.cylinder([x,.96,z],[x,1.01,z],1.05,[.20,.74,.72],1.05,10);
   // Core column: a single upright length when whole; once deleted it splits
   // into a rooted base (below cutY) and an upper length riding away powered-down.
   const severed=fall>0;
   if(severed){
-   m.cylinder(base([0,.05,0]),base([0,cutY-fall*.12,0]),.10+tier*.016,[.16,.86,.92],.035+tier*.011,8);
-   m.cylinder(map([0,cutY,0]),map([0,height,0]),.10+tier*.016,[.16,.86,.92],.035+tier*.011,8);
+   m.cylinder(base([0,.05,0]),base([0,cutY-fall*.12,0]),.10+tier*.016,[.20,.79,.69],.035+tier*.011,8);
+   m.cylinder(map([0,cutY,0]),map([0,height,0]),.10+tier*.016,[.20,.79,.69],.035+tier*.011,8);
   }else{
-   m.cylinder(base([0,.05,0]),base([0,height,0]),.10+tier*.016,[.16,.86,.92],.035+tier*.011,8);
+   m.cylinder(base([0,.05,0]),base([0,height,0]),.10+tier*.016,[.20,.79,.69],.035+tier*.011,8);
   }
   // Growth stage 0 is a bare boot-up spark, not a formed avatar.
   if(tier===0){
@@ -394,8 +394,17 @@
    m.gem(...map([0,height+.26,0]),.19,[.34,.90,.95],2,1.2);return;
   }
   const color=prior?[.30,.28,.34]:palette;
-  corona(m,map([0,height,0]),[0,0,0,.43,.58,.67,.82][tier],
-    tier===3?5:tier===4?7:tier===5?9:12,color,tier>=5);
+  // Fish-like body with fan tail, dorsal plates and a luminous eye.
+  // The creature's body is anchored to its falling upper segment during a cut.
+  const body=1+(tier-3)*.43;
+  m.sphere(map([0,height,0]),body,body*.52,body*.45,color,2,7+tier,12+tier*2);
+  m.tri(map([-body*.7,height,0]),map([-body*1.7,height+body*.55,0]),
+        map([-body*1.7,height-body*.55,0]),color,2);
+  m.gem(...map([body*.68,height+body*.13,0]),.14,[.02,.12,.18],2,.9);
+  for(let fin=0;fin<Math.max(1,tier-2);fin++){
+    const px=(fin/Math.max(1,tier-2)-.5)*body;
+    m.gem(...map([px,height+body*.5,0]),.22+fin*.07,[.49,.94,.77],2,.8);
+  }
   if(tier>=4){
    for(let k=0;k<(tier===4?2:tier===5?4:6);k++){
     const a=k*TAU/Math.max(2,tier===4?2:tier===5?4:6);
@@ -407,7 +416,7 @@
   }
   // A neon halo-ring and node crown is earned, never present at 0 goals.
   if(tier>=5&&!prior){
-   m.ring(map([0,height*.71,0]),tier===6?1.18:.80,.065,[.98,.34,.78],'xz',2);
+   m.ring(map([0,height*.71,0]),tier===6?1.18:.80,.065,[.58,.93,.74],'xz',2);
    if(tier===6){
     for(let k=0;k<8;k++){
      const a=k*TAU/8;
@@ -419,7 +428,7 @@
   }
   if(cutting&&age>contact-.01&&age<contact+.73){
    // Neon shards and data fragments burst outward and fall as the beam deletes.
-   const sparkTones=[[.30,.90,.98],[.98,.34,.78],[.60,.46,.98],[.55,.95,1]];
+   const sparkTones=[[.30,.90,.98],[.58,.93,.74],[.36,.67,.91],[.55,.95,1]];
    for(let j=0;j<12;j++){
     const a=j*TAU/12,spread=clamp((age-contact)/.75),drop=spread*spread*1.9;
     const lx=x+Math.cos(a)*spread*1.8,lz=z+Math.sin(a)*spread*1.8;
@@ -438,7 +447,7 @@
   // The camera sees the UNDERSIDE of this horizontal XZ opening. The neon
   // vortex spins behind the arm; the ring always stays above the mech grip.
   const p=(a,rad,dy=0)=>[x+Math.cos(a)*rad,y+dy,z+Math.sin(a)*rad];
-  const vortex=[[.05,.02,.14],[.22,.05,.30],[.52,.10,.52],[.14,.52,.72],[.30,.92,.98]];
+  const vortex=[[.05,.02,.14],[.22,.05,.30],[.52,.10,.52],[.14,.52,.72],[.26,.85,.78]];
   for(let band=0;band<5;band++){
    const low=band*r/5,high=(band+1)*r/5;
    for(let j=0;j<SEG;j++){
@@ -525,7 +534,7 @@
     [.035,.048,.027],highlight,7,5);
   }
   // Emissive neon cuff bands and a glowing palm sigil on the mech housing.
-  for(const yy of [5.45,7.35])m.ring(at(0,yy,-.05),1.40,.095,[.98,.34,.78],'xz',2);
+  for(const yy of [5.45,7.35])m.ring(at(0,yy,-.05),1.40,.095,[.58,.93,.74],'xz',2);
   m.gem(...at(0,.10,1.03),.43,[.20,.88,.96],2,1.4);
   for(const sx of [-1,1])m.gem(...at(sx*.54,.30,.94),.15,[.40,.92,1],2,1.1);
   // Twin plasma grip-blades on a glowing pivot, with two ring mounts. The
@@ -605,7 +614,7 @@
    const x=(pseudoRand(j+2)*2-1)*16.5,z=(pseudoRand(j+44)*2-1)*13;
    const y=.3+pseudoRand(j+13)*8;
    const p=[x+.6*Math.sin(elapsed*.4+j),y+(elapsed*.45+j)%7,z+.7*Math.cos(elapsed*.3+j)];
-   m.gem(...p,.10,pseudoRand(j)>.5?[.98,.40,.80]:[.40,.92,1],2,.32);
+   m.gem(...p,.10,pseudoRand(j)>.5?[.57,.91,.69]:[.40,.92,1],2,.32);
   }
   portal(m,step,age,elapsed);
   if(coronation){
@@ -624,7 +633,7 @@
      const angle=k*TAU/8;const px=x+Math.cos(angle)*(1.4+beam*.3),pz=z+Math.sin(angle)*(1.4+beam*.3);
      m.gem(px,1.4+height+beam*(2.2+(k%2)*.9),pz,.25,[.45,.94,1],2,1.8);
     }
-    m.ring([x,1.6+height+beam*2,z],1.5+beam*.7,.12+beam*.10,[.98,.34,.78],'xz',2);
+    m.ring([x,1.6+height+beam*2,z],1.5+beam*.7,.12+beam*.10,[.58,.93,.74],'xz',2);
    }
   }
   const [hx,hy,hz]=handPosition(models,cutIds,step,age,previous,elapsed);
@@ -699,7 +708,7 @@ void main(){
  vec3 sunDir=normalize(vec3(-.48,.83,.32));
  float nd=max(dot(n,sunDir),0.);
  float light=floor((.48+nd*.56)*7.+.5)/7.;
- vec3 warm=vec3(1.02,.80,1.04),cool=vec3(.56,.86,1.04);
+ vec3 warm=vec3(.79,1.03,.92),cool=vec3(.47,.83,1.04);
  vec3 col=v_color*mix(cool,warm,clamp(nd*.70+.22,0.,1.))*light;
  vec2 uv=v_pos.xz;
  float noise=painted(uv*2.4);
