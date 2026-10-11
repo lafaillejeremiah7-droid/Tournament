@@ -1,10 +1,12 @@
 """A fixtures-backed source connector.
 
-Serves verse text, original-language terms, and commentary context from the
-bundled fixtures (and the on-disk cache). This is the connector used by the
-dry-run skeleton so the full pipeline shape runs with zero network. FEAT-002
-adds the real connectors (bible-api, Strong's, CCEL/New Advent, ...) alongside
-this one via the same registry.
+Serves verse text, original-language terms, and commentary context purely from
+the bundled fixtures with zero network. The real connectors
+(:mod:`deepresearch.sources.bible_api`, :mod:`~deepresearch.sources.strongs`,
+:mod:`~deepresearch.sources.commentary`) already fall back to these same
+fixtures in offline/dry-run mode, so this connector is retained as a simple,
+network-free option (e.g. for isolated tests) that speaks the shared
+:class:`SourceConnector` interface.
 """
 
 from __future__ import annotations
@@ -21,7 +23,7 @@ from deepresearch.sources.base import (
 
 
 class FixturesConnector(SourceConnector):
-    """Reads bundled sample data keyed by normalized reference."""
+    """Reads bundled sample data keyed by normalized reference / topic."""
 
     name = "fixtures"
 
@@ -57,10 +59,11 @@ class FixturesConnector(SourceConnector):
 
     def _fetch_strongs(self, request: SourceRequest) -> SourceResult:
         strongs: dict[str, Any] = load_fixture("strongs")
-        entries = strongs.get(request.reference)
+        key = request.reference or request.query
+        entries = strongs.get(key)
         if not entries:
             return SourceResult.missing(
-                self.name, f"no fixture lexicon data for {request.reference!r}"
+                self.name, f"no fixture lexicon data for {key!r}"
             )
         return SourceResult(
             connector=self.name,
@@ -73,10 +76,11 @@ class FixturesConnector(SourceConnector):
 
     def _fetch_commentary(self, request: SourceRequest) -> SourceResult:
         commentary: dict[str, Any] = load_fixture("commentary")
-        entries = commentary.get(request.reference)
+        key = request.reference or request.query
+        entries = commentary.get(key)
         if not entries:
             return SourceResult.missing(
-                self.name, f"no fixture commentary for {request.reference!r}"
+                self.name, f"no fixture commentary for {key!r}"
             )
         return SourceResult(
             connector=self.name,

@@ -1,22 +1,46 @@
 {
   "Matthew 5:17": [
     {
-      "surface": "\u03c0\u03bb\u03b7\u03c1\u1ff6\u03c3\u03b1\u03b9",
+      "term": "\u03c0\u03bb\u03b7\u03c1\u1ff6\u03c3\u03b1\u03b9",
       "transliteration": "plerosai",
       "strongs": "G4137",
-      "gloss": "to fill up, complete, bring to full expression / fulfill",
       "language": "greek",
+      "definition": "to fill up, complete, bring to full expression; to fulfill.",
+      "insight": "Jesus describes bringing the Law and Prophets to their intended goal, not setting them aside.",
       "source": "Public-domain Strong's Greek lexicon",
       "locator": "G4137"
     },
     {
-      "surface": "\u03ba\u03b1\u03c4\u03b1\u03bb\u1fe6\u03c3\u03b1\u03b9",
+      "term": "\u03ba\u03b1\u03c4\u03b1\u03bb\u1fe6\u03c3\u03b1\u03b9",
       "transliteration": "katalysai",
       "strongs": "G2647",
-      "gloss": "to loosen down, demolish, abolish / destroy",
       "language": "greek",
+      "definition": "to loosen down, demolish, abolish; to destroy.",
+      "insight": "The word Jesus explicitly denies: he did not come to tear down the Scriptures.",
       "source": "Public-domain Strong's Greek lexicon",
       "locator": "G2647"
+    }
+  ],
+  "turn the other cheek": [
+    {
+      "term": "\u1fe5\u03b1\u03c0\u03af\u03b6\u03b5\u03b9",
+      "transliteration": "rhapizei",
+      "strongs": "G4474",
+      "language": "greek",
+      "definition": "to strike with the open hand, to slap, especially a backhanded blow.",
+      "insight": "A backhand to the right cheek was an insult of dishonor more than an act of injury, framing the saying as a response to humiliation.",
+      "source": "Public-domain Strong's Greek lexicon",
+      "locator": "G4474"
+    },
+    {
+      "term": "\u1f00\u03bd\u03b8\u03af\u03c3\u03c4\u03b7\u03bc\u03b9",
+      "transliteration": "anthistemi",
+      "strongs": "G436",
+      "language": "greek",
+      "definition": "to set oneself against, to resist, to oppose, often in a hostile or violent sense.",
+      "insight": "'Do not resist' targets repaying evil with evil; it does not command passivity toward injustice.",
+      "source": "Public-domain Strong's Greek lexicon",
+      "locator": "G436"
     }
   ]
 }

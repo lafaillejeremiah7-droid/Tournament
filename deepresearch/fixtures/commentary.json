@@ -2,16 +2,59 @@
   "Matthew 5:17": [
     {
       "kind": "church-fathers",
-      "summary": "Early commentators read 'fulfil' not as discarding the Law but as bringing out its full and intended meaning, with Christ as its goal.",
+      "excerpt": "Early commentators read 'fulfil' not as discarding the Law but as bringing out its full and intended meaning, with Christ as its goal.",
       "source": "Public-domain patristic commentary (CCEL)",
       "locator": "Commentary on Matthew",
-      "url": "https://www.ccel.org/"
+      "url": "https://www.ccel.org/ccel/schaff/npnf110.html"
     },
     {
       "kind": "historical",
-      "summary": "In first-century Jewish usage, to 'fulfil' the Law contrasts with 'abolishing' it; the phrase frames continuity with the Hebrew Scriptures rather than rupture.",
+      "text": "In first-century Jewish usage, to 'fulfil' the Law contrasts with 'abolishing' it; the phrase frames continuity with the Hebrew Scriptures rather than rupture.",
       "source": "Public-domain historical background corpus",
       "locator": "Second Temple background note"
+    },
+    {
+      "kind": "cross-reference",
+      "reference": "Romans 3:31",
+      "text": "Paul echoes the same logic: faith does not abolish the law but upholds it.",
+      "source": "Public-domain cross-reference index",
+      "locator": "Romans 3:31"
+    },
+    {
+      "kind": "cross-reference",
+      "reference": "Matthew 5:18",
+      "text": "The very next verse stresses the enduring authority of the Law 'till all be fulfilled.'",
+      "source": "Public-domain cross-reference index",
+      "locator": "Matthew 5:18"
+    }
+  ],
+  "turn the other cheek": [
+    {
+      "kind": "church-fathers",
+      "excerpt": "Classic commentators understood the saying as refusing retaliation and the cycle of revenge, not as endorsing abuse or injustice.",
+      "source": "Public-domain patristic commentary (New Advent, Fathers of the Church)",
+      "locator": "Homilies on Matthew",
+      "url": "https://www.newadvent.org/fathers/200118.htm"
+    },
+    {
+      "kind": "historical",
+      "text": "A backhanded blow to the right cheek was, in the first-century Mediterranean world, an act of insult and dishonor directed at a social inferior; the response reframes the dynamic of honor and shame.",
+      "source": "Public-domain historical background corpus",
+      "locator": "Honor-shame background note"
+    },
+    {
+      "kind": "cross-reference",
+      "reference": "Romans 12:17-21",
+      "text": "Paul develops the same ethic: do not repay evil for evil, but overcome evil with good.",
+      "source": "Public-domain cross-reference index",
+      "locator": "Romans 12:17-21"
+    },
+    {
+      "kind": "cross-reference",
+      "reference": "1 Peter 2:23",
+      "text": "Jesus himself is held up as the model: when reviled, he did not revile in return.",
+      "source": "Public-domain cross-reference index",
+      "locator": "1 Peter 2:23"
     }
   ]
 }
