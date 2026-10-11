@@ -426,7 +426,7 @@ class Draws(unittest.TestCase):
         self.assertEqual(upgraded['final']['players']['p1']['goals'],[None]*8)
     def test_store_draw_cannot_be_changed_by_regular_save(self):
         with tempfile.TemporaryDirectory() as d:
-            store=Store(Path(d)/'data.json');store.save(self.fresh(),allow_draw=True)
+            store=Store(Path(d)/'data.json');store.save(self.fresh(),allow_draw=True,restore=True)
             store.save(round2_draw_action(store.state,'start'),allow_draw=True)
             original=deepcopy(store.state)
             edited=deepcopy(original);edited['round2']['draw']['order'].reverse()
@@ -497,7 +497,7 @@ class Round1Lineups(unittest.TestCase):
 class HTTP(unittest.TestCase):
     def test_round2_draw_endpoint_and_completion(self):
         with tempfile.TemporaryDirectory() as d:
-            store=Store(Path(d)/'data.json');store.save(Draws().fresh(),allow_draw=True)
+            store=Store(Path(d)/'data.json');store.save(Draws().fresh(),allow_draw=True,restore=True)
             server=make_server(store,0);thread=threading.Thread(target=server.serve_forever,daemon=True);thread.start()
             url=f'http://127.0.0.1:{server.server_port}'
             try:
