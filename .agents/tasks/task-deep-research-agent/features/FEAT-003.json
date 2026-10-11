@@ -2,7 +2,7 @@
   "id": "FEAT-003",
   "type": "docs",
   "description": "Harden the deliverable: a no-network/no-key automated test suite (the safety net), full README documentation, .env.example, and a final content-integrity/neutrality pass. After this feature the project is ready for the orchestrator to push and open a PR.",
-  "status": "pending",
+  "status": "completed",
   "steps": [
     "Create tests/ (pytest) that run with NO network and NO API keys using the dry-run path + bundled fixtures. Cover: (1) reference/topic normalization (verse ref parsing AND topic->candidate passages); (2) EACH source connector against recorded fixtures (bible_api, strongs, commentary) including the public-domain allowlist rejecting NIV/ESV; (3) the LLM abstraction via the deterministic stub provider; (4) dossier schema validation (a known-good dossier passes, a malformed one fails); (5) an END-TO-END dry-run producing a schema-valid dossier for both a verse and a topic; (6) graceful degradation: a simulated unavailable source records a gap and does not raise.",
     "Add tests/fixtures/ with recorded connector responses and an expected sample dossier. Ensure tests force offline/dry-run (e.g. monkeypatch the HTTP getter to raise if called) so a real network call during tests is treated as a failure.",
@@ -23,5 +23,5 @@
     "Confirm README.md is substantially larger than the original stub and contains the sections: Setup, Dry-run, Architecture, Dossier Schema, Sources, Roadmap."
   ],
   "blocked_reason": null,
-  "findings": ""
+  "findings": "Added pytest suite under tests/ (49 tests) covering normalization (verse + topic), each connector (bible_api incl. NIV/ESV refusal and a recorded bible-api.com passage body, strongs, commentary incl. allowlist), the stub LLM provider, schema validation (good + several malformed cases), end-to-end dry-run for verse and topic, and graceful degradation. tests/conftest.py has an autouse guard that unsets API keys and monkeypatches cache.default_http_getter to raise NetworkAccessError, so any real network call fails the suite; connectors also run on an offline Cache. Added pyproject [tool.pytest.ini_options] (pythonpath/testpaths/addopts) so the suite runs from repo root without an editable install. Verified: `unset OPENAI_API_KEY ANTHROPIC_API_KEY; .venv/bin/python -m pytest -q` -> 49 passed, offline. Note: tests are pytest-style functions, so `python -m unittest discover` collects 0; README documents pytest as the required runner. Rewrote README.md (12.3KB) with Setup, Dry-run vs Live, Testing, Architecture (connector + LLM abstractions + 6 stages + caching + graceful degradation), Dossier schema, Sources, content-integrity principles, and the multi-bot Roadmap. Expanded .env.example with placeholder-only keys + optional config vars. Confirmed .gitignore ignores .venv/ __pycache__/ .cache/ output/ .env; requirements pinned; no secrets committed. The 'Song of Songs' three-word book name is NOT matched by the existing reference regex in pipeline.py (max two book words); test uses supported references and does not change pipeline scope."
 }

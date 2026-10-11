@@ -30,6 +30,13 @@ include = ["deepresearch*"]
 [tool.setuptools.package-data]
 deepresearch = ["schema/*.json", "fixtures/*.json"]
 
+[tool.pytest.ini_options]
+# Run from the repo root so `import deepresearch` and `from tests.conftest ...`
+# both resolve without an editable install, keeping the suite self-contained.
+pythonpath = ["."]
+testpaths = ["tests"]
+addopts = "-q"
+
 [tool.black]
 line-length = 120
 
