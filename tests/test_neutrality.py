@@ -242,6 +242,37 @@ def test_dry_run_stub_produces_no_neutrality_flags(tmp_path):
         )
 
 
+# Every topic whose anchor carries bundled verse text (fixtures/verses.json), plus
+# the verse-reference query. The stub copies commentary excerpts verbatim into
+# scanned talking-point detail, so this sweep is the regression guard that a future
+# fixture edit cannot silently introduce a neutrality flag.
+_FIXTURE_BACKED_QUERIES = [
+    "turn the other cheek",
+    "judge not",
+    "ask and it will be given",
+    "narrow gate",
+    "born again",
+    "i am the way the truth and the life",
+    "Matthew 5:17",
+]
+
+
+def test_dry_run_all_fixture_backed_topics_produce_no_neutrality_flags(tmp_path):
+    """Sweep EVERY fixture-backed topic so a future commentary/fixture edit cannot
+    silently introduce a neutrality false positive through the stub's verbatim
+    copy of commentary excerpts into talking-point detail."""
+    for i, query in enumerate(_FIXTURE_BACKED_QUERIES):
+        data = _run_dry(tmp_path / f"fb{i}", query)
+        assert "review_flags" in data
+        # Confirm the topic really is fixture-backed (real scripture resolved),
+        # otherwise the zero-flag assertion would be vacuous.
+        assert data["translations"], f"{query!r} should resolve anchor translations"
+        assert data["review_flags"] == [], (
+            f"fixture-backed commentary must not be flagged for {query!r}: "
+            f"{data['review_flags']}"
+        )
+
+
 # --------------------------------------------------------------------------- #
 # (d) schema validates WITH and WITHOUT flags
 # --------------------------------------------------------------------------- #
@@ -288,12 +319,22 @@ def test_review_flag_roundtrips_to_dict():
 def test_check_does_not_mutate_dossier():
     d = _dossier_with_material()
     synthesize(d, LoadedProvider())
+    # synthesize() builds the citation index; make the gaps snapshot meaningful too.
+    from deepresearch.models import Gap
+
+    d.gaps.append(Gap(source="test:probe", reason="seeded so the snapshot is non-empty"))
 
     before_misconception = d.misconception.statement
     before_deeper = d.deeper_truth.statement
     before_title = d.title
     before_summary = d.summary
     before_points = copy.deepcopy([(tp.point, tp.detail) for tp in d.talking_points])
+    # The "never mutates" contract also covers the flat citation index and gaps.
+    from deepresearch.models import _citations_to_list
+
+    assert d.citations, "synthesize should have populated the citation index"
+    before_citations = copy.deepcopy(_citations_to_list(d.citations))
+    before_gaps = copy.deepcopy([g.to_dict() for g in d.gaps])
 
     flags = check_neutrality(d)
     assert flags  # it did find something, so this is a meaningful test
@@ -303,3 +344,5 @@ def test_check_does_not_mutate_dossier():
     assert d.title == before_title
     assert d.summary == before_summary
     assert [(tp.point, tp.detail) for tp in d.talking_points] == before_points
+    assert _citations_to_list(d.citations) == before_citations
+    assert [g.to_dict() for g in d.gaps] == before_gaps

@@ -148,6 +148,29 @@ def test_end_to_end_unmapped_topic_degrades(tmp_path):
     _assert_valid_and_populated(data)
 
 
+def test_end_to_end_mapped_but_unfixtured_anchor_degrades(tmp_path):
+    """A topic that IS mapped in topic_anchors.json but whose anchors carry NO
+    bundled verse text (enhancement A's gap-degrading tier). Verified empirically:
+    offline the bible_api connector finds no fixture text, so translations and
+    resolved_references stay empty and structured gaps are recorded, yet the
+    dossier is still schema-valid and nothing crashes."""
+    data = _run(tmp_path, "eye of the needle")
+    assert data["query_kind"] == "topic"
+    assert data["resolved_reference"] is None
+    # The anchors (Matthew 19:24 / Mark 10:25 / Luke 18:25) resolve from the map,
+    # but with no fixture verse text and no network the translations never populate,
+    # so resolved_references (derived from translations) degrades to empty.
+    assert data["translations"] == []
+    assert data["resolved_references"] == []
+    # The missing verse text is recorded as structured bible_api gaps.
+    assert data["gaps"], "a mapped-but-unfixtured anchor should record at least one gap"
+    assert any(
+        g["source"].startswith("bible_api") for g in data["gaps"]
+    ), "the missing verse text should surface as a bible_api gap"
+    # Still a complete, schema-valid dossier (graceful degradation, no crash).
+    _assert_valid_and_populated(data)
+
+
 def test_end_to_end_is_deterministic(tmp_path):
     a = _run(tmp_path / "a", "Matthew 5:17")
     b = _run(tmp_path / "b", "Matthew 5:17")
