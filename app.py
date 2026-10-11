@@ -5,7 +5,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import urlsplit
 from datetime import datetime, timezone
-from engine import new_state, validate, evaluate, bind_rosters, round2_draw_action, round1_lineups, round1_lineup_action, has_inputs, validate_goal_changes
+from engine import new_state, validate, evaluate, bind_rosters, round2_draw_action, round1_lineups, round1_lineup_action, final_lineups, has_inputs, validate_goal_changes
 
 ROOT=Path(__file__).resolve().parent
 MAX_BODY=2_000_000
@@ -21,12 +21,21 @@ class Store:
         # Persist initial/migrated draws too; restarting before the first edit
         # must not silently reshuffle the teams that were already displayed.
         round1_lineups(self.state)
+        final_lineups(self.state)
         if loaded!=self.state or (self.state['settings']['start_at'] and not self.state['settings']['disaster_started_at']):
             self.save(self.state)
         self.revision=0
     def payload(self): return {'state':self.state,'view':evaluate(self.state),'revision':self.revision}
-    def save(self,state,allow_draw=False,restore=False):
+    def save(self,state,allow_draw=False,restore=False,allow_lineup=False):
         state=validate(state)
+        reset_round1=not state['round1']['lineups'] and all(
+            not state[k]['roster'] and not has_inputs(state[k]) for k in ['round1','round2','final'])
+        if not restore and not allow_lineup and not reset_round1 and state['round1']['lineups']!=self.state['round1']['lineups']:
+            raise ValueError('Saved Round 1 lineups are protected. Use Reshuffle teams before entering scores, or restore a backup.')
+        reset_final=not state['final']['lineups'] and not state['final']['roster'] and not has_inputs(state['final'])
+        if not restore and not reset_final and (state['final']['lineups']!=self.state['final']['lineups'] or
+                (self.state['final']['lineups'] and state['final']['roster']!=self.state['final']['roster'])):
+            raise ValueError('Saved final lineups are protected. Clear the final to draw new teams, or restore a backup.')
         settings=state['settings']
         previous_settings=self.state['settings']
         if not settings['start_at']:
@@ -44,6 +53,7 @@ class Store:
         if not allow_draw and incoming!=previous and not reset:
             raise ValueError('Saved Round 2 lineups are protected. Use the Reshuffle teams button before entering scores, or restore a backup.')
         state=bind_rosters(state)
+        final_lineups(state)
         validate_goal_changes(state,None if restore else self.state)
         self.path.parent.mkdir(parents=True,exist_ok=True)
         temp=self.path.with_suffix('.tmp')
@@ -68,7 +78,10 @@ def make_server(store,port=8765):
             self.send_header('X-Content-Type-Options','nosniff')
             if filename:self.send_header('Content-Disposition',f'attachment; filename="{filename}"')
             self.end_headers()
-            self.wfile.write(data)
+            try:
+                self.wfile.write(data)
+            except (BrokenPipeError,ConnectionResetError):
+                pass  # A closed tab must not produce a server traceback.
         def do_GET(self):
             route=urlsplit(self.path).path
             with store.lock:
@@ -119,7 +132,7 @@ def make_server(store,port=8765):
                     if self.path=='/api/round2-draw':
                         store.save(round2_draw_action(store.state,data['action'],data.get('game')),allow_draw=True)
                     elif self.path=='/api/round1-lineup':
-                        store.save(round1_lineup_action(store.state,data['action'],data.get('game')))
+                        store.save(round1_lineup_action(store.state,data['action'],data.get('game')),allow_lineup=True)
                     else: store.save(data['state'],allow_draw=data.get('restore') is True,restore=data.get('restore') is True)
                     return self.send(200,store.payload())
             except (ValueError,KeyError,TypeError) as e:self.send(400,{'error':str(e)})

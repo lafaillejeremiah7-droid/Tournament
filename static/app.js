@@ -823,7 +823,7 @@ function finalPage(){const v=view.final,g=finalGame;
   `<td>${m.B.map(p=>esc(state.names[p])).join(' · ')}</td>`+
   `<td>${v.games[m.game-1].ready?'✓ COMPLETE':'PENDING'}</td></tr>`
  );
- html+=`<details><summary>View all eight team rotations</summary><p class="hint">Eight different team splits are played. Everyone plays eight matches, with changing teammates and opponents. Slots and match order stay fixed. Games 1 and 2 carry double weight at the default multiplier.</p>`+
+ html+=`<details><summary>View all eight team rotations</summary><p class="hint">Everyone plays eight matches. New finals randomize player slots and choose the first two games to reduce weighted teammate imbalance, then save the teams and game order. Eight games cannot give every pair equal time together: pairs share 2–4 games. Games 1 and 2 carry double weight at the default multiplier. Existing scored backups keep their original teams.</p>`+
   `${table(['GAME','TEAM A','TEAM B','STATUS'],rotationRows)}</details>`;
  const pointsRows=v.rows.map(r=>
   `<tr><td>${esc(r.name)}</td>${r.game_points.map(p=>`<td class="calc">${fmt(p)}</td>`).join('')}</tr>`
@@ -989,7 +989,7 @@ const resetCascade=key=>key==='round1'?['round1','round2','final']:key==='round2
 // Human-readable labels for the per-round clear-round controls and their cascade.
 const clearRoundLabel={round1:'Clear Know Your Code',round2:'Clear Adapt or Delete',final:'Clear Last Node Standing'};
 const clearRoundCopy={round1:'Clear Know Your Code (also clears Adapt or Delete &amp; Last Node Standing)',round2:'Clear Adapt or Delete (also clears Last Node Standing)',final:'Clear Last Node Standing'};
-function resetStage(key){resetCeremonyHistory(key);for(const k of resetCascade(key)){state[k].extras=[];state[k].roster=[];if(k==='round2')state[k].draw={order:[],lineups:[],revealed:0,completed:0,mode:'random'};if(k==='round1')state[k].lineups=[];for(const d of Object.values(state[k].players)){d.goals=Array(k==='final'?8:5).fill(null);if(k==='final')d.results=Array(8).fill('');}}}
+function resetStage(key){resetCeremonyHistory(key);for(const k of resetCascade(key)){state[k].extras=[];state[k].roster=[];if(k==='round2')state[k].draw={order:[],lineups:[],revealed:0,completed:0,mode:'random'};if(k==='round1'||k==='final')state[k].lineups=[];for(const d of Object.values(state[k].players)){d.goals=Array(k==='final'?8:5).fill(null);if(k==='final')d.results=Array(8).fill('');}}}
 function markWinner(team,game=finalGame){const match=view.final.schedule[game];if(!match||view.final.stale)return;for(const t of ['A','B'])for(const p of match[t])state.final.players[p].results[game]=t===team?'W':'L';}
 document.addEventListener('input',e=>{
  const el=e.target;

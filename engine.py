@@ -30,7 +30,7 @@ def match_goal_error(stage, teams, game):
 def stage_schedules(s):
     return {'round1':s['round1'].get('lineups',[]),
             'round2':round2_schedule(s['round2']['draw']),
-            'final':final_schedule(s['final']['roster'])}
+            'final':final_schedule(s['final']['roster'],s['final'].get('lineups'))}
 
 def validate_goal_changes(s, previous=None):
     """Enforce goal limits on writes, retaining old scores for manual repair.
@@ -79,14 +79,51 @@ def new_state():
     return {'version': 6, 'wheel': {'text': '', 'remove_winner': False}, 'names': {p: '' for p in IDS},
             'settings': {'win_points': 1, 'goal_points': 1.5, 'multiplier': 2, 'prizes': WINNER_TAKE_ALL_PRIZES.copy(), 'start_at': '', 'disaster_started_at': ''},
             'round1': blank_round(), 'round2': blank_round(5, is_round2=True),
-            'final': {'players': {p: {'goals': [None]*FINAL_GAMES, 'results': ['']*FINAL_GAMES} for p in IDS}, 'extras': [], 'roster': []}}
+            'final': {'players': {p: {'goals': [None]*FINAL_GAMES, 'results': ['']*FINAL_GAMES} for p in IDS}, 'extras': [], 'roster': [], 'lineups': []}}
 
-def final_schedule(roster):
-    """One representative of each unordered 3v3 partition of six players."""
+def final_schedule(roster, lineups=None):
+    """Read saved teams, falling back to the original schedule for old scores."""
     if len(roster) != 6: return []
+    if lineups:
+        return [{'game':i+1,'A':list(m['A']),'B':list(m['B'])} for i,m in enumerate(lineups)]
     return [{'game': i+1, 'A': [roster[0], *pair],
              'B': [p for p in roster if p not in (roster[0], *pair)]}
             for i, pair in enumerate(list(combinations(roster[1:], 2))[:FINAL_GAMES])]
+
+def final_lineups(s):
+    """Draw once, reducing weighted exposure without reassigning old results.
+
+    Eight games cannot give equal teammate counts: even the best schedule has
+    pairs together 2–4 times. Shuffle player slots to remove identity bias and
+    choose the first two games to minimize the weighted exposure range.
+    """
+    stage=s['final']
+    if stage.get('lineups') or len(stage['roster'])!=6:
+        return
+    order=list(stage['roster'])
+    if has_inputs(stage):
+        matches=final_schedule(order)
+    else:
+        rng=secrets.SystemRandom()
+        rng.shuffle(order)
+        matches=final_schedule(order)
+        pairs=list(combinations(order,2))
+        exposure=[[int((p in m['A'])==(q in m['A'])) for p,q in pairs] for m in matches]
+        multiplier=Decimal(str(s['settings']['multiplier']))
+        def cost(double):
+            counts=[sum(e[j] for e in exposure)+(multiplier-1)*sum(exposure[i][j] for i in double)
+                    for j in range(len(pairs))]
+            return max(counts)-min(counts),sum(c*c for c in counts)
+        choices=list(combinations(range(FINAL_GAMES),2))
+        rng.shuffle(choices)
+        first=min(choices,key=cost)
+        rest=[i for i in range(FINAL_GAMES) if i not in first]
+        rng.shuffle(rest)
+        matches=[matches[i] for i in [*first,*rest]]
+        # A/B labels confer no scoring benefit; avoid pinning one player to A.
+        for match in matches:
+            if rng.randrange(2):match['A'],match['B']=match['B'],match['A']
+    stage['lineups']=[{'A':m['A'],'B':m['B']} for m in matches]
 
 def _round2_valid_lineups(lineups,order):
     if not isinstance(lineups,list) or len(lineups)!=ROUND2_GAMES or len(order)!=8:
@@ -215,7 +252,7 @@ def migrate(s):
     if version==5:
         # Previously completed or scored games retain their old fixed lineups.
         # Unplayed games receive new balanced 4v4 teams without losing scores.
-        s=deepcopy(s)
+        s=_normalize_game_lengths(deepcopy(s))
         draw=s['round2']['draw']
         order=draw.get('order',[])
         if order:
@@ -259,7 +296,7 @@ def migrate(s):
 
 def numeric(v, nullable=False, integer=False):
     if v is None and nullable: return
-    if isinstance(v,bool) or not isinstance(v,(int,float)) or not math.isfinite(v) or not 0 <= v <= 100000:
+    if isinstance(v,bool) or not isinstance(v,(int,float)) or not 0 <= v <= 100000 or not math.isfinite(v):
         raise ValueError('Enter a number from 0 to 100,000.')
     if integer and v != int(v): raise ValueError('Goals must be whole numbers.')
 
@@ -290,6 +327,7 @@ def validate(s):
         # $30 winner-take-all prize structure; clients cannot change the payout.
         s['settings']['prizes'] = WINNER_TAKE_ALL_PRIZES.copy()
         s['round1'].setdefault('lineups',[])
+        s['final'].setdefault('lineups',[])
         lineups=s['round1']['lineups']
         if not isinstance(lineups,list) or (lineups and not _valid_lineups(lineups)):
             raise ValueError('Invalid Know Your Code game teams.')
@@ -299,6 +337,15 @@ def validate(s):
                 raise ValueError('Invalid player records or too many extra games.')
             if not isinstance(a['roster'],list) or len(a['roster'])!=len(set(a['roster'])) or any(p not in IDS for p in a['roster']):
                 raise ValueError('Invalid roster.')
+            if stage=='final':
+                lineups=a['lineups']
+                if not isinstance(lineups,list) or (lineups and (
+                    len(lineups)!=FINAL_GAMES or len(a['roster'])!=6 or any(
+                        not isinstance(m,dict) or set(m)!={'A','B'} or
+                        any(not isinstance(m[t],list) or len(m[t])!=3 for t in ['A','B']) or
+                        len(set(m['A']+m['B']))!=6 or set(m['A']+m['B'])!=set(a['roster'])
+                        for m in lineups))):
+                    raise ValueError('Final saved teams must be eight complete 3v3 splits.')
             if stage=='round2':
                 draw=a['draw']
                 order=draw['order']
@@ -318,17 +365,21 @@ def validate(s):
                 if len(d['goals'])!={'round1':5,'round2':5,'final':FINAL_GAMES}[stage]:
                     raise ValueError('Know Your Code needs 5 games, Adapt or Delete 5 games, and Last Node Standing 8 games.')
                 for v in d['goals']: numeric(v,True,True)
+                d['goals']=[None if v is None else int(v) for v in d['goals']]
                 if stage=='final':
                     if len(d['results'])!=FINAL_GAMES or any(v not in ['','W','L'] for v in d['results']):
                         raise ValueError('Results must be W or L.')
             for extra in a['extras']:
                 if not isinstance(extra,dict) or set(extra)!=set(IDS):
                     raise ValueError('Invalid extra-game records.')
-                for value in extra.values():
+                for player,value in extra.items():
                     if stage=='final':
                         numeric(value['goals'],True,True)
+                        if value['goals'] is not None:value['goals']=int(value['goals'])
                         if value['result'] not in ['','W','L']: raise ValueError('Results must be W or L.')
-                    else: numeric(value,True,True)
+                    else:
+                        numeric(value,True,True)
+                        if value is not None:extra[player]=int(value)
     except (KeyError,TypeError,AttributeError): raise ValueError('This is not a valid tournament backup.')
     return s
 
@@ -562,7 +613,7 @@ def evaluate(s):
                      'goals':sum(v or 0 for v in d['goals']),'wins':sum(v=='W' for v in d['results']),
                      'played':sum(d['goals'][g] is not None and bool(d['results'][g]) for g in range(FINAL_GAMES)),
                      'game_points':game_points,'rank':None,'prize':None,'status':'PENDING'})
-    schedule=final_schedule(roster)
+    schedule=final_schedule(roster,stage.get('lineups') if not stale else None)
     games=[]
     for g in range(FINAL_GAMES):
         count=sum(stage['players'][p]['goals'][g] is not None for p in roster)
