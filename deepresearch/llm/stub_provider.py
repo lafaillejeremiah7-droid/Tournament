@@ -5,6 +5,12 @@ API keys so dry-run and tests are deterministic. It consumes the JSON brief of
 gathered materials built by :mod:`deepresearch.synthesis` and reflects it back
 into a dossier-shaped structure, REUSING the citations present in the brief so
 the integrity check always passes. It invents no sources.
+
+The misconception / deeper-truth spine prose is DETERMINISTIC SCAFFOLDING
+templated from the gathered material (it reuses a provided commentary or
+historical excerpt), so it tracks the query rather than hardcoding a single
+theme. It is placeholder structure for dry-run and tests, not model-quality
+analysis; live providers (openai/anthropic) produce the real spine.
 """
 
 from __future__ import annotations
@@ -62,20 +68,37 @@ class StubProvider(LLMProvider):
         misconception_cite = comm_cites[0] if comm_cites else all_cites[0]
         truth_cites = (term_cites[:1] or trans_cites[:1] or all_cites[:1]) + comm_cites[:1]
 
+        # Derive the spine prose from the gathered material so the dry-run text
+        # tracks THIS query instead of a hardcoded theme. The deeper-truth
+        # statement reuses a classic commentary excerpt (or historical note)
+        # that the brief actually provided; the misconception frames the surface
+        # reading the sources push back on. This is deterministic scaffolding,
+        # not model-quality prose (see the stub's module docstring and README).
+        source_insight = ""
+        if commentary and commentary[0].get("excerpt"):
+            source_insight = commentary[0]["excerpt"].strip()
+        elif historical and historical[0].get("text"):
+            source_insight = historical[0]["text"].strip()
+
         misconception = {
             "statement": (
-                f"Many people read {reference} as if it overturns or cancels what came before, "
-                "treating it as a stand-alone rule detached from the rest of Scripture."
+                f"Many people take {reference} at surface level and assume its plain wording "
+                "settles the matter, without weighing how the original language, historical "
+                "setting, and the wider teaching of Jesus Christ shape its meaning."
             ),
             "citations": [misconception_cite],
         }
+        truth_statement = (
+            f"Read against the gathered public-domain sources, {reference} carries a deeper, "
+            "better-supported meaning than the surface reading suggests"
+        )
+        if source_insight:
+            truth_statement += f": {source_insight}"
+        elif gloss_bits:
+            truth_statement += f", as the key terms ({gloss_bits}) make clear"
+        truth_statement += "." if not truth_statement.endswith(".") else ""
         deeper_truth = {
-            "statement": (
-                "Read in context, the passage points to continuity and completion rather than "
-                "cancellation: Jesus brings the earlier Scriptures to their intended goal"
-                + (f", as the key terms ({gloss_bits}) make clear" if gloss_bits else "")
-                + "."
-            ),
+            "statement": truth_statement,
             "citations": truth_cites or [all_cites[0]],
         }
 

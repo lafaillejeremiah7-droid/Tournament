@@ -24,6 +24,7 @@ from typing import Optional
 
 from deepresearch import SCHEMA_VERSION
 from deepresearch.cache import Cache
+from deepresearch.fixtures import load_fixture
 from deepresearch.config import Config
 from deepresearch.llm.base import LLMProvider, build_provider
 from deepresearch.models import (
@@ -89,27 +90,49 @@ class Pipeline:
             return "reference", normalized
         return "topic", None
 
-    def fetch_translations(self, reference: Optional[str], gaps: list[Gap]) -> list[Translation]:
-        if not reference:
+    def resolve_topic_anchors(self, query: str) -> list[str]:
+        """Map a free-text topic to one or more anchor passage references.
+
+        A topic has no primary ``resolved_reference``, but many topics map to
+        well-known passages (e.g. "turn the other cheek" -> Matthew 5:39). The
+        mapping is data-driven (``fixtures/topic_anchors.json``) so new topics
+        drop in without code changes; an unknown topic simply yields ``[]`` and
+        the topic dossier carries no scripture text (recorded as a gap).
+        """
+        try:
+            anchors: dict[str, list[str]] = load_fixture("topic_anchors")
+        except FileNotFoundError:
+            return []
+        key = re.sub(r"\s+", " ", query.strip()).lower()
+        for topic, refs in anchors.items():
+            if topic.strip().lower() == key:
+                return list(refs)
+        return []
+
+    def fetch_translations(self, references: list[str], gaps: list[Gap]) -> list[Translation]:
+        if not references:
             return []
         connector = self.registry.get("bible_api")
         out: list[Translation] = []
-        for translation in self.config.translations:
-            result = connector.fetch(
-                SourceRequest(kind="verse", reference=reference, translation=translation)
-            )
-            if result.gap:
-                gaps.append(Gap(source=f"bible_api:verse:{translation}", reason=result.reason))
-                continue
-            citation = result.citations[0] if result.citations else Citation(source="bible-api")
-            out.append(
-                Translation(
-                    translation=translation,
-                    reference=result.data.get("reference", reference),
-                    text=result.data.get("text", ""),
-                    citation=citation,
+        for reference in references:
+            for translation in self.config.translations:
+                result = connector.fetch(
+                    SourceRequest(kind="verse", reference=reference, translation=translation)
                 )
-            )
+                if result.gap:
+                    gaps.append(
+                        Gap(source=f"bible_api:verse:{translation}", reason=result.reason)
+                    )
+                    continue
+                citation = result.citations[0] if result.citations else Citation(source="bible-api")
+                out.append(
+                    Translation(
+                        translation=translation,
+                        reference=result.data.get("reference", reference),
+                        text=result.data.get("text", ""),
+                        citation=citation,
+                    )
+                )
         return out
 
     def extract_original_terms(
@@ -240,10 +263,19 @@ class Pipeline:
             provider=self.provider.name,
             model=self.config.llm_model,
         )
-        dossier.translations = self.fetch_translations(normalized, gaps)
-        dossier.resolved_references = (
-            [t.reference for t in dossier.translations] if dossier.translations else []
-        )
+        # A verse query fetches its own reference; a topic query resolves to one
+        # or more anchor passages so the topic dossier still carries scripture.
+        if normalized:
+            translation_refs = [normalized]
+        else:
+            translation_refs = self.resolve_topic_anchors(query)
+        dossier.translations = self.fetch_translations(translation_refs, gaps)
+        seen_refs: set[str] = set()
+        dossier.resolved_references = [
+            t.reference
+            for t in dossier.translations
+            if not (t.reference in seen_refs or seen_refs.add(t.reference))
+        ]
         dossier.original_language_terms = self.extract_original_terms(normalized, query, gaps)
         historical, commentary = self.gather_context(normalized, query, gaps)
         dossier.historical_context = historical

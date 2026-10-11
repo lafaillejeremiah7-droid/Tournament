@@ -62,10 +62,23 @@ def test_end_to_end_topic(tmp_path):
     data = _run(tmp_path, "turn the other cheek")
     assert data["query_kind"] == "topic"
     assert data["resolved_reference"] is None
-    # A topic has no translations but still produces a sourced spine.
+    # A topic resolves to anchor passage(s) so the dossier still carries scripture.
+    assert data["translations"], "a topic should resolve anchor translations"
+    assert data["resolved_references"] == ["Matthew 5:39"]
+    for t in data["translations"]:
+        assert t["reference"] == "Matthew 5:39"
     assert data["original_language_terms"]
     assert data["commentary"]
     _assert_valid_and_populated(data)
+
+
+def test_topic_spine_tracks_the_query(tmp_path):
+    """The dry-run spine prose is derived from the gathered material, so a topic
+    other than Matthew 5:17 does not get the old hardcoded cancel-vs-fulfil text."""
+    data = _run(tmp_path, "turn the other cheek")
+    spine = (data["misconception"]["statement"] + " " + data["deeper_truth"]["statement"]).lower()
+    assert "turn the other cheek" in spine
+    assert "cancel" not in spine and "overturns" not in spine
 
 
 def test_end_to_end_is_deterministic(tmp_path):

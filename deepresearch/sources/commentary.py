@@ -92,8 +92,10 @@ class CommentaryConnector(SourceConnector):
             url = e.get("url")
             # Enforce the allowlist/robots policy for any URL we might fetch.
             if url and (not host_allowed(url) or not path_allowed(url)):
-                # Skip disallowed/off-allowlist URL; record a gap, keep the text
-                # only if it is a bundled public-domain excerpt (no live fetch).
+                # Off-allowlist / disallowed URL: drop the entry entirely
+                # (excerpt and all). We never surface content whose URL is not
+                # on the public-domain host allowlist, even if an excerpt is
+                # bundled, so nothing off-allowlist can leak into a dossier.
                 continue
             if url:
                 self._prime_cache(e, url)

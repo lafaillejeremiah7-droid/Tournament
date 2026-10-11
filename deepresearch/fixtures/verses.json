@@ -18,5 +18,25 @@
       "translation": "asv",
       "url": "https://bible-api.com/Matthew%205:17?translation=asv"
     }
+  },
+  "Matthew 5:39": {
+    "kjv": {
+      "reference": "Matthew 5:39",
+      "text": "But I say unto you, That ye resist not evil: but whosoever shall smite thee on thy right cheek, turn to him the other also.",
+      "translation": "kjv",
+      "url": "https://bible-api.com/Matthew%205:39?translation=kjv"
+    },
+    "web": {
+      "reference": "Matthew 5:39",
+      "text": "But I tell you, don't resist him who is evil; but whoever strikes you on your right cheek, turn to him the other also.",
+      "translation": "web",
+      "url": "https://bible-api.com/Matthew%205:39?translation=web"
+    },
+    "asv": {
+      "reference": "Matthew 5:39",
+      "text": "but I say unto you, Resist not him that is evil: but whosoever smiteth thee on thy right cheek, turn to him the other also.",
+      "translation": "asv",
+      "url": "https://bible-api.com/Matthew%205:39?translation=asv"
+    }
   }
 }

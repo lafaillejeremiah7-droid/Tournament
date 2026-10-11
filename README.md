@@ -29,7 +29,12 @@ These rules are enforced in the prompts **and** re-checked in code
 - **Denominational neutrality.** The shared **66-book canon** is the baseline.
   Where traditions differ (canon, interpretation), the difference is noted
   neutrally; no denomination is favored. The person and teaching of Jesus Christ
-  stay at the center.
+  stay at the center. **Note (v1 limitation):** neutrality is enforced only by
+  the system prompt — there is no programmatic neutrality check — so for the
+  live `openai`/`anthropic` providers it is *unverified* and rests on the model
+  honoring the instruction. The human-review gate is the backstop; a
+  programmatic neutrality check is future work. In dry-run the stub echoes
+  neutral boilerplate, so neutrality there is deterministic by construction.
 - **No scraping of copyrighted modern translations.** Only public-domain
   scripture is ever fetched. Copyrighted modern translations (NIV, ESV, NASB,
   NLT, …) are refused *before* any URL is built, and commentary fetches are
@@ -91,6 +96,15 @@ python -m deepresearch research "turn the other cheek" --dry-run
 Both commands write a `.json` and a `.md` dossier into the output directory
 (default `output/`).
 
+> **Dry-run spine prose is deterministic scaffolding.** The stub provider
+> templates the `misconception` / `deeper_truth` statements from the gathered
+> fixture material so the text *tracks the query* (a topic like "turn the other
+> cheek" no longer gets Matthew-5:17 "cancel vs. fulfil" wording). It is still
+> placeholder structure, not model-quality analysis — the live
+> `openai`/`anthropic` providers produce the real spine. Dry-run exists to prove
+> the pipeline, schema, and citation-integrity contract end to end with zero
+> network and zero keys.
+
 ### Live mode
 
 Install an SDK extra, set a key, and select a provider:
@@ -150,7 +164,12 @@ The pipeline runs **six discrete stages**, each a method on
    still routed to the connectors by its query text (the topic → candidate
    passages path).
 2. **`fetch_translations`** — pull the public-domain translations for the verse
-   (via the `bible_api` connector).
+   (via the `bible_api` connector). For a *topic*, the query is first mapped to
+   one or more **anchor passage references** (data-driven via
+   `deepresearch/fixtures/topic_anchors.json`, e.g. "turn the other cheek" →
+   Matthew 5:39), so a topic dossier also carries scripture text. An unmapped
+   topic simply resolves no anchors and the dossier records the absence as a
+   gap rather than crashing.
 3. **`extract_original_terms`** — pull Strong's / lexicon key terms.
 4. **`gather_context`** — pull historical background and classic commentary /
    Church-Fathers excerpts (plus cross-references).
