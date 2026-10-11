@@ -33,7 +33,7 @@ assert(!app.includes("inp('settings.prizes."),'payouts must not be editable');
 assert(app.includes("prizes:[30,0,0]"),'reset-all keeps $30/0/0');
 assert(monuments.includes('const slots=[1].map(place=>'),'only one trophy pedestal');
 assert(monuments.includes('$30'),'only $30 champion');
-for(const geometry of ["part('maze-hedges'","part('rose-beds'","part('pavilions'","part('fountains'","part('royal-palace'","part('rose-arches'"]){
+for(const geometry of ["part('skyline'","part('charge-nodes'","part('nodes'","part('holo-signs'","part('megastructure'","part('neon-arches'"]){
  assert(city.includes(geometry),'missing 3D scenery: '+geometry);
 }
 assert(cityStyle.includes('#walkway-view{')&&cityStyle.includes('position:fixed;inset:0'),'full viewport garden');

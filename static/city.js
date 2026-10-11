@@ -1,4 +1,4 @@
-/* Dependency-free Royal Garden 3D renderer. The garden scene, camera and
+/* Dependency-free Neon Grid 3D renderer. The synthwave city scene, camera and
    ceremony effects never mutate tournament scoring. */
 (function(){
  'use strict';
@@ -15,7 +15,7 @@
  const norm=a=>mul(a,1/(Math.hypot(...a)||1));
  const rand=n=>{const x=Math.sin(n*127.1+311.7)*43758.5453;return x-Math.floor(x);};
  const smooth=t=>t*t*(3-2*t);
- const TAU=Math.PI*2,GARDEN_CENTER=[0,-62];
+ const TAU=Math.PI*2,GRID_CENTER=[0,-62],GARDEN_CENTER=GRID_CENTER;
  function multiply(a,b){const out=new Float32Array(16);for(let c=0;c<4;c++)for(let r=0;r<4;r++)for(let k=0;k<4;k++)out[c*4+r]+=a[k*4+r]*b[c*4+k];return out;}
  function perspective(fov,aspect,near,far){const f=1/Math.tan(fov/2);return new Float32Array([f/aspect,0,0,0,0,f,0,0,0,0,(far+near)/(near-far),-1,0,0,2*far*near/(near-far),0]);}
  function lookAt(eye,target){const z=norm(sub(eye,target)),x=norm(cross([0,1,0],z)),y=cross(z,x);return new Float32Array([x[0],y[0],z[0],0,x[1],y[1],z[1],0,x[2],y[2],z[2],0,-dot(x,eye),-dot(y,eye),-dot(z,eye),1]);}
@@ -49,16 +49,17 @@
  let tournament=[],unlocks={},routeTime=0,ceremony=null,ceremonyGeneration=0;
  let monuments=null,podiumSites=[],podiumTime=0,riseAt=null;
  const roomKeys=['settings','round1','round2','final','overview'];
- // Pavilion palette: registration, introspection, adaptation, final, leaderboard.
- const roomColors=[[.71,.85,.60],[.95,.58,.68],[.70,.68,.92],[.97,.79,.43],[.70,.88,.77]];
+ // Neon node palette: registration, introspection, adaptation, final, leaderboard.
+ const roomColors=[[.25,.95,.90],[.98,.30,.72],[.55,.45,1.0],[.99,.72,.25],[.35,.90,.78]];
  const ROMAN=['I','II','III','IV','V'];
- const PETALS=[[1,.55,.65],[.85,.2,.25],[1,.8,.35]];
+ // Data-mote spark colors (cyan / magenta / amber) for the drifting dynamic mesh.
+ const PETALS=[[.30,.95,1.0],[.98,.25,.70],[1,.72,.30]];
  const media=window.matchMedia('(prefers-reduced-motion: reduce)');
  // Calm-morning ambience: birds are fully present near progress 0 and gone by this
  // threshold. The audio chirps in BrawlAudio use the same cutoff so the sky birds and
  // their song appear and disappear together.
  const BIRD_THRESHOLD=.2;
- let settings={},state={progress:0,phase:'THE GARDEN IS WAITING'},width=1,height=1,rooms=[],gates=[],dirty=true,geometryDirty=true;
+ let settings={},state={progress:0,phase:'GRID WAITING'},width=1,height=1,rooms=[],gates=[],dirty=true,geometryDirty=true;
  let bloomLevel=0,gardenFlowers=0,gardenHedges=0;
  let staticMesh=new Mesh(),staticArray=new Float32Array();
  let elapsed=0,lastFrame=0,lastSample=0,paused=false,suspended=false,inside=false,transition=null,lastBuild='',needsLayout=true;
@@ -71,11 +72,13 @@
  let camera={eye:baseCamera.eye.slice(),target:baseCamera.target.slice()},vp;
  let gl=null,ctx=null,program,skyProgram,staticBuffer,dynamicBuffer,skyBuffer,uniforms,skyUniforms;
  const fov=66*Math.PI/180;
- // Sky colors shared by the sky shader, the fog and the static fallback gradient.
+ // Synthwave night-sky colors shared by the sky shader, the fog and the static
+ // fallback gradient: near-black indigo at the top, a hot magenta/orange sunset
+ // band along the horizon that deepens as dusk settles.
  const skyStops=d=>({
-  top:color([.22,.35,.51],[.10,.08,.22],d),
-  bottom:d<=.7?color([.80,.75,.64],[.98,.55,.30],d/.7):color([.98,.55,.30],[.45,.22,.25],(d-.7)/.3)});
- const fogColor=(d,p)=>color(skyStops(d).bottom,[.80,.70,.52],p*.3);
+  top:color([.04,.02,.10],[.02,.01,.06],d),
+  bottom:d<=.7?color([.70,.14,.55],[.98,.30,.42],d/.7):color([.98,.30,.42],[.55,.10,.42],(d-.7)/.3)});
+ const fogColor=(d,p)=>color(skyStops(d).bottom,[.08,.40,.52],p*.4);
  function shader(type,code){
   const s=gl.createShader(type);gl.shaderSource(s,code);gl.compileShader(s);
   if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(s));return s;
@@ -84,8 +87,8 @@
  // No uniform is shared between the vertex and fragment stages: their default float
  // precisions differ (highp vs mediump), and GLSL ES 1.00 fails the link on a mismatch.
  const VERTEX_SRC='attribute vec3 a_pos,a_normal,a_color;attribute float a_kind;uniform mat4 u_vp;uniform float u_wtime,u_wheat,u_surge;uniform vec2 u_center;varying vec3 v_pos,v_normal,v_color;varying float v_kind;void main(){float wave=0.;if(a_kind>1.5&&a_kind<2.5){float ang=atan(a_pos.z-u_center.y,a_pos.x-u_center.x);float bob=max(0.,sin(u_wtime*5.+a_pos.x*.35+a_pos.z*.27));float mex=pow(max(0.,cos(ang-u_wtime*.9)),24.);wave=bob*.12*(.3+u_wheat)+mex*.9*u_wheat+u_surge*bob*.5;}vec3 p=a_pos+vec3(0.,wave,0.);v_pos=p;v_normal=a_normal;v_color=a_color;v_kind=a_kind;gl_Position=u_vp*vec4(p,1.);}';
- // Painted stone, stippled hedges and vegetation, baked-feeling light
- // steps and the subtle quantization characteristic of PS2-era materials.
+ // Neon wireframe towers, glowing grid floor and synthwave signage, with the
+ // banded light steps and subtle quantization of CRT / retro-futurist materials.
  const FRAGMENT_SRC=`
 precision mediump float;
 varying vec3 v_pos,v_normal,v_color;
@@ -140,7 +143,10 @@ void main(){
  gl_FragColor=vec4(c,alpha);
 }`;
  const SKY_VERTEX_SRC='attribute vec2 a_pos;varying vec2 v_uv;void main(){v_uv=a_pos*.5+.5;gl_Position=vec4(a_pos,0.,1.);}';
- const SKY_FRAGMENT_SRC='precision mediump float;varying vec2 v_uv;uniform float u_heat,u_dusk,u_time;float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5);}float noise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(hash(i),hash(i+vec2(1,0)),f.x),mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),f.x),f.y);}void main(){vec2 uv=v_uv;vec3 top=mix(vec3(.22,.35,.51),vec3(.10,.08,.22),u_dusk);vec3 bottom=u_dusk<=.7?mix(vec3(.80,.75,.64),vec3(.98,.55,.30),u_dusk/.7):mix(vec3(.98,.55,.30),vec3(.45,.22,.25),(u_dusk-.7)/.3);vec3 c=mix(bottom,top,smoothstep(.15,1.,uv.y));float cloud=noise(uv*vec2(5,10)+vec2(u_time*.009,0));cloud+=noise(uv*vec2(13,21)+vec2(u_time*.014,2))*.4;float cover=smoothstep(.7,1.2,cloud);c=mix(c,mix(vec3(.97,.95,.90),vec3(.92,.62,.52),u_dusk),cover*.25);float sun=exp(-length((uv-vec2(.72,mix(.80,.16,u_dusk)))*vec2(1.,1.7))*40.);c+=mix(vec3(1.,.92,.7),vec3(1.,.45,.2),u_dusk)*sun;c+=vec3(.80,.70,.52)*u_heat*.12*(1.-uv.y);if(u_dusk>.9)c+=vec3(step(.997,hash(floor(uv*240.))))*(u_dusk-.9)*10.*smoothstep(.4,1.,uv.y);gl_FragColor=vec4(c,1.);}';
+ // Synthwave nightscape: near-black indigo top, a hot magenta/orange sunset band,
+ // a big banded retro sun low on the horizon and a faint neon grid glow that
+ // brightens as the grid charges (u_heat). Scanlines and a star speckle sell CRT.
+ const SKY_FRAGMENT_SRC='precision mediump float;varying vec2 v_uv;uniform float u_heat,u_dusk,u_time;float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5);}float noise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(hash(i),hash(i+vec2(1,0)),f.x),mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),f.x),f.y);}void main(){vec2 uv=v_uv;vec3 top=mix(vec3(.04,.02,.10),vec3(.02,.01,.06),u_dusk);vec3 bottom=u_dusk<=.7?mix(vec3(.70,.14,.55),vec3(.98,.30,.42),u_dusk/.7):mix(vec3(.98,.30,.42),vec3(.55,.10,.42),(u_dusk-.7)/.3);vec3 c=mix(bottom,top,smoothstep(.12,.72,uv.y));float sy=mix(.46,.30,u_dusk);float sun=exp(-length((uv-vec2(.5,sy))*vec2(1.,1.9))*18.);float band=step(.5,fract((uv.y-sy)*26.));sun*=mix(1.,band,smoothstep(sy,sy-.14,uv.y));c+=mix(vec3(1.,.86,.35),vec3(1.,.32,.55),u_dusk)*sun*1.3;float horizon=smoothstep(.34,.3,uv.y)*smoothstep(.0,.14,uv.y);float gl=noise(vec2(uv.x*24.,0.))*.5+.5;c+=vec3(.10,.95,1.0)*horizon*(.18+u_heat*.5)*gl;float stars=step(.9975,hash(floor(uv*vec2(260.,150.))));c+=vec3(.65,.75,1.0)*stars*smoothstep(.5,1.,uv.y)*(.5+u_heat*.3);float scan=.5+.5*sin(uv.y*620.+u_time*.6);c*=1.-.05*scan;c+=vec3(.08,.40,.52)*u_heat*.10*(1.-uv.y);gl_FragColor=vec4(c,1.);}';
  function initGL(){
   gl=canvas.getContext('webgl',{alpha:false,antialias:true,powerPreference:'low-power'});
   if(!gl)return false;
@@ -153,7 +159,7 @@ void main(){
   return true;
  }
  let mode='webgl';
- try{if(!initGL())mode='static';}catch(error){console.warn('Garden renderer uses static projection:',error.message);mode='static';}
+ try{if(!initGL())mode='static';}catch(error){console.warn('Neon Grid renderer uses static projection:',error.message);mode='static';}
  if(mode==='static'){
   // A fresh canvas can obtain 2D even if an attempted WebGL setup already claimed one.
   const fallback=document.createElement('canvas');fallback.id=canvas.id;fallback.setAttribute('aria-hidden','true');canvas.replaceWith(fallback);ctx=fallback.getContext('2d');
@@ -163,7 +169,7 @@ void main(){
  // Front face vertical layout of a gate, all heights from y=0 at the gate (s = gate size).
  
  function layout(){
-  // Five garden pavilions at the ends of the winding palace hedge paths.
+  // Five neon entrance nodes standing along the avenues of the neon grid city.
   const sites=[[-26,-35],[-14,-68],[0,-42],[14,-68],[26,-35]];
   rooms=roomKeys.map((key,i)=>{
    const [x,z]=sites[i],size=i===4?9:8,N=[0,0,1],pos=[x,0,z];
@@ -190,24 +196,28 @@ void main(){
   return 'open';
  }
  function rebuildGarden(){
-  // Build the fixed hedge maze and seasonal flowers in the full-viewport WebGL scene.
+  // Build the fixed neon skyline and the countdown-driven charge nodes of the
+  // full-viewport synthwave city scene.
   const m=new Mesh(),still=mode==='static';partTris={};rebuilds++;
   const part=(name,fn)=>{const before=m.data.length;fn();partTris[name]=(m.data.length-before)/30;};
-  const stone=[.78,.77,.65],gravel=[.83,.77,.60],hedge=[.14,.36,.18],hedgeTip=[.21,.49,.25],gold=[.83,.67,.36];
-  const openRoses=Math.floor(bloomLevel*112);
-  const roseColors=[[.99,.42,.53],[.97,.73,.48],[.92,.67,.87],[.97,.93,.76]];
+  const slab=[.06,.07,.13],floor=[.03,.05,.11],tower=[.05,.10,.20],towerTop=[.10,.55,.70],chrome=[.70,.60,.95];
+  const litNodes=Math.floor(bloomLevel*112);
+  const nodeColors=[[.25,.95,1.0],[.98,.25,.70],[.60,.45,1.0],[1,.78,.30]];
   gardenFlowers=0;gardenHedges=0;
-  part('lawn',()=>{
-   m.box(0,-.6,-61,180,1.2,182,[.21,.39,.23]);
-   m.box(0,-.03,-61,111,.12,138,[.22,.45,.27]);
-   // Formal cobblestone walks between raised green hedge walls.
-   m.box(0,.035,-50,7,.08,120,gravel);
-   for(const z of [-30,-48,-66,-84,-101])m.box(0,.05,z,78,.08,5,gravel);
-   for(const x of [-34,-17,17,34])m.box(x,.045,-61,4,.08,100,gravel);
-   // Palace terrace and stairway, beyond the fountain court.
-   for(let k=0;k<6;k++)m.box(0,.15+k*.25,-127-k*1.7,78-k*2,.3,10,stone);
+  part('grid-floor',()=>{
+   m.box(0,-.6,-61,180,1.2,182,floor);
+   m.box(0,-.03,-61,111,.12,138,[.04,.07,.15]);
+   // Glowing neon avenues laid out as a Tron-style grid between the tower blocks.
+   m.box(0,.035,-50,7,.08,120,towerTop);
+   for(const z of [-30,-48,-66,-84,-101])m.box(0,.05,z,78,.08,5,towerTop);
+   for(const x of [-34,-17,17,34])m.box(x,.045,-61,4,.08,100,[.60,.20,.60]);
+   // Raised data-terrace steps leading up to the central megastructure.
+   for(let k=0;k<6;k++)m.box(0,.15+k*.25,-127-k*1.7,78-k*2,.3,10,slab);
   });
-  part('maze-hedges',()=>{
+  part('skyline',()=>{
+   // Rows of wireframe skyscraper slabs lining the avenues. Each block is a dark
+   // tower body capped with a glowing neon cornice; counted as gardenHedges so the
+   // scene still reports its structural density (>40 towers) to the tests.
    const walls=[
     [-39,-58,3,78],[-29,-46,3,40],[-29,-88,3,40],
     [39,-58,3,78],[29,-46,3,40],[29,-88,3,40],
@@ -223,125 +233,134 @@ void main(){
      const length=(alongX?w:d)/segments;
      const px=x+(alongX?(i-(segments-1)/2)*length:0);
      const pz=z+(alongX?0:(i-(segments-1)/2)*length);
-     m.box(px,1.7,pz,alongX?length+.05:w,3.4,alongX?d:length+.05,hedge);
-     m.box(px,3.35,pz,alongX?length+.04:w+.02,.55,alongX?d+.02:length+.04,hedgeTip);
+     m.box(px,1.7,pz,alongX?length+.05:w,3.4,alongX?d:length+.05,tower);
+     m.box(px,3.35,pz,alongX?length+.04:w+.02,.55,alongX?d+.02:length+.04,towerTop);
      gardenHedges++;
     }
    }
-   // Small hedge islands give the maze recognizable turns from above.
+   // Scattered standalone high-rises break up the grid and read as a skyline from above.
    for(let k=0;k<14;k++){const x=(k%7-3)*12,z=-35-Math.floor(k/7)*49;
-    if(Math.abs(x)<10)continue;m.box(x,1.2,z,4,2.4,5,[.12,.34,.18]);}
+    if(Math.abs(x)<10)continue;m.box(x,1.2,z,4,2.4,5,[.06,.12,.24]);}
   });
-  part('rose-beds',()=>{
-   // The opening countdown grows the roses. A stable permutation scatters the
-   // flowers around the maze and preserves their positions across reloads.
-   // As bloom approaches 1 the open roses swell to a dramatic, HUGE payoff:
-   // the ramp starts around 55% bloom and peaks ~3.4x at full bloom.
-   const bloomScale=1+smooth(clamp((bloomLevel-.55)/.45))*2.4;
+  part('charge-nodes',()=>{
+   // The countdown charges the grid: a field of charge nodes lights up one by one.
+   // A stable permutation scatters the nodes between the towers and keeps their
+   // positions across reloads. As charge approaches 1 the lit nodes surge into a
+   // dramatic, HUGE power-up: the ramp starts around 55% charge and peaks ~3.4x at
+   // full charge, when extra neon rings and a bright beacon crown each node.
+   const chargeScale=1+smooth(clamp((bloomLevel-.55)/.45))*2.4;
    for(let i=0;i<112;i++){
     const lane=i%8,rank=Math.floor(i/8),side=lane<4?-1:1;
     const x=side*(5+(lane%4)*8)+Math.sin(i*13.1)*1.4,z=-19-rank*7.3;
-    const y=.2+(i%4)*.05,col=roseColors[i%roseColors.length];
-    m.box(x,.3*Math.max(1,bloomScale*.6),z,.13,.6*Math.max(1,bloomScale*.6),.13,[.12,.42,.17]);
-    const open=(i*37)%112<openRoses;
-    if(open){
-     const by=.95+(bloomScale-1)*.55,pr=.4*bloomScale,ph=.76+(bloomScale-1)*.4;
-     m.gem(x,by,z,.62*bloomScale,col,3,.55);gardenFlowers++;
-     for(let k=0;k<5;k++){const angle=k*TAU/5;m.gem(x+Math.sin(angle)*pr,ph,z+Math.cos(angle)*pr,.28*bloomScale,
-      color(col,[.95,.93,.78],.15),3,.4);}
-     // Full bloom only: a fuller outer petal fan and a small golden coronet on
-     // top crown each rose. Gated on bloomLevel>=1 so partial bloom never
-     // inflates the triangle budget (the full-vs-partial tri delta is the pin).
+    const col=nodeColors[i%nodeColors.length];
+    m.box(x,.3*Math.max(1,chargeScale*.6),z,.13,.6*Math.max(1,chargeScale*.6),.13,[.08,.14,.26]);
+    const lit=(i*37)%112<litNodes;
+    if(lit){
+     const by=.95+(chargeScale-1)*.55,pr=.4*chargeScale,ph=.76+(chargeScale-1)*.4;
+     m.gem(x,by,z,.62*chargeScale,col,3,.55);gardenFlowers++;
+     for(let k=0;k<5;k++){const angle=k*TAU/5;m.gem(x+Math.sin(angle)*pr,ph,z+Math.cos(angle)*pr,.28*chargeScale,
+      color(col,[.85,.95,1.0],.15),3,.4);}
+     // Full charge only: an outer halo of neon sparks plus a tall white-hot beacon
+     // crown each node. Gated on bloomLevel>=1 so partial charge never inflates the
+     // triangle budget (the full-vs-partial tri delta is the revert-sensitive pin).
      if(bloomLevel>=1){
-      const outer=pr*1.55,oy=ph-.18*bloomScale;
-      for(let k=0;k<3;k++){const angle=k*TAU/3+.6;m.gem(x+Math.sin(angle)*outer,oy,z+Math.cos(angle)*outer,.3*bloomScale,
-       color(col,[.97,.93,.76],.3),3,.5);}
-      m.gem(x,by+.5*bloomScale,z,.22*bloomScale,gold,3,.9);
+      const outer=pr*1.55,oy=ph-.18*chargeScale;
+      for(let k=0;k<3;k++){const angle=k*TAU/3+.6;m.gem(x+Math.sin(angle)*outer,oy,z+Math.cos(angle)*outer,.3*chargeScale,
+       color(col,[.90,.98,1.0],.3),3,.5);}
+      m.gem(x,by+.5*chargeScale,z,.22*chargeScale,[.95,.98,1.0],3,.9);
      }
-    }else m.gem(x,.75,z,.19,[.43,.20,.22],3,1.2);
+    }else m.gem(x,.75,z,.19,[.14,.10,.22],3,1.2);
    }
   });
-  part('pavilions',()=>{
+  part('nodes',()=>{
+   // The five interactive entrance nodes: neon kiosks with chrome pylons, a glowing
+   // header prism and a holo-ring doorway you jack into. Sealed nodes go dark.
    for(const g of rooms){
     const [x,,z]=g.pos,r=g.size,colorTop=g.color,stateGate=gateState(g.key),sealed=stateGate==='sealed';
-    m.box(x,.2,z,r*2.1,.4,r*1.8,stone);
+    m.box(x,.2,z,r*2.1,.4,r*1.8,[.07,.09,.17]);
     for(const dx of [-r*.7,r*.7])for(const dz of [-r*.58,r*.58]){
-     m.box(x+dx,3.3,z+dz,.46,6.2,.46,[.93,.91,.81]);
-     m.box(x+dx,6.52,z+dz,.88,.34,.88,gold);
+     m.box(x+dx,3.3,z+dz,.46,6.2,.46,chrome);
+     m.box(x+dx,6.52,z+dz,.88,.34,.88,towerTop);
     }
-    // A translucent-looking vaulted copper roof, lantern and finial.
-    m.box(x,6.85,z,r*2.1,.7,r*1.78,sealed?[.36,.35,.32]:colorTop);
-    m.gem(x,8.8,z,r*.75,sealed?[.35,.34,.31]:colorTop,0,.48);
-    m.box(x,9.5,z,.2,2,.2,gold);
-    m.gem(x,10.65,z,.35,gold,3,1.7);
-    if(sealed)for(let k=0;k<5;k++)m.box(x+(k-2)*r*.34,2.7,z+r*.77,.16,5.2,.17,[.32,.34,.32]);
+    // A glowing header prism, floating beacon and antenna finial.
+    m.box(x,6.85,z,r*2.1,.7,r*1.78,sealed?[.12,.13,.18]:colorTop);
+    m.gem(x,8.8,z,r*.75,sealed?[.11,.12,.17]:colorTop,0,.48);
+    m.box(x,9.5,z,.2,2,.2,chrome);
+    m.gem(x,10.65,z,.35,sealed?[.20,.22,.30]:[.90,.98,1.0],3,1.7);
+    if(sealed)for(let k=0;k<5;k++)m.box(x+(k-2)*r*.34,2.7,z+r*.77,.16,5.2,.17,[.14,.15,.20]);
     else{
-     m.box(x,1,z+r*.7,r*.6,1.7,.14,[.18,.41,.24]);
+     m.box(x,1,z+r*.7,r*.6,1.7,.14,[.08,.20,.26]);
      m.loop([x,.55,z+r*1.02],[1,0,0],[0,0,-1],r*.55,.18,g.color,3);
     }
    }
   });
-  part('royal-palace',()=>{
+  part('megastructure',()=>{
+   // The central megastructure terminating the grand avenue: a wireframe mainframe
+   // tower with a neon crown prism and two chrome spires flanking it.
    const z=-133;
-   m.box(0,9,z-1,56,18,18,[.89,.86,.77]);
-   m.box(0,19,z-1,60,2,21,[.41,.53,.35]);
-   m.box(0,24,z-1,28,8,12,[.91,.88,.78]);
-   m.gem(0,31,z,3.5,gold,0,1.5);
+   m.box(0,9,z-1,56,18,18,[.07,.11,.22]);
+   m.box(0,19,z-1,60,2,21,towerTop);
+   m.box(0,24,z-1,28,8,12,[.09,.14,.27]);
+   m.gem(0,31,z,3.5,[.90,.98,1.0],0,1.5);
    for(let k=-5;k<=5;k++){
     const x=k*4.4;
-    m.box(x,9.2,z+8,.8,14,.8,[.97,.95,.85]);
-    m.box(x,16.7,z+8,2,.6,1.2,gold);
-    if(k%2===0)m.box(x,8,z+8.55,1.1,5,.2,[.17,.27,.22]);
+    m.box(x,9.2,z+8,.8,14,.8,chrome);
+    m.box(x,16.7,z+8,2,.6,1.2,towerTop);
+    if(k%2===0)m.box(x,8,z+8.55,1.1,5,.2,[.08,.45,.58]);
    }
-   for(const x of [-26,26]){m.box(x,14,z,5,28,5,stone);m.gem(x,30,z,4.5,gold,0,1.2);}
+   for(const x of [-26,26]){m.box(x,14,z,5,28,5,[.06,.10,.20]);m.gem(x,30,z,4.5,[.98,.30,.72],0,1.2);}
   });
-  part('fountains',()=>{
+  part('holo-signs',()=>{
+   // Floating holo-signage pads scattered through the plazas, each projecting a
+   // bright neon glyph up into the night.
    for(const [x,z,r] of [[0,-22,5],[0,-113,6],[-46,-66,4],[46,-66,4]]){
-    m.loop([x,.18,z],[1,0,0],[0,0,-1],r,.8,stone);
-    m.box(x,.14,z,r*1.28,.28,r*1.28,[.30,.60,.66]);
-    m.gem(x,1.3,z,.7,[.91,.91,.79]);
-    m.gem(x,3,z,.3,gold,3,3);
+    m.loop([x,.18,z],[1,0,0],[0,0,-1],r,.8,[.08,.45,.58]);
+    m.box(x,.14,z,r*1.28,.28,r*1.28,[.10,.20,.40]);
+    m.gem(x,1.3,z,.7,[.60,.85,1.0]);
+    m.gem(x,3,z,.3,[.98,.30,.72],3,3);
    }
   });
-  part('rose-arches',()=>{
+  part('neon-arches',()=>{
+   // A procession of neon gateway arches spanning the main avenue; their keystone
+   // lamp ignites as the grid charge sweeps past each arch.
    for(let n=0;n<7;n++){
     const z=-19-n*15,x=n%2?-2:2;
-    for(const off of [-4.7,4.7])m.box(x+off,2.5,z,.45,5,.45,[.71,.72,.62]);
-    m.box(x,5.1,z,10,.5,.65,[.23,.44,.23]);
-    m.gem(x,6.1,z,.8,bloomLevel>(n%3)/3?roseColors[n%4]:[.22,.46,.23],3,1.1);
+    for(const off of [-4.7,4.7])m.box(x+off,2.5,z,.45,5,.45,chrome);
+    m.box(x,5.1,z,10,.5,.65,[.08,.40,.52]);
+    m.gem(x,6.1,z,.8,bloomLevel>(n%3)/3?nodeColors[n%4]:[.10,.14,.26],3,1.1);
    }
   });
   staticMesh=m;staticArray=new Float32Array(m.data);
   if(mode==='webgl'){gl.bindBuffer(gl.ARRAY_BUFFER,staticBuffer);gl.bufferData(gl.ARRAY_BUFFER,staticArray,gl.STATIC_DRAW);}
   geometryDirty=false;lastBuild=state.progress+'|'+duskTarget+'|'+bloomLevel;dirty=true;
  }
- // A single low-poly bird: a shallow V of two wing triangles that gently flaps.
+ // A single low-poly drone glyph: a shallow V of two neon triangles that gently drifts.
  function bird(mesh,x,y,z,scale,flap,col){
   const span=scale,drop=scale*(.3+flap*.5);
   const body=[x,y,z];
   mesh.tri(body,[x-span,y+drop,z-span*.2],[x-span*.5,y+scale*.08,z-span*.1],col);
   mesh.tri(body,[x+span*.5,y+scale*.08,z+span*.1],[x+span,y+drop,z+span*.2],col);
  }
- // Draw a handful of ambient birds across the morning sky. They only appear while the
- // arena is calm (progress<BIRD_THRESHOLD) and no round is settled yet (dusk 0), and fade
- // out as the crowd gathers. Under reduced motion or the static fallback they are drawn in
- // fixed poses with no animation, and when the world is paused the shared frozen `t` keeps
- // them still like the rest.
+ // Draw a handful of ambient drone glyphs across the night sky. They only appear while
+ // the grid is calm (progress<BIRD_THRESHOLD) and no round is settled yet (dusk 0), and
+ // fade out as the system energizes. Under reduced motion or the static fallback they are
+ // drawn in fixed poses with no animation, and when the world is paused the shared frozen
+ // `t` keeps them still like the rest.
  
  function effects(t){
   const m=new Mesh(),still=media.matches||mode==='static';
-  // Four fountains remain active independently of round completions.
+  // Energy fountains sparking up from the holo-sign pads, independent of round results.
   for(const [x,z,r] of [[0,-22,5],[0,-113,6],[-46,-66,4],[46,-66,4]]){
    const count=still?5:10;
    for(let i=0;i<count;i++){
     const angle=i*TAU/count,u=still?.45:(t*.57+i*.113)%1;
     const radius=r*.65*Math.sin(Math.PI*u),h=.5+Math.sin(Math.PI*u)*3.3;
-    m.gem(x+Math.cos(angle)*radius,h,z+Math.sin(angle)*radius,.12,[.61,.89,.91],3,1.1);
+    m.gem(x+Math.cos(angle)*radius,h,z+Math.sin(angle)*radius,.12,[.40,.95,1.0],3,1.1);
    }
   }
-  // Drifting rose petals increase after each round settles.
-  const petals=8+Math.round(bloomLevel*55);
-  for(let i=0;i<petals;i++){
+  // Drifting data motes / sparks rise through the city as the grid charges.
+  const motes=8+Math.round(bloomLevel*55);
+  for(let i=0;i<motes;i++){
    const x=(rand(i+201)-.5)*78,z=-17-rand(i+304)*99,u=still?.3:(t*(.03+rand(i+399)*.018)+rand(i+521))%1;
    m.gem(x+Math.sin(t*.54+i)*.4,still?.2:17*(1-u)+.2,z,.16,PETALS[i%PETALS.length],3,.46);
   }
@@ -350,19 +369,19 @@ void main(){
    const slot=monuments.slots.find(s=>s.place===site.place);if(!slot)continue;
    const [x,,z]=site.pos,w=site.size,rise=monuments.complete?(still||riseAt===null?1:smooth(clamp((podiumTime-riseAt)/2.4))):0;
    const h=w*(.4+(4-site.place)*.28+rise*.9);
-   const medal=site.place===1?[.94,.77,.34]:site.place===2?[.78,.79,.81]:[.68,.42,.27];
-   m.box(x,h/2,z,w*1.6,h,w*1.3,slot.tied?[.37,.41,.36]:medal);
-   m.box(x,h+.07,z,w*1.75,.15,w*1.45,[.9,.85,.71],3);
-   if(monuments.complete)m.loop([x,h+.2,z],[1,0,0],[0,0,-1],w*.62,.15,[.93,.70,.35],3);
+   const medal=site.place===1?[.98,.80,.28]:site.place===2?[.70,.85,1.0]:[.98,.40,.60];
+   m.box(x,h/2,z,w*1.6,h,w*1.3,slot.tied?[.20,.24,.34]:medal);
+   m.box(x,h+.07,z,w*1.75,.15,w*1.45,[.70,.90,1.0],3);
+   if(monuments.complete)m.loop([x,h+.2,z],[1,0,0],[0,0,-1],w*.62,.15,[.98,.78,.30],3);
   }
-  // Opening ceremony grows a halo of flowers around the cleared pavilion.
+  // Node-online ceremony blooms a halo of neon sparks around the energized node.
   const ceremonyStart=m.data.length;
   if(ceremony&&ceremony.at!==null){
    const g=rooms.find(r=>r.key===ceremony.key);
    if(g){
     const age=(performance.now()-ceremony.at)/1000,[x,,z]=g.pos;
     const spread=ceremony.phase==='crowned'?clamp((age-1.4)/3.6):0;
-    m.loop([x,.13,z],[1,0,0],[0,0,-1],g.size*(.5+2*spread),.21,[.92,.72,.45],3);
+    m.loop([x,.13,z],[1,0,0],[0,0,-1],g.size*(.5+2*spread),.21,[.40,.95,1.0],3);
     for(let i=0;i<24;i++){
      const angle=i*TAU/24,r=g.size*(.16+spread*1.5);
      const h=ceremony.phase==='crowned'?Math.max(.5,8*(1-spread)):10*(1-clamp(age/1.4))+3;
@@ -436,14 +455,14 @@ void main(){
   const next=window.CityTimeline.sample(settings,now),arrived=next.remaining===0;
   if(next.progress!==state.progress)dirty=true;
   state=next;
-  // The saved countdown is the only bloom source. Scores and round status never
-  // affect it; zero remaining time opens every rose, even before any match starts.
+  // The saved countdown is the only charge source. Scores and round status never
+  // affect it; zero remaining time fully charges the grid, even before any match starts.
   bloomLevel=next.progress;
   if(!suspended&&!paused){
-   // Gentle garden wind and opening chimes follow the countdown progress.
+   // Low synth hum and power-up chimes follow the countdown charge.
    const ev=window.BrawlAudio?.ambience?.(next.progress,arrived);
    if((ev==='roar'||ev==='big'||ev==='begin')&&isMoving()){surgeAt=elapsed;surgeBig=ev!=='roar';}
-   // Morning birdsong: on while the arena is calm and no round is settled, off once the crowd gathers.
+   // Ambient synth / drone glyphs: on while the grid is calm and no round is settled, off once it energizes.
    window.BrawlAudio?.ambientBirds?.(next.progress<BIRD_THRESHOLD&&!arrived&&dusk===0);
   }else window.BrawlAudio?.ambientBirds?.(false);
   document.body.style.setProperty('--arena-heat',String(state.progress));
@@ -458,13 +477,13 @@ void main(){
   }
   if(ceremony&&ceremony.at!==null&&!media.matches&&mode==='webgl'){
    const age=(now-ceremony.at)/1000;camera={eye:ceremony.camera.eye.slice(),target:ceremony.camera.target.slice()};
-   // Crowd-roar rumble at the crown moment; paused arena and reduced motion keep the camera still.
+   // Power-surge rumble at the online moment; paused grid and reduced motion keep the camera still.
    if(!paused&&age>=1.4&&age<3){const k=1-(age-1.4)/1.6;camera.eye[0]+=Math.sin(age*43)*.08*k;camera.eye[1]+=Math.cos(age*37)*.05*k;}
    return;
   }
   if(inside||sceneView!=='street')return;
   camera={eye:baseCamera.eye.slice(),target:baseCamera.target.slice()};
-  // Hovering aerial camera. The tiny motion suggests flight above the stands.
+  // Hovering aerial camera. The tiny motion suggests flight above the neon skyline.
   if(moving){const hover=Math.sin(elapsed*.62)*.14;camera.eye[1]+=hover;camera.target[1]+=hover;}
   if(moving&&surgeEnv>0){camera.eye[0]+=Math.sin(elapsed*43)*surgeEnv*(surgeBig?.06:.03);camera.eye[1]+=Math.cos(elapsed*37)*surgeEnv*.03;}
  }
@@ -521,7 +540,7 @@ void main(){
    const gate=rooms.find(r=>r.key===key);if(!gate)return;
    const generation=++ceremonyGeneration;ceremony={key,phase:'approach',at:null};
    sceneView='ceremony';document.body.classList.add('gate-ceremony');resize();
-   const hud=document.getElementById('ceremony-status');if(hud)hud.textContent='RETURNING TO THE GARDEN'+(label?': '+label.toUpperCase():'');
+   const hud=document.getElementById('ceremony-status');if(hud)hud.textContent='RETURNING TO THE GRID'+(label?': '+label.toUpperCase():'');
    const {front,N,size}=gate,gx=gate.pos[0];
    await travel([{eye:[gx*.25,32,-12],target:lifted(front,6)},{eye:lifted(add(front,mul(N,18)),12),target:lifted(front,size*.8)}],false);
    if(generation!==ceremonyGeneration)return;

@@ -75,8 +75,8 @@ function makeWorld({gl=null}={}){
  assert.ok(status.debug.staticTriangles>2000&&status.debug.staticTriangles<16000,'garden mesh budget');
  assert.equal(Object.values(status.debug.parts).reduce((sum,n)=>sum+n,0),status.debug.staticTriangles,'part triangle counts sum to mesh');
  assert.ok(status.debug.dynamicTriangles<4000,'bounded petals/fountain mesh');
- for(const key of ['lawn','maze-hedges','rose-beds','pavilions','royal-palace','fountains','rose-arches'])
-  assert.ok(status.debug.parts[key]>0,'garden mesh part '+key+' missing');
+ for(const key of ['grid-floor','skyline','charge-nodes','nodes','megastructure','holo-signs','neon-arches'])
+  assert.ok(status.debug.parts[key]>0,'neon-city mesh part '+key+' missing');
  const labels=S.elements['door-labels'];
  assert.equal(labels.children.length,5,'only real tournament pavilions have scene labels');
  assert.equal(S.elements['city-damage'].textContent,'0% CHARGE');
@@ -93,10 +93,10 @@ function makeWorld({gl=null}={}){
  assert.equal(S.status().bloomLevel,.5);
  assert.equal(S.elements['city-damage'].textContent,'50% CHARGE');
  assert.equal(S.status().gardenFlowers,56);
- // Capture the rose geometry at mid bloom so we can prove the roses swell into a
- // dramatic HUGE full-bloom flourish (extra outer petals + golden coronet gated
- // on bloomLevel>=1). A revert of the full-bloom enrichment collapses this delta.
- const midRoseBeds=S.status().debug.parts['rose-beds'];
+ // Capture the charge-node geometry at mid charge so we can prove the nodes surge into a
+ // dramatic HUGE full-charge power-up (extra neon spark halo + white-hot beacon gated
+ // on bloomLevel>=1). A revert of the full-charge enrichment collapses this delta.
+ const midChargeNodes=S.status().debug.parts['charge-nodes'];
  const cachedBuilds=S.status().debug.rebuilds;
  S.W.setSettings(settingsAt(0));await S.step(301);
  assert.equal(S.status().debug.rebuilds,cachedBuilds,'unchanged progress reuses geometry');
@@ -111,7 +111,7 @@ function makeWorld({gl=null}={}){
  status=S.status();assert.equal(status.bloomLevel,1);
  assert.equal(status.gardenFlowers,112,'all roses open exactly at the deadline');
  assert.ok(status.debug.staticTriangles<16000,'full-bloom garden mesh stays within raised budget');
- assert.ok(status.debug.parts['rose-beds']>midRoseBeds+4000,'full bloom grows the roses into a dramatically richer flourish');
+ assert.ok(status.debug.parts['charge-nodes']>midChargeNodes+4000,'full charge surges the nodes into a dramatically richer power-up');
  assert.equal(S.elements['city-status'].textContent,'THE GRID IS FULLY CHARGED');
  assert.equal(S.elements['city-damage'].textContent,'100% CHARGE');
  assert.equal(S.elements['city-progress'].style.width,'100%');
@@ -176,5 +176,5 @@ function makeWorld({gl=null}={}){
  assert.equal(G.status().debug.rebuilds,oldBuilds+1,'bloom transition rebuilds flowers');
  assert.equal(G.status().gardenFlowers,112);
  assert.deepEqual(G.warnings,[]);
- console.log('Royal Garden renderer passed: countdown bloom, exact arrival, no early 100%, huge full-bloom rose flourish, pause, resets, scoring independence, 2D/WebGL, camera and ceremony.');
+ console.log('Neon Grid renderer passed: countdown charge, exact arrival, no early 100%, huge full-charge node surge, pause, resets, scoring independence, 2D/WebGL, camera and ceremony.');
 })().catch(e=>{console.error(e);process.exit(1);});
