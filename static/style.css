@@ -264,7 +264,7 @@ table{border-spacing:0 5px}td{box-shadow:inset 0 1px #f7efe20b}td.calc{backgroun
 .fc-plinth{height:100%;width:100%;min-height:58px;border-top:4px solid var(--metal);border-left:1px solid #ffffff30;border-right:1px solid #ffffff30;background:linear-gradient(110deg,var(--panel),var(--metal) 250%);box-shadow:inset 0 0 30px #06060d,0 0 20px #dbc07d44;display:flex;justify-content:center;align-items:start;padding-top:12px;font:700 clamp(25px,4vw,51px) monospace}
 @keyframes fc-raise{to{transform:translateY(0)}}
 @keyframes fc-rays{to{transform:rotate(360deg)}}
-@media(max-width:640px){#cutscene.final-mode .cutscene-stage{height:min(430px,54vh)}.fc-body{transform:translateX(-50%) scale(.75);transform-origin:bottom}.fc-people{inset:auto 1% 8%}.fc-podium{left:3%;right:3%;gap:2%}.fc-medal{width:31%}}
+@media(max-width:640px){#cutscene.final-mode .cutscene-stage{height:min(430px,54vh)}.fc-podium{left:3%;right:3%;gap:2%}.fc-medal{width:31%}}
 @media(prefers-reduced-motion:reduce){#cutscene.final-mode *,#cutscene.final-mode *:before,#cutscene.final-mode *:after{animation:none!important}.fc-medal{transform:none}}
 .arena-verdict{position:relative;width:100%;height:100%;min-height:240px;overflow:hidden;background:#173a29}
 #cutscene .av-player{position:absolute;left:46%;bottom:12%;width:7%;z-index:3}
@@ -299,7 +299,7 @@ table{border-spacing:0 5px}td{box-shadow:inset 0 1px #f7efe20b}td.calc{backgroun
 @keyframes av-flail{from{transform:rotate(-35deg)}to{transform:rotate(35deg)}}
 @keyframes fc-petal-fall{0%{opacity:0;transform:translateY(-30px) rotate(0)}15%{opacity:.9}100%{opacity:0;transform:translateY(80px) rotate(220deg)}}
 @keyframes crown-drop{from{opacity:0;transform:translateY(-40%) scale(.6)}to{opacity:1;transform:none}}
-@media(max-width:600px){#cutscene.verdict-mode .cutscene-stage,#cutscene.crown-mode .cutscene-stage{aspect-ratio:1.6}#cutscene .av-player{width:10%}#cutscene .av-gate{width:20%}}
+@media(max-width:600px){#cutscene.verdict-mode .cutscene-stage,#cutscene.crown-mode .cutscene-stage{aspect-ratio:1.6}#cutscene .av-player{width:10%}}
 /* Cutscene column: nothing shrinks below its content, so the two-line caption can never spill
    onto Skip. The stage is sized from the height left over, keeping its aspect ratio. */
 #cutscene{--cs-room:max(100dvh - 330px,180px);justify-content:safe center}
