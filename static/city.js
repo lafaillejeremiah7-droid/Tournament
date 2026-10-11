@@ -66,13 +66,13 @@
  let dusk=0,duskTarget=0;
  let surgeAt=null,surgeBig=false,surgeEnv=0;
  let partTris={},rebuilds=0,dynamicTriangles=0,lastDynamic=[];
- // Elevated first-person overview above the neon grid avenues.
+ // Elevated first-person overlook across the submerged reef.
  const baseCamera={eye:[0,56,25],target:[0,2,-54]};
  let sceneView='street',returnRoute=[];
  let camera={eye:baseCamera.eye.slice(),target:baseCamera.target.slice()},vp;
  let gl=null,ctx=null,program,skyProgram,staticBuffer,dynamicBuffer,skyBuffer,uniforms,skyUniforms;
  const fov=66*Math.PI/180;
- // Synthwave night-sky colors shared by the sky shader, the fog and the static
+ // Dark sea-water colors shared by the sky shader, the fog and the static
  // fallback gradient: near-black indigo at the top, a hot magenta/orange sunset
  // band along the horizon that deepens as dusk settles.
  const skyStops=d=>({top:color([.014,.17,.24],[.008,.08,.15],d),bottom:color([.004,.035,.084],[.003,.025,.062],d)});
@@ -85,7 +85,7 @@
  // No uniform is shared between the vertex and fragment stages: their default float
  // precisions differ (highp vs mediump), and GLSL ES 1.00 fails the link on a mismatch.
  const VERTEX_SRC='attribute vec3 a_pos,a_normal,a_color;attribute float a_kind;uniform mat4 u_vp;uniform float u_wtime,u_wheat,u_surge;uniform vec2 u_center;varying vec3 v_pos,v_normal,v_color;varying float v_kind;void main(){float wave=0.;if(a_kind>1.5&&a_kind<2.5){float ang=atan(a_pos.z-u_center.y,a_pos.x-u_center.x);float bob=max(0.,sin(u_wtime*5.+a_pos.x*.35+a_pos.z*.27));float mex=pow(max(0.,cos(ang-u_wtime*.9)),24.);wave=bob*.12*(.3+u_wheat)+mex*.9*u_wheat+u_surge*bob*.5;}vec3 p=a_pos+vec3(0.,wave,0.);v_pos=p;v_normal=a_normal;v_color=a_color;v_kind=a_kind;gl_Position=u_vp*vec4(p,1.);}';
- // Neon wireframe towers, glowing grid floor and synthwave signage, with the
+ // Refracted ocean lighting, rough reef stone and luminous anemones, with the
  // banded light steps and subtle quantization of CRT / retro-futurist materials.
  const FRAGMENT_SRC=`
 precision mediump float;
@@ -181,7 +181,7 @@ void main(){
  // Front face vertical layout of a gate, all heights from y=0 at the gate (s = gate size).
  
  function layout(){
-  // Five neon entrance nodes standing along the avenues of the neon grid city.
+  // Five glowing diving chambers along the sunken trench.
   const sites=[[-26,-35],[-14,-68],[0,-42],[14,-68],[26,-35]];
   rooms=roomKeys.map((key,i)=>{
    const [x,z]=sites[i],size=i===4?9:8,N=[0,0,1],pos=[x,0,z];
@@ -209,7 +209,7 @@ void main(){
  }
  function rebuildGrid(){
   // Build the fixed neon skyline and the countdown-driven charge nodes of the
-  // full-viewport synthwave city scene.
+  // full-viewport underwater reef scene.
   const m=new Mesh(),still=mode==='static';partTris={};rebuilds++;
   const part=(name,fn)=>{const before=m.data.length;fn();partTris[name]=(m.data.length-before)/30;};
   const seabed=[.04,.10,.12];

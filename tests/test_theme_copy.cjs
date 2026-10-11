@@ -15,7 +15,7 @@ for(const name of stages){
  assert(index.includes(name),'home missing '+name);
  assert(app.includes(name),'game navigation missing '+name);
 }
-for(const old of ['Face Your Weakness','Abandon Your Comfort','Prove Your Resolve','COLISEUM DIVISION']){
+for(const old of ['Face Your Weakness','Abandon Your Comfort','Prove Your Resolve','COLISEUM DIVISION','KNOW YOUR CODE','ADAPT OR DELETE','LAST NODE STANDING']){
  assert(!index.includes(old)&&!app.includes(old),'obsolete displayed label: '+old);
 }
 // The Royal Garden chrome has been replaced entirely: no garden/rose/pavilion wording
@@ -65,6 +65,7 @@ assert(!app.includes("inp('settings.prizes."),'payouts must not be editable');
 assert(app.includes("prizes:[30,0,0]"),'reset-all keeps $30/0/0');
 assert(monuments.includes('const slots=[1].map(place=>'),'only one trophy pedestal');
 assert(monuments.includes('$30'),'only $30 champion');
+assert(app.includes("'Hatchling','First glow','Reef swimmer','Deep diver','Reef hunter','Abyssal predator','Leviathan'"),'seven sea-creature progression tiers');
 for(const geometry of ["part('skyline'","part('charge-nodes'","part('nodes'","part('holo-signs'","part('megastructure'","part('neon-arches'"]){
  assert(city.includes(geometry),'missing 3D scenery: '+geometry);
 }

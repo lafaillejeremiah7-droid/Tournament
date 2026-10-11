@@ -71,7 +71,7 @@ window.BrawlAudio=(()=>{
  function compost(){const thud=noise(.55,.24,230);tone(63,.55,.17,'sine',32);return thud;}
  function slam(){const a=noise(.35,.2,300);tone(60,.4,.15,'sine',40);return a;}
  function victory(){const a=fanfare();cheer(true);return a;}
- // Rising static and soft chimes build toward the Grid Powers Up countdown.
+ // Rising static and soft chimes build toward the Reef Awakening countdown.
  // The cadence advances even while muted so unmuting never releases a backlog.
  function ambience(progress,arrived){
   const n=Number(progress);progress=Number.isFinite(n)?Math.min(1,Math.max(0,n)):0;arrived=!!arrived;
@@ -85,10 +85,10 @@ window.BrawlAudio=(()=>{
   // sound and returns null regardless of progress or elapsed time.
   return null;
  }
- // A single morning birdsong phrase: a few quick, high, frequency-swept blips.
- function chirp(){if(muted||!ctx||ctx.state!=='running'||document.hidden)return;const base=1850+Math.random()*1500,blips=2+Math.floor(Math.random()*3);for(let i=0;i<blips;i++){const f=base*(.78+Math.random()*.5);tone(f,.06+Math.random()*.05,.03,'sine',f*(1.25+Math.random()*.5));}}
+ // Sparse low-frequency sonar clicks and soft underwater pings.
+ function chirp(){if(muted||!ctx||ctx.state!=='running'||document.hidden)return;const base=480+Math.random()*260,blips=2+Math.floor(Math.random()*2);for(let i=0;i<blips;i++){const f=base*(.78+Math.random()*.5);tone(f,.10+Math.random()*.07,.025,'sine',f*(1.05+Math.random()*.20));}}
  return {unlock,stop,roar,cheer,boo,horn,fanfare,hook,slam,shears,compost,victory,ambience,
- // Gentle ambient blips through the booting grid. The world tick passes
+ // Gentle ambient blips through the awakening reef. The world tick passes
  // on=true only during the low-progress morning; chirps obey mute and document.hidden
  // and stop when the countdown intensifies or the player mutes them.
  ambientBirds(on){if(!on){birdsOn=false;return;}if(muted||document.hidden||!ctx||ctx.state!=='running')return;const now=Date.now();if(!birdsOn){birdsOn=true;lastChirp=now;nextChirpGap=0;}if(now-lastChirp>=nextChirpGap){chirp();lastChirp=now;nextChirpGap=1400+Math.random()*2600;}},
@@ -228,7 +228,7 @@ function overview(){
  );
  html+=panel(
   'Every player',
-  table(['PLAYER','KNOW YOUR CODE','ADAPT OR DELETE','FINAL RANK','TOTAL POINTS','PRIZE'],everyPlayerRows),
+  table(['PLAYER','KNOW YOUR DEPTH','ADAPT OR SINK','FINAL RANK','TOTAL POINTS','PRIZE'],everyPlayerRows),
   `<button data-action="csv">Export CSV</button>`
  );
  if(final.rows.length){
@@ -337,7 +337,7 @@ function extras(key){const stage=state[key],v=view[key];if(!v.rows.length)return
    grows from their cumulative, engine-scored goals; eliminated avatars are deleted,
    not removed from the grid. The opening countdown charges separately. */
 const rosterStages=['round1','round2','final'];
-const nodeTierNames=['Cold boot','First spark','Flickering chamber','Live chamber','Bright construct','Overclocked core','Full power'];
+const nodeTierNames=['Hatchling','First glow','Reef swimmer','Deep diver','Reef hunter','Abyssal predator','Leviathan'];
 function nodeTier(goals){
  return goals<=0?0:goals<3?1:goals<6?2:goals<10?3:goals<15?4:goals<21?5:6;
 }
@@ -447,7 +447,7 @@ function renderDivineScene(stage,cuts,latest=-1){
   return `<div class="divine-plant ${cls}" data-player="${p.id}" data-goals="${p.goals}"><div class="divine-stems">${nodeSvg(p.tier)}</div><strong class="divine-name">${esc(p.name)}</strong><small>${p.goals} ${p.goals===1?'GOAL':'GOALS'}</small><em class="divine-stage-name">${esc(nodeTierNames[p.tier]||'Node')}</em><b class="divine-cut-label">${p.priorPruned||severed?'SUNK':severing?'MARKED':''}</b></div>`;
  }).join('');
  const html=`<div class="divine-scene ${latest>=0?'is-cutting':'is-thinking'}" data-stage="${stage}" style="--strike-x:${strikeX}%;--strike-y:${strikeY}%">`+
-  `<canvas class="divine-canvas" aria-label="A gigantic neon mech arm and plasma grip-claw descending through a vortex above ten three-dimensional neon avatars"></canvas>`+
+  `<canvas class="divine-canvas" aria-label="The abyssal guardian's immense claw descending through a whirlpool above ten evolving deep-sea creatures"></canvas>`+
   `<div class="divine-stars"></div><div class="divine-halo"></div><div class="divine-portal" aria-hidden="true"></div>`+
   `<div class="divine-judge">${divineHandSvg()}</div>`+
   `<div class="divine-oracle">${latest<0?'THE ABYSS WATCHES':'THE DEPTHS HAVE SPOKEN'}</div>`+
@@ -696,7 +696,7 @@ function closeResult(){
 function round(key){
  if(key==='round2')return round2Page();
  const v=view.round1;
- let html=title('ROUND 01 · COLD BOOT','Know Your Depth','The first principle: power begins with understanding your own code. Confront your weaknesses, study your mistakes, and change your play. Across five 5v5 games, only eight of ten stay online.','10 → 8 PLAYERS')+notice(v.issues);
+ let html=title('ROUND 01 · FIRST DESCENT','Know Your Depth','The first descent reveals your limits. Recognize your mistakes, learn from them, and earn your place among the eight survivors. Across five 5v5 games, only eight of ten stay online.','10 → 8 PLAYERS')+notice(v.issues);
  html+=nodeRoster('round1');
  html+=`<div class="games">${v.games.map(g=>`<div class="game ${g.ready?'ready':''}"><b>Game ${g.game}</b>A: ${g.counts.A}/5 · B: ${g.counts.B}/5</div>`).join('')}</div>`;
  round1Game=Math.min(round1Game,4);

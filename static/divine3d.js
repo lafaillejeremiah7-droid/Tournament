@@ -1,9 +1,9 @@
-/* THE SYSTEM'S VERDICT: the same dependency-free, low-poly WebGL geometry
+/* THE ABYSS'S VERDICT: the same dependency-free, low-poly WebGL geometry
  * approach as city.js, rendered into an independent cinematic canvas. All neon
  * avatars, the giant mech arm, and its articulated plasma grip-claw are genuine
  * 3D meshes with normals, lighting, depth testing and a perspective camera.
  * Deep Sea: abyssal ruins, glowing coral and filtered ocean light with
- * wireframe, grid horizon, CRT scanline. The SYSTEM scans then DELETES. */
+ * a suspended water column. The guardian examines the divers before they sink. */
 (function(){
  'use strict';
  const TAU=Math.PI*2,clamp=(n,a=0,b=1)=>Math.max(a,Math.min(b,n));
@@ -197,7 +197,7 @@
       slab=[.09,.13,.22],neon=[.16,.84,.92];
   m.box(0,-1.05,0,70,2.1,73,[.018,.08,.105],3);
   m.box(0,.012,0,64,.06,69,deck,3);
-  // Glowing TRON grid floor: alternating dark tiles with emissive seam motes.
+  // Mottled seabed patches sprinkled with marine snow and luminous silt.
   for(let x=-30;x<=30;x+=5)for(let z=-30;z<=30;z+=5){
    const dark=(Math.round(x+z)/5)%2===0;
    m.box(x,.057,z,4.85,.04,4.85,dark?[.04,.12,.15]:[.05,.15,.17],3);
