@@ -225,8 +225,8 @@ void main(){
  });
  part('skyline',()=>{
    // Two walls of jagged coral, sponge towers and anemone-like branching growth.
-   for(const side of [-1,1])for(let k=0;k<45;k++){
-     const x=side*(21+rand(k*7+side*13)*32),z=-10-k*2.91+rand(k*19+3)*2;
+   for(const side of [-1,1])for(let k=0;k<22;k++){
+     const x=side*(21+rand(k*7+side*13)*32),z=-10-k*5.55+rand(k*19+3)*2;
      const h=2.4+rand(k*17+7)*6.6;
      const dark=k%3===0?[.12,.33,.35]:k%3===1?[.10,.39,.31]:[.24,.29,.36];
      m.gem(x,.60,z,1.6+rand(k+31),[.06,.14,.15],0,.47);
@@ -250,11 +250,11 @@ void main(){
      m.box(x,h*.5,z,.28,h,.28,lit?[.10,.38,.39]:[.05,.12,.14]);
      if(lit){
        gardenFlowers++;
-       for(let p=0;p<5;p++){const angle=p*TAU/5;
+       for(let p=0;p<2;p++){const angle=p*Math.PI;
          m.gem(x+Math.cos(angle)*.64,h*.75,z+Math.sin(angle)*.64,.44,col,3,1.45);}
        m.gem(x,h+.25,z,.67,[.61,.95,.80],3,1.5);
        if(bloomLevel>=1){
-         for(let p=0;p<5;p++){const angle=p*TAU/5+.3;
+         for(let p=0;p<3;p++){const angle=p*TAU/3+.3;
            m.gem(x+Math.cos(angle)*1.23,h+.25,z+Math.sin(angle)*1.23,.56,[.64,.98,.78],3,1.55);}
          m.loop([x,h+.5,z],[1,0,0],[0,0,-1],1,.16,[.64,.98,.78],3,6);
        }

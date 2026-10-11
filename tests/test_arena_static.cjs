@@ -110,7 +110,7 @@ function makeWorld({gl=null}={}){
  await S.advance(1000);
  status=S.status();assert.equal(status.bloomLevel,1);
  assert.equal(status.gardenFlowers,112,'all roses open exactly at the deadline');
- assert.ok(status.debug.staticTriangles<16000,'full-bloom garden mesh stays within raised budget');
+ assert.ok(status.debug.staticTriangles<16000,'full-awake reef mesh remains under 16k triangles: '+status.debug.staticTriangles);
  assert.ok(status.debug.parts['charge-nodes']>midChargeNodes+4000,'full charge surges the nodes into a dramatically richer power-up');
  assert.equal(S.elements['city-status'].textContent,'THE REEF IS FULLY AWAKE');
  assert.equal(S.elements['city-damage'].textContent,'100% AWAKE');
