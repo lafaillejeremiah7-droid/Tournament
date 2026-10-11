@@ -41,7 +41,7 @@ def validate_goal_changes(s, previous=None):
     """
     schedules=stage_schedules(s)
     old_schedules=stage_schedules(previous) if previous else {}
-    labels={'round1':'Know Your Code','round2':'Adapt or Delete','final':'Last Node Standing'}
+    labels={'round1':'Know Your Depth','round2':'Adapt or Sink','final':'The Abyssal Crown'}
     for key in labels:
         stage=s[key]
         old=previous[key] if previous else None
@@ -330,7 +330,7 @@ def validate(s):
         s['final'].setdefault('lineups',[])
         lineups=s['round1']['lineups']
         if not isinstance(lineups,list) or (lineups and not _valid_lineups(lineups)):
-            raise ValueError('Invalid Know Your Code game teams.')
+            raise ValueError('Invalid Know Your Depth game teams.')
         for stage in ['round1','round2','final']:
             a=s[stage]
             if set(a['players'])!=set(IDS) or len(a['extras'])>50:
@@ -363,7 +363,7 @@ def validate(s):
                     raise ValueError('Round 2 saved teams must be five complete 4v4 splits.')
             for d in a['players'].values():
                 if len(d['goals'])!={'round1':5,'round2':5,'final':FINAL_GAMES}[stage]:
-                    raise ValueError('Know Your Code needs 5 games, Adapt or Delete 5 games, and Last Node Standing 8 games.')
+                    raise ValueError('Know Your Depth needs 5 games, Adapt or Sink 5 games, and The Abyssal Crown 8 games.')
                 for v in d['goals']: numeric(v,True,True)
                 d['goals']=[None if v is None else int(v) for v in d['goals']]
                 if stage=='final':
@@ -500,7 +500,7 @@ def round1_view(s, names_ok):
         games.append({'game':g+1,'teams':teams,'counts':counts,'goals':match_goals(stage,teams,g),'score_error':score_error,'ready':ready})
         if score_error:issues.append(f'Game {g+1}: {score_error}')
     if not lineups:
-        issues.append('Generating game teams. Reload Know Your Code to shuffle the first split.')
+        issues.append('Generating game teams. Reload Know Your Depth to shuffle the first split.')
     if not all(g['ready'] for g in games):
         issues.append('Complete all five games: enter a score for every player each game. Enter 0 for no goals.')
     ready=not issues
@@ -534,10 +534,10 @@ def round2_view(s, roster, names_ok, upstream=True):
     scores={}
     issues=extra_goal_issues(stage)
     stale=bool(stage['roster'] and stage['roster']!=roster)
-    if not upstream: issues.append('Complete Know Your Code and resolve its cut ties.')
-    if stale: issues.append('The survivor list changed. Reset Adapt or Delete before entering new scores.')
+    if not upstream: issues.append('Complete Know Your Depth and resolve its cut ties.')
+    if stale: issues.append('The survivor list changed. Reset Adapt or Sink before entering new scores.')
     if not names_ok: issues.append('Enter 10 unique player names in Players & rules.')
-    if not draw['order']: issues.append('Draw the 4v4 team rotations to start Adapt or Delete.')
+    if not draw['order']: issues.append('Draw the 4v4 team rotations to start Adapt or Sink.')
     games=[]
     for match in schedule:
         g=match['game']-1
@@ -593,7 +593,7 @@ def evaluate(s):
     scores={}
     issues=extra_goal_issues(stage,True)
     stale=bool(stage['roster'] and stage['roster']!=roster)
-    if not r2['complete']: issues.append('Complete Adapt or Delete and resolve its cut ties.')
+    if not r2['complete']: issues.append('Complete Adapt or Sink and resolve its cut ties.')
     if stale: issues.append('The finalist list changed. Reset the final before entering new scores.')
     for p in roster:
         d=stage['players'][p]
@@ -708,7 +708,7 @@ def round2_draw_action(s, action, game=None):
     stage=s['round2']
     draw=stage['draw']
     if not view['round1']['complete'] or view['round2']['stale']:
-        raise ValueError('Complete Know Your Code and resolve any changed Round 2 roster first.')
+        raise ValueError('Complete Know Your Depth and resolve any changed Round 2 roster first.')
     if action=='start':
         if draw['order']: return s  # Repeat clicks/retries never reroll a saved draw.
         if has_inputs(stage): raise ValueError('Existing scores cannot be assigned to a new draw.')
@@ -778,7 +778,7 @@ def round1_lineups(s):
     return stage['lineups']
 
 def round1_lineup_action(s, action, game=None):
-    """Optional guarded per-game re-roll of a cosmetic Know Your Code split.
+    """Optional guarded per-game re-roll of a cosmetic Know Your Depth split.
 
     'game' is 1-based (matches the frontend's game numbering). A reroll RAISES
     if any player already has an entered score for that game, so a reroll never
