@@ -102,7 +102,6 @@ def make_server(store,port=8765):
                         writer.writerow([safe,r1.get(p,{}).get('status',''),r2.get(p,{}).get('status',''),r.get('rank',''),r.get('total',''),r.get('prize',''),r.get('status','')])
                     return self.send(200,out.getvalue().encode('utf-8-sig'),'text/csv; charset=utf-8','brawl-hockey-standings.csv')
             files={
-                '/divine-preview':('divine_actual_scene_standalone.html','text/html; charset=utf-8'),
                 '/monuments.js':('monuments.js','text/javascript; charset=utf-8'),
                 '/':('index.html','text/html; charset=utf-8'),
                 '/app.js':('app.js','text/javascript; charset=utf-8'),
