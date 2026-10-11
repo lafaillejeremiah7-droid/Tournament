@@ -68,12 +68,12 @@ assert(rendererSource.includes('metal=[.12,.62,.78]'),'plasma grip-blades use a 
 assert(!rendererSource.includes('metal=[.34,.21,.12]'),'the old weathered rusty shear color is gone');
 assert(!rendererSource.includes('metal=[.29,.34,.36]'),'the old cold steel shear color is gone');
 assert(rendererSource.includes('Neon chrome / emissive mech alloy'),'kind-8 shader branch reads as glowing plasma-lit alloy');
-assert(rendererSource.includes('Neon shards and data fragments'),'blade-contact debris is neon shards / data fragments');
+assert(rendererSource.includes('Bioluminescent fragments and marine particles'),'blade-contact debris is neon shards / data fragments');
 assert(rendererSource.includes('sparkTones'),'cut debris uses neon spark tones');
 assert(!rendererSource.includes('leafTones'),'the old leaf-green debris tones are gone');
 assert(!rendererSource.includes('.12,[1,.86,.51],2,1.45)'),'the old gold gem debris burst at the cut is removed');
-assert(rendererSource.includes('layered neon-magenta skyline ridges'),'createField adds a distant neon skyline ridge vista');
-assert(rendererSource.includes('Dense neon tower skyline'),'createField adds a neon tower band behind the city');
+assert(rendererSource.includes('layered abyssal rock ridges'),'createField adds a distant neon skyline ridge vista');
+assert(rendererSource.includes('Dense coral-tower reef'),'createField adds a neon tower band behind the city');
 assert(rendererSource.includes('Flowing light-stream'),'createField adds a flowing data light-stream to the backdrop');
 assert(rendererSource.includes('Data-beams'),'portal emits scanning data-beam light shafts through the night sky');
 assert(!rendererSource.includes('Keep the horizon clear: no distant forest'),'the obsolete clear-horizon comment is gone');
@@ -149,13 +149,13 @@ const fingersOpen=ivoryMaxZ(0,0),fingersClosed=ivoryMaxZ(0,0.95);
 // shut: a revert to the old curl math (only +6.72 reach) FAILS this.
 assert(fingersClosed>fingersOpen+10,'real hand() claw digits curl strongly forward as close ramps 0->1 (fails if the claw `curl` math is reverted to the old weaker curl): '+JSON.stringify({fingersOpen,fingersClosed,delta:fingersClosed-fingersOpen}));
 // (2) Core split: render one real plant() mid/post-delete and read its neon
-// core column (color [.16,.86,.92]) vertices. Whole, the core reaches the
+// core column (color [.20,.79,.69]) vertices. Whole, the core reaches the
 // corona at height+.75; once deleted the upright base is capped at cutY
 // (=height*.78) while the upper length rotates/drops away, so the core's max Y
 // falls well below the whole height. Reverting the `if(severed){...}` split
 // keeps the core a single full-height cylinder and this assertion fails.
 const severModel={id:'p3',tier:5,priorPruned:false};
-const stemMaxY=age=>{const mesh=three._plantMesh(severModel,2,['p3','p7'],0,age);let y=-1e9;const near=(a,b)=>Math.abs(a-b)<0.01;for(let i=0;i<mesh.data.length;i+=10)if(near(mesh.data[i+6],.16)&&near(mesh.data[i+7],.86)&&near(mesh.data[i+8],.92)&&mesh.data[i+1]>y)y=mesh.data[i+1];return y;};
+const stemMaxY=age=>{const mesh=three._plantMesh(severModel,2,['p3','p7'],0,age);let y=-1e9;const near=(a,b)=>Math.abs(a-b)<0.01;for(let i=0;i<mesh.data.length;i+=10)if(near(mesh.data[i+6],.20)&&near(mesh.data[i+7],.79)&&near(mesh.data[i+8],.69)&&mesh.data[i+1]>y)y=mesh.data[i+1];return y;};
 // The base cap was lowered by fall*.12 (FEAT-001) to open a visible break, so
 // at full fall the deleted base max Y sits at cutY-0.12 world units, not cutY.
 const stemWhole=stemMaxY(0.80),stemSevered=stemMaxY(3.0),cutWorldY=4.63*.78-0.12+.75;

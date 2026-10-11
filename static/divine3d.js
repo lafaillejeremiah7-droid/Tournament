@@ -252,7 +252,7 @@
    holoSign(m,x,.1,-18.4,4,(x+20)/4);
    holoSign(m,x,.1,19.4,4,(x+24)/4);
   }
-  // Distant painted vista: layered neon-magenta skyline ridges, a glowing
+  // Distant painted vista: layered abyssal rock ridges, a glowing
   // data-tower band and a flowing light-stream threading toward the horizon.
   // Kept far back and low on screen so the foreground avatars stay the focus.
   const ridgeTones=[[.06,.28,.33],[.04,.21,.27],[.03,.15,.22]];
@@ -268,7 +268,7 @@
     prevX=px;prevY=peak;
    }
   }
-  // Dense neon tower skyline sitting below the ridges in the mid distance.
+  // Dense coral-tower reef sitting below the ridges in the mid distance.
   const tower=[.95,.24,.70],towerLit=[.30,.86,.95];
   for(let t=0;t<22;t++){
    const tz=-46-pseudoRand(t*5+3)*7,tx=-50+t*4.6+pseudoRand(t*9)*2.4;
@@ -427,7 +427,7 @@
    }
   }
   if(cutting&&age>contact-.01&&age<contact+.73){
-   // Neon shards and data fragments burst outward and fall as the beam deletes.
+   // Bioluminescent fragments and marine particles burst outward and fall as the beam deletes.
    const sparkTones=[[.30,.90,.98],[.58,.93,.74],[.36,.67,.91],[.55,.95,1]];
    for(let j=0;j<12;j++){
     const a=j*TAU/12,spread=clamp((age-contact)/.75),drop=spread*spread*1.9;
