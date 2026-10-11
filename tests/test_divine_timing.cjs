@@ -31,7 +31,7 @@ const advance=at=>{
 const stage=document.querySelector('#cutscene-stage'),overlay=document.querySelector('#cutscene');
 const cutIds=JSON.parse(run("JSON.stringify(divineCuts('round1'))"));
 assert.equal(cutIds.length,2);
-const goalTier=JSON.parse(run("JSON.stringify(plantGardenModel('round1'))"));
+const goalTier=JSON.parse(run("JSON.stringify(nodeRosterModel('round1'))"));
 assert(goalTier.some(p=>p.tier>0),'show actual growth stages');
 (async()=>{
  const promise=run("playDivineCutscene('round1')");

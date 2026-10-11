@@ -1,4 +1,4 @@
-// Royal Garden theme, payout and visible copy regression checks.
+// Neon Grid theme, payout and visible copy regression checks.
 // Run: node tests/test_theme_copy.cjs
 'use strict';
 const assert=require('node:assert/strict');
@@ -8,7 +8,7 @@ const read=p=>fs.readFileSync(path.join(root,p),'utf8');
 const index=read('static/index.html'),app=read('static/app.js');
 const city=read('static/city.js'),style=read('static/style.css');
 const cityStyle=read('static/city.css'),monuments=read('static/monuments.js');
-const stages=['Know Thy Nature','Adapt or Wither','The Last Bloom'];
+const stages=['Know Your Code','Adapt or Delete','Last Node Standing'];
 assert(index.includes('<title>The Neon Grid - Brawl Hockey</title>'),'page title');
 assert(index.includes('THE GRID BOOTS'),'opening countdown');
 for(const name of stages){
@@ -24,6 +24,32 @@ for(const old of ['Face Your Weakness','Abandon Your Comfort','Prove Your Resolv
 const indexLower=index.toLowerCase();
 for(const garden of ['ROYAL GARDEN','ROYAL HEDGE MAZE','ROSE BLOOM','ROSES WAITING','Pause garden','Garden sound on','BACK TO GARDEN','THE GARDENER','PAVILION','PRUNED']){
  assert(!indexLower.includes(garden.toLowerCase()),'garden chrome must be reskinned out of index.html: '+garden);
+}
+// STRENGTHENED garden-vocabulary blocklist. The retheme now covers BOTH index.html and
+// app.js, so the user-facing copy in each must never regress to the old round names or the
+// garden/flower vocabulary. We scrub ONLY the deliberately-preserved internal class/variable
+// hooks (the cutscene art classes .divine-plant/.divine-plants, .garden-verdict, the gv-* art
+// classes, the .fc-petal confetti class and its `petals` local) before scanning, so those hooks
+// survive but any genuine user-visible garden word anywhere else still fails the suite.
+const scrub=src=>src
+ .replace(/divine-plants?/g,'')      // cutscene plant art class hooks
+ .replace(/garden-verdict/g,'')      // verdict artwork container hook
+ .replace(/gv-[\w-]+/g,'')           // every gv-* fallback art class (gv-rose-arch, gv-hedge, gv-gardener, ...)
+ .replace(/fc-petal/g,'')            // confetti class hook
+ .replace(/\bpetals\b/g,'');         // the local confetti variable name
+const bannedCopy=[
+ // The old nature round names must never reappear as user copy.
+ 'Know Thy Nature','Adapt or Wither','The Last Bloom',
+ // The Royal Garden flora/pruning vocabulary.
+ 'garden','bloom','blooming','rose','petal','hedge','flower','wither',
+ 'will to live','take root','final garden','natural selection',
+];
+for(const [label,src] of [['index.html',index],['app.js',app]]){
+ const scrubbed=scrub(src).toLowerCase();
+ for(const word of bannedCopy){
+  assert(!scrubbed.includes(word.toLowerCase()),
+   label+' must not contain garden/old-round user copy: '+word);
+ }
 }
 // The 'down' verdict caption must not regress to the garden-shears 'SNIP!' vocabulary.
 // Match the user-visible caption word (uppercase with the bang) so the preserved
@@ -55,4 +81,4 @@ assert(!style.includes('.fc-judgment'),'removed abandoned lineup animation');
 const braces=text=>(text.match(/{/g)||[]).length-(text.match(/}/g)||[]).length;
 assert.equal(braces(style),0,'style.css braces');
 assert.equal(braces(cityStyle),0,'city.css braces');
-console.log('PASS: Royal Garden copy, nature rounds, $30 champion, viewport, scene, lean styles.');
+console.log('PASS: Neon Grid copy, code rounds, $30 champion, viewport, scene, lean styles, and no garden/old-round regression.');

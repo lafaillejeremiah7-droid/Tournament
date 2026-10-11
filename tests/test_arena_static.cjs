@@ -135,7 +135,7 @@ function makeWorld({gl=null}={}){
 
  // A settled round still calls the 3D pavilion ceremony once.
  let bloomCalls=0;
- const ceremony=S.W.crownGate('round1','Know Thy Nature',()=>bloomCalls++);
+ const ceremony=S.W.crownGate('round1','Know Your Code',()=>bloomCalls++);
  assert.equal(S.status().ceremony.phase,'approach');
  await flush();
  assert.equal(S.status().ceremony.phase,'descend');

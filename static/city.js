@@ -53,7 +53,7 @@
  const roomColors=[[.25,.95,.90],[.98,.30,.72],[.55,.45,1.0],[.99,.72,.25],[.35,.90,.78]];
  const ROMAN=['I','II','III','IV','V'];
  // Data-mote spark colors (cyan / magenta / amber) for the drifting dynamic mesh.
- const PETALS=[[.30,.95,1.0],[.98,.25,.70],[1,.72,.30]];
+ const SPARKS=[[.30,.95,1.0],[.98,.25,.70],[1,.72,.30]];
  const media=window.matchMedia('(prefers-reduced-motion: reduce)');
  // Calm-morning ambience: birds are fully present near progress 0 and gone by this
  // threshold. The audio chirps in BrawlAudio use the same cutoff so the sky birds and
@@ -66,7 +66,7 @@
  let dusk=0,duskTarget=0;
  let surgeAt=null,surgeBig=false,surgeEnv=0;
  let partTris={},rebuilds=0,dynamicTriangles=0,ceremonyRange=[0,0],lastDynamic=[];
- // Elevated first-person overview above the garden paths.
+ // Elevated first-person overview above the neon grid avenues.
  const baseCamera={eye:[0,56,25],target:[0,2,-54]};
  let sceneView='street',returnRoute=[];
  let camera={eye:baseCamera.eye.slice(),target:baseCamera.target.slice()},vp;
@@ -195,7 +195,7 @@ void main(){
   if(['round1','round2','final'].includes(key)&&stage?.status==='complete'&&!(ceremony?.key===key&&ceremony.phase!=='crowned'))return 'crowned';
   return 'open';
  }
- function rebuildGarden(){
+ function rebuildGrid(){
   // Build the fixed neon skyline and the countdown-driven charge nodes of the
   // full-viewport synthwave city scene.
   const m=new Mesh(),still=mode==='static';partTris={};rebuilds++;
@@ -362,7 +362,7 @@ void main(){
   const motes=8+Math.round(bloomLevel*55);
   for(let i=0;i<motes;i++){
    const x=(rand(i+201)-.5)*78,z=-17-rand(i+304)*99,u=still?.3:(t*(.03+rand(i+399)*.018)+rand(i+521))%1;
-   m.gem(x+Math.sin(t*.54+i)*.4,still?.2:17*(1-u)+.2,z,.16,PETALS[i%PETALS.length],3,.46);
+   m.gem(x+Math.sin(t*.54+i)*.4,still?.2:17*(1-u)+.2,z,.16,SPARKS[i%SPARKS.length],3,.46);
   }
   // Tournament podium stays bound to actual saved rank/results.
   if(monuments)for(const site of podiumSites){
@@ -374,7 +374,7 @@ void main(){
    m.box(x,h+.07,z,w*1.75,.15,w*1.45,[.70,.90,1.0],3);
    if(monuments.complete)m.loop([x,h+.2,z],[1,0,0],[0,0,-1],w*.62,.15,[.98,.78,.30],3);
   }
-  // Node-online ceremony blooms a halo of neon sparks around the energized node.
+  // Node-online ceremony ignites a halo of neon sparks around the energized node.
   const ceremonyStart=m.data.length;
   if(ceremony&&ceremony.at!==null){
    const g=rooms.find(r=>r.key===ceremony.key);
@@ -385,7 +385,7 @@ void main(){
     for(let i=0;i<24;i++){
      const angle=i*TAU/24,r=g.size*(.16+spread*1.5);
      const h=ceremony.phase==='crowned'?Math.max(.5,8*(1-spread)):10*(1-clamp(age/1.4))+3;
-     m.gem(x+Math.cos(angle)*r,h+Math.sin(angle*2+age)*.7,z+Math.sin(angle)*r,.31,PETALS[i%PETALS.length],3,.5);
+     m.gem(x+Math.cos(angle)*r,h+Math.sin(angle*2+age)*.7,z+Math.sin(angle)*r,.31,SPARKS[i%SPARKS.length],3,.5);
     }
    }
   }
@@ -433,7 +433,7 @@ void main(){
  }
  function positionLabels(){
   const host=document.getElementById('door-labels');if(!host||!vp)return;
-  const names=['Players & rules','Know Thy Nature','Adapt or Wither','The Last Bloom','Leaderboard'];
+  const names=['Players & rules','Know Your Code','Adapt or Delete','Last Node Standing','Leaderboard'];
   const labelAt=g=>add(add(g.pos,[0,g.size*1.05+.6,0]),mul(g.N,.4));
   const items=sceneView==='podium'&&monuments?podiumSites.map(site=>({id:'place'+site.place,pos:add(site.pos,[0,6,0]),label:site.place+'. '+(monuments.slots.find(s=>s.place===site.place)?.names.join(' · ')||'Awaiting finalist')})):
    [...rooms.map((g,i)=>({id:g.key,pos:labelAt(g),label:ROMAN[i]+' / '+names[i],locked:gateState(g.key)==='sealed'})),
@@ -509,7 +509,7 @@ void main(){
    dirty=true;
   }
   if(needsLayout)layout();
-  if(geometryDirty||lastBuild!==state.progress+'|'+duskTarget+'|'+bloomLevel)rebuildGarden();
+  if(geometryDirty||lastBuild!==state.progress+'|'+duskTarget+'|'+bloomLevel)rebuildGrid();
   if(!moving&&!transition&&!dirty)return;
   updateCamera(now,moving);
   vp=multiply(perspective(fov,width/height,.3,900),lookAt(camera.eye,camera.target));
