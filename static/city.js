@@ -334,13 +334,6 @@ void main(){
   if(mode==='webgl'){gl.bindBuffer(gl.ARRAY_BUFFER,staticBuffer);gl.bufferData(gl.ARRAY_BUFFER,staticArray,gl.STATIC_DRAW);}
   geometryDirty=false;lastBuild=state.progress+'|'+duskTarget+'|'+bloomLevel;dirty=true;
  }
- // A single low-poly drone glyph: a shallow V of two neon triangles that gently drifts.
- function bird(mesh,x,y,z,scale,flap,col){
-  const span=scale,drop=scale*(.3+flap*.5);
-  const body=[x,y,z];
-  mesh.tri(body,[x-span,y+drop,z-span*.2],[x-span*.5,y+scale*.08,z-span*.1],col);
-  mesh.tri(body,[x+span*.5,y+scale*.08,z+span*.1],[x+span,y+drop,z+span*.2],col);
- }
  // Draw a handful of ambient drone glyphs across the night sky. They only appear while
  // the grid is calm (progress<BIRD_THRESHOLD) and no round is settled yet (dusk 0), and
  // fade out as the system energizes. Under reduced motion or the static fallback they are
