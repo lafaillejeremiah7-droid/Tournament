@@ -69,12 +69,12 @@ for(const geometry of ["part('skyline'","part('charge-nodes'","part('nodes'","pa
  assert(city.includes(geometry),'missing 3D scenery: '+geometry);
 }
 assert(cityStyle.includes('#walkway-view{')&&cityStyle.includes('position:fixed;inset:0'),'full viewport garden');
-assert(style.includes('.garden-verdict'),'garden verdict artwork');
-for(const token of ['gv-shears','gv-compost','gv-pruning-count','gv-snip','gv-pruned','gv-fling']){
- assert(style.includes(token),'missing pruning visual: '+token);
-}
+assert(!style.includes('.garden-verdict'),'obsolete 2D garden verdict removed');
+assert(!app.includes('function playCutscene('),'unused name-based verdict removed');
+assert(!city.includes('crownGate('),'unused gate ceremony removed');
+assert(!index.includes('ceremony-hud'),'retired ceremony HUD removed');
 assert(app.includes("stage==='final'?p.rank!==1:p.status==='CUT'"),'five losing finalists are pruned by the current cut-list function');
-assert(app.includes('runReducedFinalPruning(cuts)'),'reduced-motion finalists also get individual scenes');
+assert(app.includes('beginDivineJudgement(stage,cuts)')&&app.includes('strikeDivinePlant(stage,cuts,i)'),'active 3D cutscene owns the elimination sequence');
 assert(!app.includes('hookSvg='),'removed obsolete hook artwork');
 assert(!style.includes('.av-emperor'),'removed obsolete emperor styles');
 assert(!style.includes('.fc-judgment'),'removed abandoned lineup animation');

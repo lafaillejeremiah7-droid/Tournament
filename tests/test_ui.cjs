@@ -614,46 +614,29 @@ const flushMicro=async()=>{for(let i=0;i<20;i++)await Promise.resolve();};
  assert.equal(vm.runInContext('cutsceneActive',context),false,'a non-final match submit does not play the cutscene');
  assert.equal(vm.runInContext('resultFinal',context),false,'match 1 of 5 is not the final match');
  await click({action:'close-result'});
- // (C) SKIPPABLE: starting the cutscene flags it active and reveals the overlay; the
- //     single endCutscene() path (Skip button / click / Esc / completion all route here)
- //     hides the overlay, clears the flag, and lets the standings render.
+ // Active WebGL verdict: Skip/Escape/completion all end the same promise.
  const overlayEl=context.document.querySelector('#cutscene');
- // playCutscene's promise resolves ONLY via endCutscene (the sandbox's setTimeout never
- // fires), so start it without awaiting, assert it is active, then drive the single
- // dismiss path that Skip/click/Esc all share.
- vm.runInContext("playCutscene(['Alpha','Bravo']);",context);
- assert.equal(vm.runInContext('cutsceneActive',context),true,'playCutscene marks the cutscene active and shows the overlay');
- assert.equal(overlayEl.hidden,false,'the overlay is visible while the cutscene plays');
- const carryStage=context.document.querySelector('#cutscene-stage').innerHTML;
- assert(carryStage.includes('crown-card')&&!carryStage.includes('cut-escort'),'crown card replaces all carrying figures');
-
+ vm.runInContext("playDivineCutscene('round1');",context);
+ assert.equal(vm.runInContext('cutsceneActive',context),true,'active 3D cutscene opens');
+ assert.equal(overlayEl.hidden,false,'the overlay is visible while the 3D cutscene plays');
+ assert(context.document.querySelector('#cutscene-stage').innerHTML.includes('divine-scene'),'3D verdict scene rendered');
  vm.runInContext('endCutscene();',context);
- assert.equal(vm.runInContext('cutsceneActive',context),false,'endCutscene (Skip/click/Esc) clears the active flag');
- assert.equal(overlayEl.hidden,true,'endCutscene hides the overlay so the standings show');
- // After dismissal the user is free to land on the resultFullscreen standings.
+ assert.equal(vm.runInContext('cutsceneActive',context),false,'Skip ends 3D cutscene');
+ assert.equal(overlayEl.hidden,true,'Skip hides the overlay');
  vm.runInContext('state=fixture.state;view=fixture.view;',context);
  await click({action:'submit-match',stage:'round1',match:'4'});
  await flushMicro();
- assert.equal(vm.runInContext('cutsceneActive',context),false,'the ranking does not launch a cutscene');
+ assert.equal(vm.runInContext('cutsceneActive',context),false,'completed round shows Continue without auto-cutscene');
  assert(resultEl.innerHTML.includes('data-action="advance-stage"'),'completed round offers Continue');
  await click({action:'close-result'});
- // (D) REDUCED MOTION: with matchMedia matches:true (the sandbox default) the animated
- //     carry is replaced by a STATIC summary carrying an 'ELIMINATED: names' caption.
  assert.equal(vm.runInContext("reducedMotion()",context),true,'sandbox defaults to reduced motion');
- vm.runInContext("playCutscene(['Casey','Dakota']);",context);
- const captionEl=context.document.querySelector('#cutscene-caption');
- assert(/THE GRID CHARGES/.test(captionEl.innerHTML),'reduced motion shows the static THE GRID CHARGES card');
- assert(captionEl.innerHTML.includes('Final'),'static beat labels the opened node');
+ vm.runInContext("playDivineCutscene('round1');",context);
+ assert(context.document.querySelector('#cutscene-stage').innerHTML.includes('divine-plant'),'reduced-motion fallback preserves named avatars');
  vm.runInContext('endCutscene();',context);
- // (E) EMPTY eliminated list: playCutscene resolves immediately and never flags active.
- vm.runInContext('cutsceneActive=false;',context);
- await vm.runInContext('playCutscene([])',context);
- assert.equal(vm.runInContext('cutsceneActive',context),false,'playCutscene with no names resolves without showing the overlay');
- // Verdict play and a double dismiss stay harmless.
- context.window.CityWorld={setSuspended(){}};
- context.verdictCuts=payload.view.round1.rows.filter(r=>r.status==='CUT').map(r=>r.name);
- vm.runInContext("playCutscene(verdictCuts,'Know Your Code','round1');",context);
- vm.runInContext('endCutscene();',context);
- vm.runInContext('endCutscene();',context);assert.equal(vm.runInContext('cutsceneActive',context),false,'a second dismiss is harmless');
- console.log('FEAT-003 elimination cutscene: divineCuts per stage, no-trigger on non-final, crown card fallback, skippable single-dismiss path, reduced-motion static NODE ONLINE, and empty-list skip passed.');
+ vm.runInContext("playDivineCutscene('settings');",context);
+ assert.equal(vm.runInContext('cutsceneActive',context),false,'noncompetitive stage does not start a verdict');
+ vm.runInContext("playDivineCutscene('round1');",context);
+ vm.runInContext('endCutscene();endCutscene();',context);
+ assert.equal(vm.runInContext('cutsceneActive',context),false,'repeated Skip remains harmless');
+ console.log('FEAT-003 elimination cutscene: engine-based divineCuts, no auto-trigger, accessible WebGL/CSS fallback, Skip and double dismiss passed.');
 })().catch(e=>{console.error(e);process.exitCode=1;});
