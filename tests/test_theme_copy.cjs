@@ -20,9 +20,15 @@ for(const old of ['Face Your Weakness','Abandon Your Comfort','Prove Your Resolv
 }
 // The Royal Garden chrome has been replaced entirely: no garden/rose/pavilion wording
 // survives in the index.html scaffold (fails if the reskin regresses to garden copy or goes blank).
+// Compare case-insensitively so lowercase leftovers (e.g. "royal garden"/"pavilions") are caught too.
+const indexLower=index.toLowerCase();
 for(const garden of ['ROYAL GARDEN','ROYAL HEDGE MAZE','ROSE BLOOM','ROSES WAITING','Pause garden','Garden sound on','BACK TO GARDEN','THE GARDENER','PAVILION','PRUNED']){
- assert(!index.includes(garden),'garden chrome must be reskinned out of index.html: '+garden);
+ assert(!indexLower.includes(garden.toLowerCase()),'garden chrome must be reskinned out of index.html: '+garden);
 }
+// The 'down' verdict caption must not regress to the garden-shears 'SNIP!' vocabulary.
+// Match the user-visible caption word (uppercase with the bang) so the preserved
+// internal 'gv-snip' art class hook and "audible snip" comments are left alone.
+assert(!app.includes('SNIP!'),'verdict caption must not use garden-shears SNIP! wording in app.js');
 // Positive cyberpunk anchors so the test still fails if the copy is blanked.
 for(const neon of ["THE NEON GRID","GRID CHARGE","JACK INTO AN OPEN NODE","Grid audio on","Pause grid","THE SYSTEM'S VERDICT"]){
  assert(index.includes(neon),'missing neon chrome anchor in index.html: '+neon);

@@ -1157,9 +1157,9 @@ let ceremonyLabel="",ceremonyStage="",cutsceneRunId=0,cutsceneReturnResult=false
 const titled=(label,suffix)=>(label?label+': ':'')+suffix;
 const schedule=(fn,ms)=>cutsceneTimers.push(setTimeout(()=>{if(cutsceneActive)fn();},ms));
 const verdictPhases=['enter','judge','down','hook','drag','gone','summary'];
-// Captions retheme to the neon purge; 'PRUNED'/'SNIP!' tokens stay for the
+// Captions retheme to the neon purge; the 'PRUNED' token stays for the
 // verdict regression test and the preserved gv-* fallback art classes.
-const verdictCaptions={enter:'THE SYSTEM LOCKS YOUR NODE',judge:'THE BEAM CHARGES',down:'SNIP!',hook:'HURLED INTO THE VOID',drag:'PURGE IMPACT',gone:'PRUNED'};
+const verdictCaptions={enter:'THE SYSTEM LOCKS YOUR NODE',judge:'THE BEAM CHARGES',down:'DELETE!',hook:'HURLED INTO THE VOID',drag:'PURGE IMPACT',gone:'PRUNED'};
 const verdictSounds={judge:a=>a.horn(),down:a=>a.shears(),hook:a=>a.hook(),drag:a=>a.compost(),gone:a=>a.slam()};
 function verdictBackdrop(){
  // Neon-city fallback art reusing the gv-* class hooks: dark grid, holo arch,
