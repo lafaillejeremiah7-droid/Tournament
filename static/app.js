@@ -358,25 +358,28 @@ function nodeRosterModel(key){
  });
 }
 function nodeSvg(level){
- // A neon avatar / data-construct: a glowing core column with boot-up fins and
- // an orbiting corona of data plates that grows denser with each goal tier.
- const tip=94-level*10,leafCount=Math.min(level+1,6);
- const leaf=Array.from({length:leafCount},(_,i)=>{
-  const y=101-i*9,dir=i%2?-1:1,edge=18+level*1.7;
-  return `<path d="M56 ${y} Q${56+dir*11} ${y-14} ${56+dir*edge} ${y-6} Q${56+dir*9} ${y+5} 56 ${y}Z" fill="${i%2?'#1f9fd0':'#3fd6ec'}" stroke="#0d5c86" stroke-width="0.8"/>`;
+ // Seven progressively larger bioluminescent sea creatures, beginning with a hatchling.
+ const tier=Math.max(0,Math.min(6,Number(level)||0));
+ const length=15+tier*4.2,half=8+tier*1.65,cx=57,cy=72;
+ const glow=tier===0?'#4e9d98':tier<3?'#56cbb8':tier<5?'#71e6ce':'#b7f6cf';
+ const edge=tier<3?'#225966':'#31878e';
+ const spots=Array.from({length:tier*2},(_,i)=>{
+   const x=cx-length*.46+i%4*length*.24,y=cy+(i%3-1)*half*.43;
+   return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(1.1+tier*.18).toFixed(1)}" fill="#d0fff0" opacity=".65"/>`;
  }).join('');
- let head='<ellipse cx="56" cy="99" rx="5" ry="6" fill="#4fd8ea" stroke="#0f6a8c"/>';
- if(level===1)head=`<ellipse cx="56" cy="${tip+5}" rx="6" ry="9" fill="#ff79cf" stroke="#ffd0ef"/>`;
- if(level>=2){
-  const count=level>=5?9:level>=4?8:6,r=5+level*1.25;
-  head=(level>=5?`<circle cx="56" cy="${tip+5}" r="${19+level*2}" fill="none" stroke="#39e3ff" stroke-opacity=".58" stroke-width="2" stroke-dasharray="3 5"/>`:'');
-  head+=Array.from({length:count},(_,i)=>{
-   const angle=(i/count)*Math.PI*2,x=56+Math.cos(angle)*r,y=tip+5+Math.sin(angle)*r;
-   return `<ellipse cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" rx="${(6+level*.8).toFixed(1)}" ry="${(4.4+level*.6).toFixed(1)}" fill="${i%2?'#ff8fd6':'#e64bb0'}" stroke="#ffd6ef" stroke-width=".6"/>`;
-  }).join('')+`<circle cx="56" cy="${tip+5}" r="${3+level*.5}" fill="#4fe6ff" stroke="#1685ad"/>`;
- }
- const base=`<ellipse cx="56" cy="126" rx="34" ry="5" fill="#071320" opacity=".5"/><path d="M39 107 L73 107 L69 125 L43 125 Z" fill="#13405c" stroke="#2fb4df" stroke-width="1.5"/><path d="M37 105 H75 V111 H37 Z" fill="#1a5c82" stroke="#5fd6f1" stroke-width="1"/>`;
- return `<svg class="node-art" viewBox="0 0 112 135" aria-hidden="true" focusable="false">${level>=5?`<ellipse cx="56" cy="${tip+7}" rx="30" ry="26" fill="#39e3ff" opacity=".12"/>`:''}<path d="M56 109 Q${60+level} ${tip+30} 56 ${tip+8}" fill="none" stroke="#2bbfe6" stroke-width="${2.4+level*.6}" stroke-linecap="round"/>${leaf}${head}${base}</svg>`;
+ const bubbles=Array.from({length:tier+1},(_,i)=>`<circle cx="${76+i%3*8}" cy="${63-i*8}" r="${1.1+i*.35}" fill="none" stroke="#89dfd5" stroke-width=".9" opacity=".48"/>`).join('');
+ const fins=tier>1?`<path d="M${cx-7} ${cy-half*.85} L${cx-3} ${cy-half-6-tier*1.5} L${cx+10} ${cy-half*.75}Z" fill="${edge}" stroke="${glow}" stroke-width="1"/>`:'';
+ const crest=tier>=5?`<path d="M${cx-4} ${cy-half-7} Q${cx+7} ${cy-half-16} ${cx+18} ${cy-half-6}" fill="none" stroke="#b6fff0" stroke-width="1.8" opacity=".8"/>`:'';
+ return `<svg class="node-art" viewBox="0 0 112 135" aria-hidden="true" focusable="false">
+ <defs><radialGradient id="deep-fish-${tier}"><stop stop-color="#b2f4d9"/><stop offset=".62" stop-color="${glow}"/><stop offset="1" stop-color="${edge}"/></radialGradient></defs>
+ <ellipse cx="55" cy="121" rx="${20+tier*3}" ry="4" fill="#011922" opacity=".6"/>
+ <path d="M${cx-length} ${cy} L${cx-length-13-tier} ${cy-half*.8} L${cx-length-11-tier} ${cy+half*.8}Z" fill="${edge}" stroke="${glow}" stroke-width="1.1"/>
+ ${fins}<ellipse cx="${cx}" cy="${cy}" rx="${length}" ry="${half}" fill="url(#deep-fish-${tier})" stroke="${glow}" stroke-width="1.1"/>
+ <path d="M${cx-2} ${cy+half*.2} L${cx-8-tier} ${cy+half+5} L${cx+9} ${cy+half*.55}Z" fill="${edge}" stroke="${glow}" stroke-width=".7"/>
+ ${spots}<circle cx="${cx+length*.53}" cy="${cy-half*.29}" r="${2.5+tier*.15}" fill="#02171e"/>
+ <circle cx="${cx+length*.71}" cy="${cy-half*.36}" r="1" fill="#f1fff4"/>
+ ${crest}${bubbles}
+ </svg>`;
 }
 function nodeRoster(key){
  const model=nodeRosterModel(key);
