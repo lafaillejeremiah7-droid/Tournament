@@ -1,0 +1,22 @@
+{
+  "Matthew 5:17": {
+    "kjv": {
+      "reference": "Matthew 5:17",
+      "text": "Think not that I am come to destroy the law, or the prophets: I am not come to destroy, but to fulfil.",
+      "translation": "kjv",
+      "url": "https://bible-api.com/Matthew%205:17?translation=kjv"
+    },
+    "web": {
+      "reference": "Matthew 5:17",
+      "text": "Don't think that I came to destroy the law or the prophets. I didn't come to destroy, but to fulfill.",
+      "translation": "web",
+      "url": "https://bible-api.com/Matthew%205:17?translation=web"
+    },
+    "asv": {
+      "reference": "Matthew 5:17",
+      "text": "Think not that I came to destroy the law or the prophets: I came not to destroy, but to fulfil.",
+      "translation": "asv",
+      "url": "https://bible-api.com/Matthew%205:17?translation=asv"
+    }
+  }
+}

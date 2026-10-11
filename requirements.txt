@@ -1,0 +1,4 @@
+# Runtime dependencies (pinned). LLM SDKs (openai/anthropic) are optional extras
+# declared in pyproject.toml and imported lazily, so they are NOT required here.
+requests==2.32.3
+jsonschema==4.23.0

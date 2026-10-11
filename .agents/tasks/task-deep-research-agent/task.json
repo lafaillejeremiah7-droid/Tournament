@@ -1,0 +1,7 @@
+{
+  "task_id": "task-deep-research-agent",
+  "task_description": "Build bot #1 of a planned multi-bot faith-content video pipeline: a Deep Research agent (Python 3 CLI package 'deepresearch') that takes a Bible verse/reference OR a free-text topic about Jesus Christ and produces a structured, deeply-sourced research dossier organized around a 'common misconception vs. deeper truth' spine. It wires public-domain sources (bible-api.com KJV/WEB/ASV, public-domain Strong's lexicon, CCEL/New Advent/sacred-texts/Gutenberg commentary) behind a source-connector abstraction, synthesizes via a pluggable LLM provider (OpenAI/Anthropic + deterministic stub) with mandatory citations and uncertainty flagging, and outputs both schema-validated JSON and human-readable Markdown. A no-key, no-network DRY-RUN path and test suite exercise the whole pipeline from bundled fixtures. Non-denominational; human-review-gated handoff for downstream bots.",
+  "status": "in_progress",
+  "feature_order": ["FEAT-001", "FEAT-002", "FEAT-003"],
+  "blocked_reason": null
+}

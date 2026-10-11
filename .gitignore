@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+*.pyc
+.cache/
+output/
+.env
+
+# packaging / tooling noise
+*.egg-info/
+build/
+dist/
+.pytest_cache/

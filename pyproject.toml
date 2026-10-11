@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "deepresearch"
+version = "0.1.0"
+description = "Deep Research agent: turns a Bible verse or a topic about Jesus Christ into a structured, deeply-sourced research dossier built around a 'common misconception vs. deeper truth' spine."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Deep Research Agent" }]
+keywords = ["bible", "research", "dossier", "faith", "llm", "pipeline"]
+dependencies = [
+    "requests==2.32.3",
+    "jsonschema==4.23.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest==8.3.3"]
+openai = ["openai>=1.0,<2.0"]
+anthropic = ["anthropic>=0.34,<1.0"]
+
+[project.scripts]
+deepresearch = "deepresearch.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["deepresearch*"]
+
+[tool.setuptools.package-data]
+deepresearch = ["schema/*.json", "fixtures/*.json"]
+
+[tool.black]
+line-length = 120
+
+[tool.ruff]
+line-length = 120

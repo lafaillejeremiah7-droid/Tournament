@@ -1,0 +1,95 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://deepresearch/dossier.schema.json",
+  "title": "Deep Research Dossier",
+  "description": "Placeholder schema for the research dossier contract. FEAT-002 finalizes it.",
+  "type": "object",
+  "required": ["schema_version", "query", "query_kind", "title", "summary", "misconceptions"],
+  "properties": {
+    "schema_version": { "type": "string" },
+    "query": { "type": "string" },
+    "query_kind": { "type": "string", "enum": ["reference", "topic"] },
+    "normalized_reference": { "type": ["string", "null"] },
+    "title": { "type": "string" },
+    "summary": { "type": "string" },
+    "translations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["translation", "reference", "text"],
+        "properties": {
+          "translation": { "type": "string" },
+          "reference": { "type": "string" },
+          "text": { "type": "string" },
+          "citations": { "type": "array", "items": { "$ref": "#/definitions/citation" } }
+        }
+      }
+    },
+    "original_terms": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["surface", "strongs", "gloss"],
+        "properties": {
+          "surface": { "type": "string" },
+          "transliteration": { "type": "string" },
+          "strongs": { "type": "string" },
+          "gloss": { "type": "string" },
+          "language": { "type": "string" },
+          "citations": { "type": "array", "items": { "$ref": "#/definitions/citation" } }
+        }
+      }
+    },
+    "context_notes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["kind", "summary"],
+        "properties": {
+          "kind": { "type": "string" },
+          "summary": { "type": "string" },
+          "citations": { "type": "array", "items": { "$ref": "#/definitions/citation" } }
+        }
+      }
+    },
+    "misconceptions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["misconception", "deeper_truth", "explanation"],
+        "properties": {
+          "misconception": { "type": "string" },
+          "deeper_truth": { "type": "string" },
+          "explanation": { "type": "string" },
+          "citations": { "type": "array", "items": { "$ref": "#/definitions/citation" } }
+        }
+      }
+    },
+    "long_form": { "type": "string" },
+    "gaps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["source", "reason"],
+        "properties": {
+          "source": { "type": "string" },
+          "reason": { "type": "string" }
+        }
+      }
+    },
+    "provider": { "type": "string" },
+    "model": { "type": ["string", "null"] }
+  },
+  "definitions": {
+    "citation": {
+      "type": "object",
+      "required": ["source"],
+      "properties": {
+        "source": { "type": "string" },
+        "locator": { "type": "string" },
+        "url": { "type": ["string", "null"] },
+        "note": { "type": "string" }
+      }
+    }
+  }
+}

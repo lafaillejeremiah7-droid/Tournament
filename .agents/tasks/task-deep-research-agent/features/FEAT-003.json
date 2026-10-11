@@ -1,0 +1,27 @@
+{
+  "id": "FEAT-003",
+  "type": "docs",
+  "description": "Harden the deliverable: a no-network/no-key automated test suite (the safety net), full README documentation, .env.example, and a final content-integrity/neutrality pass. After this feature the project is ready for the orchestrator to push and open a PR.",
+  "status": "pending",
+  "steps": [
+    "Create tests/ (pytest) that run with NO network and NO API keys using the dry-run path + bundled fixtures. Cover: (1) reference/topic normalization (verse ref parsing AND topic->candidate passages); (2) EACH source connector against recorded fixtures (bible_api, strongs, commentary) including the public-domain allowlist rejecting NIV/ESV; (3) the LLM abstraction via the deterministic stub provider; (4) dossier schema validation (a known-good dossier passes, a malformed one fails); (5) an END-TO-END dry-run producing a schema-valid dossier for both a verse and a topic; (6) graceful degradation: a simulated unavailable source records a gap and does not raise.",
+    "Add tests/fixtures/ with recorded connector responses and an expected sample dossier. Ensure tests force offline/dry-run (e.g. monkeypatch the HTTP getter to raise if called) so a real network call during tests is treated as a failure.",
+    "Verify the suite is green: `.venv/bin/python -m pytest -q` with OPENAI_API_KEY/ANTHROPIC_API_KEY unset passes. Also sanity-check `.venv/bin/python -m unittest discover -s tests` works or document pytest as the required runner.",
+    "Create .env.example documenting OPENAI_API_KEY, ANTHROPIC_API_KEY, and optional config env vars (provider/model/translations/dry-run) with placeholder values only (no real secrets).",
+    "Rewrite README.md (replacing the 11-byte stub) with: project intro (this is BOT #1, the Deep Research agent, of a planned multi-bot faith-content video company), setup (python3.12 venv + pip install -e '.[dev]'), env vars + pointer to .env.example, how to run LIVE vs DRY-RUN (exact commands), architecture (source-connector abstraction + how to add a connector, LLM provider abstraction incl. stub, the 6 pipeline stages, caching, graceful degradation), the dossier JSON SCHEMA (document the fields + schema_version + where the schema file lives), the content-integrity principles (citations required, uncertainty flagged, NON-DENOMINATIONAL neutrality with 66-book shared-canon baseline, no scraping of copyrighted modern translations), the v1 wired sources list (bible-api.com public-domain KJV/WEB/ASV; public-domain Strong's lexicon; CCEL/New Advent Fathers/sacred-texts/Gutenberg public-domain commentary), and a ROADMAP note listing the downstream bots (scriptwriter, TTS voiceover, visuals, video assembly, YouTube publisher, review dashboard) and that output is a human-review-gated handoff.",
+    "Final pass: confirm .gitignore ignores .venv/, __pycache__/, .cache/, output/, .env; confirm no secrets are committed; confirm requirements.txt deps are pinned."
+  ],
+  "acceptance_criteria": [
+    "`.venv/bin/python -m pytest -q` passes with NO network and NO API keys set.",
+    "Tests fail loudly if any real network call is attempted during the suite (HTTP getter is stubbed to raise).",
+    "README documents setup, live vs dry-run commands, architecture, the dossier schema, content-integrity principles, v1 sources, and the multi-bot roadmap.",
+    ".env.example exists with placeholder-only values; .gitignore ignores caches/outputs/.env/venv; requirements are pinned; no secrets committed."
+  ],
+  "verification": [
+    "Run: unset OPENAI_API_KEY ANTHROPIC_API_KEY; .venv/bin/python -m pytest -q and confirm all tests pass with no network access.",
+    "Run: grep -rnI -e 'sk-ant' -e 'sk-proj' -e 'sk-' . --include=*.py --include=*.toml --include=*.txt --include=*.example 2>/dev/null and confirm no real key values are present.",
+    "Confirm README.md is substantially larger than the original stub and contains the sections: Setup, Dry-run, Architecture, Dossier Schema, Sources, Roadmap."
+  ],
+  "blocked_reason": null,
+  "findings": ""
+}
