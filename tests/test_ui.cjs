@@ -8,7 +8,7 @@ const root=path.resolve(__dirname,'..');
 const payload=JSON.parse(execFileSync(process.env.PYTHON||'python3',['-c',
  "import sys,json;sys.path.insert(0,'tests');from test_tournament import fixture;from engine import evaluate;s=fixture();print(json.dumps({'state':s,'view':evaluate(s)}))"],{cwd:root,encoding:'utf8'}));
 const elements={},events={};
-// classList gains contains() so the Pause garden toggle (document.body.classList
+// classList gains contains() so the Pause ocean toggle (document.body.classList
 // .contains('world-paused')) can be exercised; element() gains createElement-friendly
 // extras (style.setProperty, remove, animate().cancel).
 const makeClassList=()=>{const set=new Set();return {toggle(c){if(set.has(c)){set.delete(c);return false;}set.add(c);return true;},remove(...c){c.forEach(x=>set.delete(x));},add(...c){c.forEach(x=>set.add(x));},contains(c){return set.has(c);}};};
@@ -317,7 +317,7 @@ const flushMicro=async()=>{for(let i=0;i<20;i++)await Promise.resolve();};
  const rebirthClear=vm.runInContext('finalGame=0;finalPage()',context);
  assert(rebirthClear.includes('data-action="clear-round" data-stage="final"'),'The Abyssal Crown renders the clear-round control for final');
  assert(rebirthClear.includes('>Clear The Abyssal Crown</'),'The Abyssal Crown clear copy is Clear The Abyssal Crown');
- assert(rebirthClear.toLowerCase().includes('clears last node standing only'),'The Abyssal Crown clear panel states it clears only The Abyssal Crown');
+ assert(rebirthClear.toLowerCase().includes('clears the abyssal crown only'),'The Abyssal Crown clear panel states it clears only The Abyssal Crown');
  // (B) EXTENDED ROUND1 CASCADE: resetStage('round1') clears round1 + round2 + final
  //     goals while array lengths stay 5/5/8, lineups cleared, round2 draw reset.
  vm.runInContext('state=fixture.state;',context);
@@ -581,7 +581,7 @@ const flushMicro=async()=>{for(let i=0;i<20;i++)await Promise.resolve();};
  context.fetch=()=>new Promise(()=>{});
  console.log('Extra-games delete controls: per-extra-game Remove (splices one), Clear all extra games (empties the list), both with one-level undo and full isolation passed.');
 
- // ---- Pause garden: #world-toggle toggles body.world-paused, swaps the label and glyph,
+ // ---- Pause ocean: #world-toggle toggles body.world-paused, swaps the label and glyph,
  //      and calls CityWorld.setPaused. The old DOM ambient effect loop is gone. ----
  assert.equal(vm.runInContext('typeof startWorldBlasts',context),'undefined','the DOM ambient effect loop is deleted');
  assert.equal(vm.runInContext('typeof stopWorldBlasts',context),'undefined','the DOM ambient effect stop is deleted');

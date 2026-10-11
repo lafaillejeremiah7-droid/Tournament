@@ -55,9 +55,9 @@ for(const [label,src] of [['index.html',index],['app.js',app]]){
 // Match the user-visible caption word (uppercase with the bang) so the preserved
 // internal 'gv-snip' art class hook and "audible snip" comments are left alone.
 assert(!app.includes('SNIP!'),'verdict caption must not use garden-shears SNIP! wording in app.js');
-// Positive cyberpunk anchors so the test still fails if the copy is blanked.
-for(const neon of ["THE DEEP SEA","REEF AWAKENING","JACK INTO AN OPEN NODE","Ocean audio on","Pause ocean","THE ABYSS DECIDES"]){
- assert(index.includes(neon),'missing neon chrome anchor in index.html: '+neon);
+// Positive deep-sea anchors so the test still fails if the copy is blanked.
+for(const neon of ["THE DEEP SEA","REEF AWAKENING","ENTER AN OPEN DIVE CHAMBER","Ocean audio on","Pause ocean","THE ABYSS DECIDES"]){
+ assert(index.includes(neon),'missing abyss interface anchor in index.html: '+neon);
 }
 assert(index.includes('ONE $30 CHAMPION'),'single champion on home screen');
 assert(app.includes('Winner-take-all prize'),'settings show fixed prize');
@@ -68,8 +68,10 @@ assert(monuments.includes('$30'),'only $30 champion');
 for(const geometry of ["part('skyline'","part('charge-nodes'","part('nodes'","part('holo-signs'","part('megastructure'","part('neon-arches'"]){
  assert(city.includes(geometry),'missing 3D scenery: '+geometry);
 }
-assert(cityStyle.includes('#walkway-view{')&&cityStyle.includes('position:fixed;inset:0'),'full viewport garden');
+assert(cityStyle.includes('#walkway-view{')&&cityStyle.includes('position:fixed;inset:0'),'full viewport reef');
 assert(!style.includes('.garden-verdict'),'obsolete 2D garden verdict removed');
+assert(city.includes('Hydrothermal vents')&&city.includes('coral arches')&&city.includes('stone temple'),'real submerged scene geometry must exist');
+assert(style.includes('ABYSS INTERFACE'),'deep-sea CSS theme required');
 assert(!app.includes('function playCutscene('),'unused name-based verdict removed');
 assert(!city.includes('crownGate('),'unused gate ceremony removed');
 assert(!index.includes('ceremony-hud'),'retired ceremony HUD removed');
