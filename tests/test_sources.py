@@ -126,6 +126,41 @@ def test_strongs_connector_records_gap_for_unknown_key():
     assert "no public-domain lexicon" in result.reason
 
 
+@pytest.mark.parametrize(
+    "key, expected_strongs",
+    [
+        ("judge not", {"G2919"}),
+        ("Matthew 7:1", {"G2919"}),
+        ("ask and it will be given", {"G154", "G2212", "G2925"}),
+        ("Matthew 7:7", {"G154", "G2212", "G2925"}),
+        ("narrow gate", {"G4728", "G4439"}),
+        ("Matthew 7:13-14", {"G4728", "G4439"}),
+        ("born again", {"G1080", "G509"}),
+        ("John 3:3", {"G1080", "G509"}),
+        ("i am the way the truth and the life", {"G3598", "G225", "G2222"}),
+        ("John 14:6", {"G3598", "G225", "G2222"}),
+    ],
+)
+def test_strongs_connector_surfaces_new_terms(key, expected_strongs):
+    """Enhancement B: pivotal Greek terms surface for the new topics/anchors."""
+    conn = StrongsConnector()
+    req = (
+        SourceRequest(kind="strongs", query=key)
+        if key[0].islower()
+        else SourceRequest(kind="strongs", reference=key)
+    )
+    result = conn.fetch(req)
+    assert not result.gap
+    terms = result.data["terms"]
+    assert {t["strongs"] for t in terms} >= expected_strongs
+    # Every term carries a term/definition and a normalized language enum.
+    for t in terms:
+        assert t["term"]
+        assert t["definition"]
+        assert t["language"] in {"Greek", "Hebrew"}
+    assert result.citations
+
+
 def test_strongs_connector_accepts_injected_dataset():
     dataset = {
         "Topic X": [
@@ -199,6 +234,55 @@ def test_commentary_skips_offallowlist_urls():
     result = conn.fetch(SourceRequest(kind="commentary", reference="Spoof 1:1"))
     assert result.gap is True
     assert "off-allowlist" in result.reason
+
+
+@pytest.mark.parametrize(
+    "key",
+    [
+        "judge not",
+        "Matthew 7:1",
+        "ask and it will be given",
+        "Matthew 7:7",
+        "narrow gate",
+        "Matthew 7:13-14",
+        "born again",
+        "John 3:3",
+        "i am the way the truth and the life",
+        "John 14:6",
+    ],
+)
+def test_commentary_connector_surfaces_new_entries(key):
+    """Enhancement B: church-fathers/historical/cross-reference notes surface
+    for the new topics/anchors, and all bundled URLs are on the allowlist."""
+    conn = CommentaryConnector(_offline_cache())
+    req = (
+        SourceRequest(kind="commentary", query=key)
+        if key[0].islower()
+        else SourceRequest(kind="commentary", reference=key)
+    )
+    result = conn.fetch(req)
+    assert not result.gap
+    notes = result.data["notes"]
+    kinds = {n["kind"] for n in notes}
+    assert {"church-fathers", "historical", "cross-reference"} <= kinds
+    # Any surfaced URL must be on the allowlist with an allowed path.
+    for n in notes:
+        if n.get("url"):
+            assert host_allowed(n["url"])
+            assert path_allowed(n["url"])
+    assert result.citations
+
+
+def test_fixture_files_are_valid_json():
+    """strongs.json, commentary.json, verses.json all parse as valid JSON."""
+    import deepresearch
+    from pathlib import Path
+
+    fixtures = Path(deepresearch.__file__).resolve().parent / "fixtures"
+    for name in ("strongs.json", "commentary.json", "verses.json"):
+        data = json.loads((fixtures / name).read_text(encoding="utf-8"))
+        assert isinstance(data, dict)
+        assert data  # non-empty
 
 
 # ------------------------------------------------------------------ registry

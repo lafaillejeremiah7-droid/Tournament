@@ -187,8 +187,9 @@ The pipeline runs **six discrete stages**, each a method on
      caesar", "faith without works", "eye of the needle") resolves correctly but
      has no bundled verse text yet, so offline it records a structured gap
      instead of scripture. Those anchors fetch live text when a network/cache is
-     available; FEAT-002 adds matching Strong's/commentary enrichment for the
-     fixture-backed subset.
+     available. The fixture-backed subset above now also carries bundled
+     public-domain Strong's terms and Church-Fathers / historical / cross-
+     reference commentary, so those topics produce rich dossiers offline.
 3. **`extract_original_terms`** — pull Strong's / lexicon key terms.
 4. **`gather_context`** — pull historical background and classic commentary /
    Church-Fathers excerpts (plus cross-references).
@@ -297,12 +298,16 @@ Only **public-domain** sources are used:
   BBE, YLT, DRA, OEB). Copyrighted modern translations (NIV/ESV/…) are refused.
 - **Original languages** — a public-domain **Strong's** Greek/Hebrew lexicon
   subset (data-driven; a fuller public-domain dataset drops in without code
-  changes).
+  changes). The bundled subset now covers the pivotal Greek terms of the
+  fixture-backed topics (e.g. *krino* for "judge not"; *aiteo/zeteo/krouo* for
+  "ask, seek, knock"; *stenos/pyle* for the narrow gate; *gennao/anothen* for
+  "born again"; *hodos/aletheia/zoe* for "the way, the truth, and the life").
 - **Historical context & commentary** — public-domain corpora on a host
   allowlist: **CCEL** (ccel.org), **New Advent** Fathers of the Church
   (newadvent.org), **sacred-texts.com**, and **Project Gutenberg**
   (gutenberg.org). A descriptive User-Agent is sent and disallowed paths are
-  skipped.
+  skipped. The bundled commentary subset carries Church-Fathers excerpts,
+  historical background, and cross-references for each fixture-backed topic.
 
 Bundled fixtures under `deepresearch/fixtures/` let dry-run and tests produce
 complete, schema-valid dossiers with zero network. Runtime `output/` dossiers

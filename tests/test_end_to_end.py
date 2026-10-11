@@ -90,6 +90,9 @@ def test_end_to_end_topic_judge_not(tmp_path):
     assert data["resolved_references"] == ["Matthew 7:1"]
     for t in data["translations"]:
         assert t["reference"] == "Matthew 7:1"
+    # Enhancement B: this fixture-backed topic now carries rich enrichment.
+    assert data["original_language_terms"], "judge not should carry Strong's terms"
+    assert data["commentary"], "judge not should carry commentary"
     _assert_valid_and_populated(data)
 
 
@@ -102,6 +105,9 @@ def test_end_to_end_topic_born_again(tmp_path):
     assert data["resolved_references"] == ["John 3:3"]
     for t in data["translations"]:
         assert t["reference"] == "John 3:3"
+    # Enhancement B: this fixture-backed topic now carries rich enrichment.
+    assert data["original_language_terms"], "born again should carry Strong's terms"
+    assert data["commentary"], "born again should carry commentary"
     _assert_valid_and_populated(data)
 
 
