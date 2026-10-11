@@ -170,23 +170,23 @@ const flushMicro=async()=>{for(let i=0;i<20;i++)await Promise.resolve();};
  }
  const pointsTable=vm.runInContext('finalPage()',context).split('<summary>View points per game</summary>')[1].split('</details>')[0];
  assert.equal((pointsTable.match(/<th>/g)||[]).length,vm.runInContext('view.final.schedule.length',context)+1,'final points table headers match the eight-game schedule');
- // Know Your Code per-game split model: teams are auto-generated cosmetic 5v5 splits
+ // Know Your Depth per-game split model: teams are auto-generated cosmetic 5v5 splits
  // (no wheel assignment, no fixed per-player team).
  const r1=JSON.parse(execFileSync(process.env.PYTHON||'python3',['-c',
   "import sys,json;sys.path.insert(0,'tests');from engine import IDS,new_state,evaluate,round1_lineups;s=new_state();s['names']={p:'Player '+str(i+1) for i,p in enumerate(IDS)};round1_lineups(s);print(json.dumps({'state':s,'view':evaluate(s),'revision':5}))"],{cwd:root,encoding:'utf8'}));
  vm.runInContext(`state=${JSON.stringify(r1.state)};view=${JSON.stringify(r1.view)};revision=5;`,context);
- // (b) Know Your Code screen shows the per-game A/B cosmetic lineup grouping with per-player
+ // (b) Know Your Depth screen shows the per-game A/B cosmetic lineup grouping with per-player
  //     goal inputs for the selected game, and NONE of the retired fixed-team controls.
  const r1Round=vm.runInContext("round1Game=0;round('round1')",context);
- assert(r1Round.includes('teams-grid'),'Know Your Code renders the per-game A/B lineup grid');
- assert(r1Round.includes('Team A')&&r1Round.includes('Team B'),'Know Your Code shows both cosmetic teams');
- assert(r1Round.includes('team-score'),'Know Your Code reuses the .team-score grouping');
+ assert(r1Round.includes('teams-grid'),'Know Your Depth renders the per-game A/B lineup grid');
+ assert(r1Round.includes('Team A')&&r1Round.includes('Team B'),'Know Your Depth shows both cosmetic teams');
+ assert(r1Round.includes('team-score'),'Know Your Depth reuses the .team-score grouping');
  const r1Inputs=[...r1Round.matchAll(/data-path="round1\.players\.(p\d+)\.goals\.0"/g)].map(m=>m[1]);
  assert.deepEqual([...new Set(r1Inputs)].sort(),[...payload.view.round1.rows.map(r=>r.id)].sort(),'all ten players have a goal input for the selected game');
  assert(!r1Round.includes('data-path="round1.players.p1.team"')&&!/round1\.players\.\w+\.team/.test(r1Round),'no per-player team select');
  assert(!r1Round.includes('Assign teams'),'no retired Assign-teams panel');
  assert(!r1Round.includes('data-action="r1-reset"')&&!r1Round.includes('data-action="r1-wheel"'),'no retired reset/open-wheel controls');
- assert(r1Round.includes('data-action="r1-reroll"'),'Know Your Code offers the per-game reshuffle control');
+ assert(r1Round.includes('data-action="r1-reroll"'),'Know Your Depth offers the per-game reshuffle control');
  // (c) The retired Name-wheel helpers are gone entirely.
  assert.equal(vm.runInContext("typeof round1MatchForName",context),'undefined');
  assert.equal(vm.runInContext("typeof resetRound1Spin",context),'undefined');
@@ -196,19 +196,19 @@ const flushMicro=async()=>{for(let i=0;i<20;i++)await Promise.resolve();};
  assert.equal(vm.runInContext("typeof randomIndex",context),'undefined','the Name-wheel random picker is gone');
  assert.equal(vm.runInContext("typeof wheelMode",context),'undefined','the shared wheelMode global is gone');
  assert.equal(vm.runInContext("typeof wheelLast",context),'undefined','the Name-wheel result global is gone');
- console.log('Know Your Code UI: per-game cosmetic A/B splits with ten goal inputs, reshuffle control, no fixed-team wheel/reset/select.');
+ console.log('Know Your Depth UI: per-game cosmetic A/B splits with ten goal inputs, reshuffle control, no fixed-team wheel/reset/select.');
  console.log('Name wheel removal: no "wheel"/"Name wheel" tab, no data-open="wheel" tile, no "Name your fate" screen on any navigable tab, and the standalone wheel helpers are gone.');
  console.log('Round 2 UI: all five lineups, eight editable players, game selection, counters, clearing and reset passed.');
 
  // ---- FEAT-003: per-match submit control, cumulative popup, final fullscreen + extra-game fold ----
- // (1) Know Your Code and Last Node Standing each render a 'Submit Match N of X' control.
+ // (1) Know Your Depth and The Abyssal Crown each render a 'Submit Match N of X' control.
  vm.runInContext('state=fixture.state;view=fixture.view;render=()=>{};flush=async()=>{};save=async()=>{};',context);
  const liveHTML=vm.runInContext("round1Game=0;round('round1')",context);
- assert(liveHTML.includes('Submit Match 1 of 5'),'Know Your Code shows a per-match submit control');
+ assert(liveHTML.includes('Submit Match 1 of 5'),'Know Your Depth shows a per-match submit control');
  assert(liveHTML.includes('data-action="submit-match" data-stage="round1" data-match="0"'));
- assert((liveHTML.match(/data-r1-game=/g)||[]).length===5,'Know Your Code has a 5-match selector');
+ assert((liveHTML.match(/data-r1-game=/g)||[]).length===5,'Know Your Depth has a 5-match selector');
  const rebirthHTML=vm.runInContext('finalGame=0;finalPage()',context);
- assert(rebirthHTML.includes('Submit Match 1 of 8'),'Last Node Standing shows a per-match submit control');
+ assert(rebirthHTML.includes('Submit Match 1 of 8'),'The Abyssal Crown shows a per-match submit control');
  assert(rebirthHTML.includes('data-action="submit-match" data-stage="final" data-match="0"'));
  // (1b) The submit control is DISABLED until that match's view games[N].ready is true.
  vm.runInContext('view=JSON.parse(JSON.stringify(fixture.view));view.round1.games[0].ready=false;',context);
@@ -247,18 +247,18 @@ const flushMicro=async()=>{for(let i=0;i<20;i++)await Promise.resolve();};
  for(const name of r1Cut)assert(r1Stage.includes(name),'the eliminated competitors remain in the displayed garden');
  vm.runInContext('endCutscene()',context);await advance;
  await click({action:'close-result'});
- // (3b) Last Node Standing (final) fullscreen's average column shows average POINTS per game
+ // (3b) The Abyssal Crown (final) fullscreen's average column shows average POINTS per game
  //      (total/played), NOT a second copy of the total. Verify the computed value appears
  //      and that it differs from the total for a player whose total != average.
  vm.runInContext('state=fixture.state;view=fixture.view;',context);
  const finalSubmit=click({action:'submit-match',stage:'final',match:'7'});
  await flushMicro();
- assert.equal(vm.runInContext('cutsceneActive',context),true,'the settled Last Node Standing final triggers the elimination cutscene');
- // Last Node Standing throws the five non-winners (rank>1); only first place survives.
+ assert.equal(vm.runInContext('cutsceneActive',context),true,'the settled The Abyssal Crown final triggers the elimination cutscene');
+ // The Abyssal Crown throws the five non-winners (rank>1); only first place survives.
  const finalThrown=payload.view.final.rows.filter(r=>r.rank!==1).map(r=>r.name);
  const finalPodium=payload.view.final.rows.filter(r=>r.rank===1).map(r=>r.name);
  const finalStage=context.document.querySelector('#cutscene-stage').innerHTML;
- assert.equal(finalThrown.length,5,'Last Node Standing snips all five non-winning finalists');
+ assert.equal(finalThrown.length,5,'The Abyssal Crown snips all five non-winning finalists');
  assert(finalStage.includes('class="divine-canvas"')&&finalStage.includes('divine-judge'),'final uses the divine hand scene with a WebGL canvas');
  assert(context.document.querySelector('#cutscene-caption').innerHTML.includes('SILENCE'),'five-second contemplation precedes the final pruning');
  const shown=[...finalStage.matchAll(/data-player="p\d+" data-goals=/g)];
@@ -308,16 +308,16 @@ const flushMicro=async()=>{for(let i=0;i<20;i++)await Promise.resolve();};
  vm.runInContext('state=fixture.state;view=fixture.view;render=()=>{};flush=async()=>{};save=async()=>{};',context);
  // (A) CLEAR-ROUND CONTROL ON EVERY STAGE with the correct cascade copy + data-stage.
  const liveClear=vm.runInContext("round1Game=0;round('round1')",context);
- assert(liveClear.includes('data-action="clear-round" data-stage="round1"'),'Know Your Code renders the clear-round control for round1');
- assert(liveClear.includes('Clear Know Your Code (also clears Adapt or Delete &amp; Last Node Standing)'),'Know Your Code clear copy names Adapt or Delete and Last Node Standing');
- assert(/clears Know Your Code and every later round/i.test(liveClear),'Know Your Code clear panel explains the full cascade');
+ assert(liveClear.includes('data-action="clear-round" data-stage="round1"'),'Know Your Depth renders the clear-round control for round1');
+ assert(liveClear.includes('Clear Know Your Depth (also clears Adapt or Sink &amp; The Abyssal Crown)'),'Know Your Depth clear copy names Adapt or Sink and The Abyssal Crown');
+ assert(/clears Know Your Depth and every later round/i.test(liveClear),'Know Your Depth clear panel explains the full cascade');
  const dieClear=vm.runInContext('round2Page()',context);
- assert(dieClear.includes('data-action="clear-round" data-stage="round2"'),'Adapt or Delete renders the clear-round control for round2');
- assert(dieClear.includes('Clear Adapt or Delete (also clears Last Node Standing)'),'Adapt or Delete clear copy names Last Node Standing');
+ assert(dieClear.includes('data-action="clear-round" data-stage="round2"'),'Adapt or Sink renders the clear-round control for round2');
+ assert(dieClear.includes('Clear Adapt or Sink (also clears The Abyssal Crown)'),'Adapt or Sink clear copy names The Abyssal Crown');
  const rebirthClear=vm.runInContext('finalGame=0;finalPage()',context);
- assert(rebirthClear.includes('data-action="clear-round" data-stage="final"'),'Last Node Standing renders the clear-round control for final');
- assert(rebirthClear.includes('>Clear Last Node Standing</'),'Last Node Standing clear copy is Clear Last Node Standing');
- assert(rebirthClear.toLowerCase().includes('clears last node standing only'),'Last Node Standing clear panel states it clears only Last Node Standing');
+ assert(rebirthClear.includes('data-action="clear-round" data-stage="final"'),'The Abyssal Crown renders the clear-round control for final');
+ assert(rebirthClear.includes('>Clear The Abyssal Crown</'),'The Abyssal Crown clear copy is Clear The Abyssal Crown');
+ assert(rebirthClear.toLowerCase().includes('clears last node standing only'),'The Abyssal Crown clear panel states it clears only The Abyssal Crown');
  // (B) EXTENDED ROUND1 CASCADE: resetStage('round1') clears round1 + round2 + final
  //     goals while array lengths stay 5/5/8, lineups cleared, round2 draw reset.
  vm.runInContext('state=fixture.state;',context);
@@ -332,7 +332,7 @@ const flushMicro=async()=>{for(let i=0;i<20;i++)await Promise.resolve();};
  assert.equal(vm.runInContext('state.round1.lineups.length',context),0,'round1 lineups cleared');
  assert.equal(vm.runInContext('state.round2.draw.revealed',context),0,'round2 draw reset');
  assert.equal(vm.runInContext('state.round2.draw.order.length',context),0,'round2 draw order cleared');
- // (C) DISABLED BUTTON SHOWS A REASON: a not-ready Know Your Code submit renders disabled
+ // (C) DISABLED BUTTON SHOWS A REASON: a not-ready Know Your Depth submit renders disabled
  //     AND carries an adjacent human-readable reason string.
  vm.runInContext('state=fixture.state;view=JSON.parse(JSON.stringify(fixture.view));view.round1.games[0].ready=false;',context);
  const disabledHTML=vm.runInContext("round1Game=0;round('round1')",context);
@@ -354,7 +354,7 @@ const flushMicro=async()=>{for(let i=0;i<20;i++)await Promise.resolve();};
  vm.runInContext(`state=${JSON.stringify(r2Next.state)};view=${JSON.stringify(r2Next.view)};tab='overview';`,context);
  const ovR2=vm.runInContext('overview()',context);
  assert(ovR2.includes('WHAT TO DO NEXT'),'overview shows the next-step banner for round2');
- assert(/data-tab="round2">Open Adapt or Delete/.test(ovR2),'next-step button targets Adapt or Delete when round2 is the next step');
+ assert(/data-tab="round2">Open Adapt or Sink/.test(ovR2),'next-step button targets Adapt or Sink when round2 is the next step');
  assert(!/data-tab="settings"/.test(ovR2.split('round-path')[0]),'the next-step banner does not point at settings once names are set');
  // (E) UNDO FLOW: a destructive clear-round sets a snapshot and changes state; undo
  //     restores the exact prior state and clears the snapshot. performUndo persists via
@@ -365,11 +365,11 @@ const flushMicro=async()=>{for(let i=0;i<20;i++)await Promise.resolve();};
  vm.runInContext(`state=${JSON.stringify(undoFix.state)};view=${JSON.stringify(undoFix.view)};render=()=>{};flush=async()=>{};save=async()=>{};renderUndo=()=>{};`,context);
  vm.runInContext('token="T";revision=1;undoSnapshot=null;',context);
  const priorState=JSON.parse(vm.runInContext('JSON.stringify(state)',context));
- assert.equal(priorState.round1.players.p1.goals[0],2,'pristine fixture has Know Your Code scores before the destructive action');
+ assert.equal(priorState.round1.players.p1.goals[0],2,'pristine fixture has Know Your Depth scores before the destructive action');
  assert.equal(vm.runInContext('undoSnapshot',context),null,'no undo snapshot before any destructive action');
  await click({action:'clear-round',stage:'round1'});
  assert(vm.runInContext('undoSnapshot && undoSnapshot.state',context),'clear-round sets a one-level undo snapshot');
- assert.equal(vm.runInContext('undoSnapshot.label',context),'Undo: Clear Know Your Code','the snapshot carries a human label');
+ assert.equal(vm.runInContext('undoSnapshot.label',context),'Undo: Clear Know Your Depth','the snapshot carries a human label');
  assert.equal(vm.runInContext('undoSnapshot.state.round1.players.p1.goals[0]',context),2,'the snapshot preserved the pre-clear scores');
  assert(vm.runInContext('state.round1.players.p1.goals.every(x=>x===null)',context),'clear-round mutated state (round1 cleared)');
  const changed=vm.runInContext('JSON.stringify(state)',context);
@@ -388,7 +388,7 @@ const flushMicro=async()=>{for(let i=0;i<20;i++)await Promise.resolve();};
  assert.equal(vm.runInContext('undoSnapshot',context),null,'undo cleared the one-level snapshot');
  assert(undoPut&&undoPut.restore===true,'the undo PUT carried restore:true');
  context.fetch=()=>new Promise(()=>{});
- // (F) RESHUFFLE UNDO: a Know Your Code reshuffle (data-action='r1-reroll') snapshots the
+ // (F) RESHUFFLE UNDO: a Know Your Depth reshuffle (data-action='r1-reroll') snapshots the
  //     PRE-reroll split. rerollRound1Game captures the snapshot before the PUT and
  //     adopts the server echo, assigning undoSnapshot only after the echo succeeds, so
  //     the snapshot must hold the lineup/goals exactly as they were before the reroll.
@@ -408,7 +408,7 @@ const flushMicro=async()=>{for(let i=0;i<20;i++)await Promise.resolve();};
  };
  await click({action:'r1-reroll',match:'0'});
  assert(vm.runInContext('undoSnapshot',context),'a reshuffle sets a one-level undo snapshot');
- assert.equal(vm.runInContext('undoSnapshot.label',context),'Undo: Reshuffle Know Your Code Game 1','the reshuffle snapshot carries a human label');
+ assert.equal(vm.runInContext('undoSnapshot.label',context),'Undo: Reshuffle Know Your Depth Game 1','the reshuffle snapshot carries a human label');
  assert.deepEqual(JSON.parse(vm.runInContext('JSON.stringify(undoSnapshot.state)',context)),preReroll,'the reshuffle snapshot holds the pre-reroll lineup and goals');
  assert.deepEqual(JSON.parse(vm.runInContext('JSON.stringify(state.round1.lineups[0])',context)),rerolled.round1.lineups[0],'state adopted the server echo of the reshuffled lineup');
  context.fetch=()=>new Promise(()=>{});
@@ -468,14 +468,14 @@ const flushMicro=async()=>{for(let i=0;i<20;i++)await Promise.resolve();};
  context.fetch=()=>new Promise(()=>{});
  console.log('Settings clear controls: independent clear-names and clear-scoring actions, scoring/names isolation, and one-level undo for each passed.');
 
- // ---- Know Your Code per-game clear control: a 'Clear this game' button on EACH Know Your Code
+ // ---- Know Your Depth per-game clear control: a 'Clear this game' button on EACH Know Your Depth
  //      game that clears ONLY that game's goals for all ten players, Undo-able, and
  //      leaves names, scoring, and other games untouched. Mirrors clear-r2-game. ----
  vm.runInContext('state=fixture.state;view=fixture.view;render=()=>{};flush=async()=>{};save=async()=>{};',context);
- // (J) The Know Your Code round screen renders a per-game clear control with the new
+ // (J) The Know Your Depth round screen renders a per-game clear control with the new
  //     data-action and the self-evident 'Clear this game' copy, reusing .danger.clear-score.
  const liveClearGame=vm.runInContext("round1Game=2;round('round1')",context);
- assert(liveClearGame.includes('data-action="clear-r1-game"'),'Know Your Code renders the per-game clear-r1-game control');
+ assert(liveClearGame.includes('data-action="clear-r1-game"'),'Know Your Depth renders the per-game clear-r1-game control');
  assert(/data-action="clear-r1-game"[^>]*>Clear this game</.test(liveClearGame),'the clear-r1-game button copy is "Clear this game"');
  assert(/class="danger clear-score" data-action="clear-r1-game"/.test(liveClearGame),'clear-r1-game reuses the .danger.clear-score styling');
  // (K) Firing clear-r1-game clears ONLY the selected game's goals for all players; other
@@ -485,7 +485,7 @@ const flushMicro=async()=>{for(let i=0;i<20;i++)await Promise.resolve();};
  vm.runInContext(`state=${JSON.stringify(r1ClearFix.state)};view=${JSON.stringify(r1ClearFix.view)};render=()=>{};flush=async()=>{};save=async()=>{};renderUndo=()=>{};token="T";revision=1;undoSnapshot=null;round1Game=2;`,context);
  const beforeR1Clear=JSON.parse(vm.runInContext('JSON.stringify(state)',context));
  const ids10=JSON.parse(vm.runInContext('JSON.stringify(ids)',context));
- assert(ids10.length===10,'all ten players participate in every Know Your Code game');
+ assert(ids10.length===10,'all ten players participate in every Know Your Depth game');
  assert(ids10.some(p=>beforeR1Clear.round1.players[p].goals[2]!==null),'fixture has goals in the targeted game before clearing');
  await click({action:'clear-r1-game'});
  assert(ids10.every(p=>vm.runInContext(`state.round1.players.${p}.goals[2]`,context)===null),'clear-r1-game cleared game 3 goals for all ten players');
@@ -498,18 +498,18 @@ const flushMicro=async()=>{for(let i=0;i<20;i++)await Promise.resolve();};
  assert.deepEqual(JSON.parse(vm.runInContext('JSON.stringify(state.names)',context)),beforeR1Clear.names,'clear-r1-game left names untouched');
  assert.deepEqual(JSON.parse(vm.runInContext('JSON.stringify(state.settings)',context)),beforeR1Clear.settings,'clear-r1-game left scoring settings untouched');
  // Other stages untouched.
- assert.deepEqual(JSON.parse(vm.runInContext('JSON.stringify(state.round2)',context)),beforeR1Clear.round2,'clear-r1-game left Adapt or Delete untouched');
- assert.deepEqual(JSON.parse(vm.runInContext('JSON.stringify(state.final)',context)),beforeR1Clear.final,'clear-r1-game left Last Node Standing untouched');
+ assert.deepEqual(JSON.parse(vm.runInContext('JSON.stringify(state.round2)',context)),beforeR1Clear.round2,'clear-r1-game left Adapt or Sink untouched');
+ assert.deepEqual(JSON.parse(vm.runInContext('JSON.stringify(state.final)',context)),beforeR1Clear.final,'clear-r1-game left The Abyssal Crown untouched');
  // (L) The undo snapshot deep-equals the pre-action state and Undo restores it.
  assert(vm.runInContext('undoSnapshot && undoSnapshot.state',context),'clear-r1-game sets a one-level undo snapshot');
- assert.equal(vm.runInContext('undoSnapshot.label',context),'Undo: Clear Know Your Code Game 3','the clear-r1-game snapshot carries a human label');
+ assert.equal(vm.runInContext('undoSnapshot.label',context),'Undo: Clear Know Your Depth Game 3','the clear-r1-game snapshot carries a human label');
  assert.deepEqual(JSON.parse(vm.runInContext('JSON.stringify(undoSnapshot.state)',context)),beforeR1Clear,'the clear-r1-game snapshot deep-equals the pre-action state');
  context.fetch=async(url,options)=>{const body=JSON.parse(options.body);return {ok:true,json:async()=>({state:body.state,view:r1ClearFix.view,revision:(body.revision||1)+1})};};
  await click({action:'undo'});
  assert.deepEqual(JSON.parse(vm.runInContext('JSON.stringify(state)',context)),beforeR1Clear,'undo restored the exact pre-clear-r1-game state');
  assert.equal(vm.runInContext('undoSnapshot',context),null,'undo cleared the clear-r1-game snapshot');
  context.fetch=()=>new Promise(()=>{});
- console.log('Know Your Code per-game clear control: clear-r1-game button, single-game goal clearing for all ten players, names/scoring/other-games/other-stages isolation, and one-level undo passed.');
+ console.log('Know Your Depth per-game clear control: clear-r1-game button, single-game goal clearing for all ten players, names/scoring/other-games/other-stages isolation, and one-level undo passed.');
 
  // ---- Extra-games delete controls: a per-extra-game 'Remove' button on EACH extra
  //      game (deletes exactly that one) and a 'Clear all extra games' button (empties
@@ -549,8 +549,8 @@ const flushMicro=async()=>{for(let i=0;i<20;i++)await Promise.resolve();};
  assert.deepEqual(JSON.parse(vm.runInContext('JSON.stringify(state.names)',context)),beforeRemove.names,'remove-extra left names untouched');
  assert.deepEqual(JSON.parse(vm.runInContext('JSON.stringify(state.settings)',context)),beforeRemove.settings,'remove-extra left scoring untouched');
  assert.deepEqual(JSON.parse(vm.runInContext('JSON.stringify(state.round1.players)',context)),beforeRemove.round1.players,'remove-extra left round1 goals untouched');
- assert.deepEqual(JSON.parse(vm.runInContext('JSON.stringify(state.round2)',context)),beforeRemove.round2,'remove-extra left Adapt or Delete untouched');
- assert.deepEqual(JSON.parse(vm.runInContext('JSON.stringify(state.final)',context)),beforeRemove.final,'remove-extra left Last Node Standing untouched');
+ assert.deepEqual(JSON.parse(vm.runInContext('JSON.stringify(state.round2)',context)),beforeRemove.round2,'remove-extra left Adapt or Sink untouched');
+ assert.deepEqual(JSON.parse(vm.runInContext('JSON.stringify(state.final)',context)),beforeRemove.final,'remove-extra left The Abyssal Crown untouched');
  // (P) remove-extra sets a deep-equal undo snapshot and Undo restores the prior state.
  assert(vm.runInContext('undoSnapshot && undoSnapshot.state',context),'remove-extra sets a one-level undo snapshot');
  assert.equal(vm.runInContext('undoSnapshot.label',context),'Undo: Remove extra game 1','the remove-extra snapshot carries a human label');
@@ -589,17 +589,17 @@ const flushMicro=async()=>{for(let i=0;i<20;i++)await Promise.resolve();};
  const pausedCalls=[];const savedWorld=context.window.CityWorld;
  context.window.CityWorld={setPaused:p=>pausedCalls.push(p)};
  vm.runInContext('document.body.classList.remove("world-paused");',context);
- const toggleSpan={textContent:'Pause grid'},toggleGlyph={textContent:'Ⅱ '},toggleAttrs={};
+ const toggleSpan={textContent:'Pause ocean'},toggleGlyph={textContent:'Ⅱ '},toggleAttrs={};
  const worldToggleBtn={id:'world-toggle',dataset:{},setAttribute(k,v){toggleAttrs[k]=v;},querySelector:s=>s==='span'?toggleSpan:null,firstChild:toggleGlyph};
  events.click({target:{closest:()=>worldToggleBtn}});   // first toggle -> paused
  assert.equal(vm.runInContext('document.body.classList.contains("world-paused")',context),true,'toggle pauses the grid');
- assert.equal(toggleSpan.textContent,'Resume grid');assert.equal(toggleGlyph.textContent,'▶ ');assert.equal(toggleAttrs['aria-pressed'],'true');
+ assert.equal(toggleSpan.textContent,'Resume ocean');assert.equal(toggleGlyph.textContent,'▶ ');assert.equal(toggleAttrs['aria-pressed'],'true');
  events.click({target:{closest:()=>worldToggleBtn}});   // second toggle -> resumed
  assert.equal(vm.runInContext('document.body.classList.contains("world-paused")',context),false,'toggle resumes the grid');
- assert.equal(toggleSpan.textContent,'Pause grid');assert.equal(toggleGlyph.textContent,'Ⅱ ');assert.equal(toggleAttrs['aria-pressed'],'false');
+ assert.equal(toggleSpan.textContent,'Pause ocean');assert.equal(toggleGlyph.textContent,'Ⅱ ');assert.equal(toggleAttrs['aria-pressed'],'false');
  assert.deepEqual(pausedCalls,[true,false],'CityWorld.setPaused follows the toggle');
  context.window.CityWorld=savedWorld;
- console.log('Pause grid: #world-toggle toggles world-paused, Pause grid / Resume grid label and glyph, aria-pressed, CityWorld.setPaused(true/false), and no DOM ambient effect loop passed.');
+ console.log('Pause ocean: #world-toggle toggles world-paused, Pause ocean / Resume ocean label and glyph, aria-pressed, CityWorld.setPaused(true/false), and no DOM ambient effect loop passed.');
 
  // FEAT-003: verify the active Divine Selection cut list rather than retired name-mapping code.
  vm.runInContext('state=fixture.state;view=fixture.view;render=()=>{};flush=async()=>{};save=async()=>{};',context);

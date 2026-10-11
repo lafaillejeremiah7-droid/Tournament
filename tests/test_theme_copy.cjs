@@ -1,4 +1,4 @@
-// Neon Grid theme, payout and visible copy regression checks.
+// Deep Sea theme, payout and visible copy regression checks.
 // Run: node tests/test_theme_copy.cjs
 'use strict';
 const assert=require('node:assert/strict');
@@ -8,9 +8,9 @@ const read=p=>fs.readFileSync(path.join(root,p),'utf8');
 const index=read('static/index.html'),app=read('static/app.js');
 const city=read('static/city.js'),style=read('static/style.css');
 const cityStyle=read('static/city.css'),monuments=read('static/monuments.js');
-const stages=['Know Your Code','Adapt or Delete','Last Node Standing'];
-assert(index.includes('<title>The Neon Grid - Brawl Hockey</title>'),'page title');
-assert(index.includes('THE GRID BOOTS'),'opening countdown');
+const stages=['Know Your Depth','Adapt or Sink','The Abyssal Crown'];
+assert(index.includes('<title>The Deep Sea - Brawl Hockey</title>'),'page title');
+assert(index.includes('THE DESCENT BEGINS'),'opening countdown');
 for(const name of stages){
  assert(index.includes(name),'home missing '+name);
  assert(app.includes(name),'game navigation missing '+name);
@@ -56,7 +56,7 @@ for(const [label,src] of [['index.html',index],['app.js',app]]){
 // internal 'gv-snip' art class hook and "audible snip" comments are left alone.
 assert(!app.includes('SNIP!'),'verdict caption must not use garden-shears SNIP! wording in app.js');
 // Positive cyberpunk anchors so the test still fails if the copy is blanked.
-for(const neon of ["THE NEON GRID","GRID CHARGE","JACK INTO AN OPEN NODE","Grid audio on","Pause grid","THE SYSTEM'S VERDICT"]){
+for(const neon of ["THE DEEP SEA","REEF AWAKENING","JACK INTO AN OPEN NODE","Ocean audio on","Pause ocean","THE ABYSS DECIDES"]){
  assert(index.includes(neon),'missing neon chrome anchor in index.html: '+neon);
 }
 assert(index.includes('ONE $30 CHAMPION'),'single champion on home screen');
@@ -81,4 +81,4 @@ assert(!style.includes('.fc-judgment'),'removed abandoned lineup animation');
 const braces=text=>(text.match(/{/g)||[]).length-(text.match(/}/g)||[]).length;
 assert.equal(braces(style),0,'style.css braces');
 assert.equal(braces(cityStyle),0,'city.css braces');
-console.log('PASS: Neon Grid copy, code rounds, $30 champion, viewport, scene, lean styles, and no garden/old-round regression.');
+console.log('PASS: Deep Sea copy, code rounds, $30 champion, viewport, scene, lean styles, and no garden/old-round regression.');
