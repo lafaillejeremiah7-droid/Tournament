@@ -237,7 +237,7 @@ table{border-spacing:0 5px}td{box-shadow:inset 0 1px #f7efe20b}td.calc{backgroun
 #cutscene .cutscene-caption{font-size:clamp(14px,2.3vw,24px)}
 #cutscene .cutscene-caption strong{letter-spacing:3px}
 @media(max-width:600px){#cutscene .cutscene-stage{aspect-ratio:1.8}}
-/* Accessible base styles for the royal garden cutscene. */
+/* Accessible base styles for the neon grid purge cutscene. */
 .cutscene{background:radial-gradient(circle at 50% 45%,#3b1324 0%,#100713 58%,#05050a 100%);color:#fff0dc}
 .cutscene-head .eyebrow{color:#ff8c8c;letter-spacing:4px;text-shadow:0 0 16px #ff3d5c}
 .cutscene-head h2{color:#fff1dd;text-transform:uppercase;letter-spacing:2px;text-shadow:0 0 22px #ff365766}
@@ -282,7 +282,7 @@ table{border-spacing:0 5px}td{box-shadow:inset 0 1px #f7efe20b}td.calc{backgroun
 #cutscene.verdict-drag .av-name{opacity:.5}
 #cutscene.verdict-gone .av-name{opacity:0}
 #cutscene .av-lineup .av-player{position:relative;left:auto;bottom:auto;flex:0 1 9%;width:auto}
-/* Champions: laurels over the plinths and falling rose petals. */
+/* Champions: laurels over the plinths and falling neon shards. */
 #cutscene .fc-victory{background:radial-gradient(ellipse at 50% 120%,#1b6a8e 0%,#15204a 45%,#05030f 100%)}
 #cutscene .fc-medal .fc-laurel{position:absolute;bottom:calc(100% + 30px);left:50%;width:min(90px,70%);height:auto;transform:translateX(-50%)}
 #cutscene .fc-laurel path,#cutscene .crown-laurel path{fill:none;stroke:#39c6e8;stroke-width:4;stroke-linecap:round}
@@ -314,7 +314,7 @@ table{border-spacing:0 5px}td{box-shadow:inset 0 1px #f7efe20b}td.calc{backgroun
 @media(max-width:600px){#cutscene{--cs-room:max(100dvh - 430px,180px)}#cutscene .cutscene-stage{width:min(1400px,96vw,var(--cs-room) * 1.8)}#cutscene.verdict-mode .cutscene-stage,#cutscene.crown-mode .cutscene-stage{width:min(1400px,96vw,var(--cs-room) * 1.6)}}
 @media (prefers-reduced-motion: reduce){.arena-verdict *,.crown-card *,.fc-victory *{animation:none!important;transition:none!important}#cutscene .fc-petal{opacity:.8}}
 
-/* ROYAL GARDEN / GARDENER'S PRUNING VERDICT. Stage is drawn entirely in CSS/SVG. */
+/* NEON GRID / MECH-ARM PURGE VERDICT. Stage is drawn entirely in CSS/SVG. */
 :root{--ink:#f3f7eb;--pink:#b97088;--bg:#0e231b;--panel:#102a20;--line:#52735c;--muted:#b9d1b7;--text:#eef5e8;--yellow:#e6c77c;--green:#99d69d;--red:#e88291;--gray:#354e41;--blue:#b7e3cb;color-scheme:dark}
 body{background:#10271e}
 .room-header{background:linear-gradient(180deg,#091d16db,transparent);border-color:#d6e7bc30}
@@ -416,7 +416,7 @@ body{background:#10271e}
   }
 }
 
-/* The Last Bloom: one trophy pedestal, no silver or bronze winners. */
+/* Last Node Standing: one trophy pedestal, no silver or bronze winners. */
 #city-podium .monument-podium,
 #screen-podium .monument-podium{
  display:flex;justify-content:center;align-items:flex-end;gap:0;
@@ -464,28 +464,28 @@ body{background:#10271e}
 }
 
 
-/* Player roses: exactly ten original plants in every round, independent of the opening bloom. */
-.plant-garden{margin:20px 0 26px;padding:20px;border:1px solid #8c7654;background:linear-gradient(165deg,#203b2b,#223025 56%,#382923);border-radius:10px}
-.plant-heading{display:flex;align-items:end;justify-content:space-between;gap:18px;margin-bottom:14px}
-.plant-heading h2{font:600 clamp(20px,2.2vw,29px)/1.2 Georgia,serif;color:#f4dfab;margin:4px 0 0}
-.plant-heading p{max-width:410px;font-size:11px;color:#dccab0;margin:0}
-.plant-grid{list-style:none;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;padding:0;margin:0}
-.plant-card{min-width:0;border:1px solid #648063;border-radius:7px;padding:10px 9px 12px;text-align:center;background:linear-gradient(#2e4e36,#26392f 68%,#493d2b);box-shadow:inset 0 1px #9fb77c33;transition:border-color .25s,background .25s}
-.plant-card.champion{border-color:#e6bc5e;background:linear-gradient(#445c38,#374232 70%,#6e4b31)}
-.plant-card.pruned{opacity:.64;filter:saturate(.38);background:linear-gradient(#343c32,#2c302b 68%,#43392e)}
-.plant-top{display:flex;justify-content:space-between;gap:6px;align-items:center;text-align:left;font:8px/1.3 monospace;letter-spacing:.7px;color:#d3d7b4}
-.plant-state{color:#c8eab4}
-.plant-card.pruned .plant-state{color:#ffac9a}
-.plant-card.champion .plant-state{color:#ffe3a2}
-.plant-art{display:block;width:100%;height:145px;margin:4px auto 0;overflow:visible;filter:drop-shadow(0 5px 6px #14201988)}
-.plant-name{display:block;overflow-wrap:anywhere;color:#fff0d3;font-size:13px;line-height:1.25;min-height:2.5em}
-.plant-count{font:11px monospace;color:#f2d8a1;margin-top:7px}
-.plant-count b{font-size:18px;color:#ffdf84}
-.plant-card small{display:block;color:#bfd1ac;font-size:9px;margin-top:5px}
-@media(max-width:980px){.plant-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
-@media(max-width:530px){.plant-garden{padding:12px}.plant-heading{display:block}.plant-heading p{margin:7px 0}.plant-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.plant-art{height:115px}.plant-card{padding:8px 5px}.plant-top{font-size:7px}}
+/* Node roster: exactly ten original neon avatars in every round, independent of the opening grid charge. */
+.node-roster{margin:20px 0 26px;padding:20px;border:1px solid #8c7654;background:linear-gradient(165deg,#203b2b,#223025 56%,#382923);border-radius:10px}
+.node-roster-heading{display:flex;align-items:end;justify-content:space-between;gap:18px;margin-bottom:14px}
+.node-roster-heading h2{font:600 clamp(20px,2.2vw,29px)/1.2 Georgia,serif;color:#f4dfab;margin:4px 0 0}
+.node-roster-heading p{max-width:410px;font-size:11px;color:#dccab0;margin:0}
+.node-grid{list-style:none;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;padding:0;margin:0}
+.node-card{min-width:0;border:1px solid #648063;border-radius:7px;padding:10px 9px 12px;text-align:center;background:linear-gradient(#2e4e36,#26392f 68%,#493d2b);box-shadow:inset 0 1px #9fb77c33;transition:border-color .25s,background .25s}
+.node-card.champion{border-color:#e6bc5e;background:linear-gradient(#445c38,#374232 70%,#6e4b31)}
+.node-card.pruned{opacity:.64;filter:saturate(.38);background:linear-gradient(#343c32,#2c302b 68%,#43392e)}
+.node-top{display:flex;justify-content:space-between;gap:6px;align-items:center;text-align:left;font:8px/1.3 monospace;letter-spacing:.7px;color:#d3d7b4}
+.node-state{color:#c8eab4}
+.node-card.pruned .node-state{color:#ffac9a}
+.node-card.champion .node-state{color:#ffe3a2}
+.node-art{display:block;width:100%;height:145px;margin:4px auto 0;overflow:visible;filter:drop-shadow(0 5px 6px #14201988)}
+.node-name{display:block;overflow-wrap:anywhere;color:#fff0d3;font-size:13px;line-height:1.25;min-height:2.5em}
+.node-count{font:11px monospace;color:#f2d8a1;margin-top:7px}
+.node-count b{font-size:18px;color:#ffdf84}
+.node-card small{display:block;color:#bfd1ac;font-size:9px;margin-top:5px}
+@media(max-width:980px){.node-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:530px){.node-roster{padding:12px}.node-roster-heading{display:block}.node-roster-heading p{margin:7px 0}.node-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.node-art{height:115px}.node-card{padding:8px 5px}.node-top{font-size:7px}}
 
-/* Cinematic divine gardener. The light hovers over all TEN original plants for
+/* Cinematic divine mech arm. The light hovers over all TEN original nodes for
    five full seconds, then precisely cuts only the two latest losers. */
 .divine-advance{display:flex;gap:22px;align-items:center;justify-content:space-between;border-color:#d7bd7a;background:linear-gradient(120deg,#3e3321,#253c2c)}
 .divine-advance h2{margin:3px 0;font:600 21px Georgia,serif;color:#fff1bf}
@@ -513,7 +513,7 @@ body{background:#10271e}
 .divine-plants{position:absolute;inset:42% 4% 6%;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));gap:2% 1%;z-index:4}
 .divine-plant{position:relative;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:end;text-align:center;border-radius:40% 40% 5px 5px;background:linear-gradient(transparent 32%,#13335044 83%,#0a142f9c);border-bottom:3px solid #1f9fd0;box-shadow:inset 0 -5px 20px #0a2a4055}
 .divine-stems{width:100%;height:min(73%,148px);transform-origin:50% 90%;transition:filter .35s}
-.divine-stems .plant-art{width:100%;height:100%;margin:0;display:block}
+.divine-stems .node-art{width:100%;height:100%;margin:0;display:block}
 .divine-name{max-width:98%;overflow-wrap:anywhere;font:700 clamp(8px,1.3vw,15px)/1.1 Georgia,serif;color:#eafaff;text-shadow:0 2px 6px #000,0 0 10px #0d2b4b}
 .divine-plant small{font:700 clamp(7px,.8vw,11px)/1.3 monospace;color:#6fd8ec}
 .divine-cut-label{font:700 clamp(7px,.9vw,12px) monospace;color:#ff8fd6;min-height:1.3em;letter-spacing:1px}
@@ -523,8 +523,8 @@ body{background:#10271e}
 /* No-WebGL fallback for the sever: at blade contact the stem is cut through at
    the shear line (~34% down from the top). The rooted lower stump stays put
    (clip-path trims the frame to the stump) while a cloned top half (:after)
-   shears off, tumbles and drops away under gravity, reading as a rose cut in
-   two rather than a whole plant leaning over. */
+   shears off, tumbles and drops away under gravity, reading as a node severed in
+   two rather than a whole avatar leaning over. */
 .divine-plant.severing .divine-stems{animation:divine-cut-plant 1.15s .95s ease-in forwards;transform-origin:50% 34%}
 .divine-plant.severing .divine-stems:after{content:"";position:absolute;left:0;top:0;width:100%;height:34%;z-index:8;transform-origin:50% 100%;background:radial-gradient(circle at 50% 42%,#9ff2ffee 0 34%,#ff6cc9cc 46%,transparent 62%),linear-gradient(#2fb4dfcc,#1a5c82aa);clip-path:polygon(50% 0,100% 20%,86% 100%,14% 100%,0 20%);animation:divine-top-fall 1.1s .95s cubic-bezier(.3,.6,.5,1) forwards}
 .divine-plant.severing:before{content:"";position:absolute;inset:20% 10% 35%;z-index:7;border-radius:50%;background:#9ff2ffc0;filter:blur(13px);animation:divine-cut-flash 1.4s .88s both}
@@ -534,7 +534,7 @@ body{background:#10271e}
 @keyframes divine-hover{0%,100%{transform:translate(-50%,0) rotate(-2deg)}50%{transform:translate(-50%,11px) rotate(2deg)}}
 @keyframes divine-snip{0%{transform:rotate(0deg)}50%{transform:rotate(-26deg)}100%{transform:rotate(0deg)}}
 /* The remaining element is the standing stump: it holds upright and simply has
-   its severed top third clipped away at the cut line (no whole-plant tilt). */
+   its severed top third clipped away at the cut line (no whole-avatar tilt). */
 @keyframes divine-cut-plant{0%{transform:none;clip-path:inset(0 0 0 0);opacity:1}18%{transform:translateY(1px);clip-path:inset(0 0 0 0)}22%{clip-path:inset(34% 0 0 0)}100%{transform:none;clip-path:inset(34% 0 0 0);opacity:.92}}
 /* The cut-off top half tumbles sideways and falls out of frame under gravity. */
 @keyframes divine-top-fall{0%{transform:rotate(0) translate(0,0);opacity:0}6%{opacity:1}50%{transform:rotate(74deg) translate(34px,58px);opacity:.95}100%{transform:rotate(176deg) translate(62px,196px);opacity:0}}
@@ -545,8 +545,8 @@ body{background:#10271e}
 @media(max-width:740px){.divine-advance{flex-direction:column;align-items:start}.divine-advance button{width:100%}#cutscene.divine-mode .cutscene-stage{height:min(650px,66vh);aspect-ratio:auto}.divine-plants{inset:35% 1% 8%}.divine-judge{width:42%}.divine-stems{height:69%}.divine-oracle{letter-spacing:1px;font-size:8px}}
 @media(prefers-reduced-motion:reduce){#cutscene.divine-mode,#cutscene.divine-mode.divine-leaving,.divine-scene *{animation:none!important;transition:none!important}.divine-plant.severing .divine-stems{filter:grayscale(1) brightness(.37)}.divine-plant.severing .divine-stems:after{display:none}}
 
-/* The established WebGL garden geometry is also used by Divine Selection.
-   Vector foliage / hand exist only as a graceful no-WebGL fallback. */
+/* The established WebGL grid geometry is also used by Divine Selection.
+   Vector avatars / hand exist only as a graceful no-WebGL fallback. */
 #cutscene-stage .divine-canvas{display:none;position:absolute;inset:0;width:100%;height:100%;z-index:2}
 #cutscene-stage.divine-webgl .divine-canvas{display:block}
 #cutscene-stage.divine-webgl .divine-stars,#cutscene-stage.divine-webgl .divine-halo,
@@ -561,7 +561,7 @@ body{background:#10271e}
 #cutscene-stage.divine-webgl .divine-plant.prior-pruned .divine-name{opacity:.4}
 
 /* Giant gateway: canvas displays true 3D geometry; CSS is the no-WebGL fallback.
-   The portal mouth sits directly above the central flowers, not around the hand. */
+   The portal mouth sits directly above the central nodes, not around the hand. */
 #cutscene .divine-portal{
  position:absolute;left:50%;top:-22%;width:min(78%,660px);aspect-ratio:1;
  z-index:6;border-radius:50%;transform:translateX(-50%);
@@ -601,8 +601,8 @@ body{background:#10271e}
  #cutscene .divine-portal:after,#cutscene .divine-scene .divine-judge{animation:none!important}
 }
 
-/* Rebuilt 3D Royal Judgment: larger cinematic frame for the entire maze garden.
-   The 3D portal, 5x hand, shears, royal hedges, fountains and flower tiers live in
+/* Rebuilt 3D Divine Judgment: larger cinematic frame for the entire neon grid.
+   The 3D portal, 5x hand, mech arm, neon walls, data streams and node tiers live in
    the WebGL mesh. These rules preserve a clear accessible DOM label overlay. */
 #cutscene.divine-mode .cutscene-stage{
  width:min(1590px,98vw);
@@ -647,7 +647,7 @@ body{background:#10271e}
 }
 
 /* Readable five-by-two player identification HUD. Do not project HTML name
-   plates at the flowers: wide-angle perspective makes them overlap by design.
+   plates at the nodes: wide-angle perspective makes them overlap by design.
    The camera can now make cinematic close-ups without scrambling the labels. */
 #cutscene-stage.divine-webgl .divine-plants{
  position:absolute;inset:auto 2% 2%;z-index:6;

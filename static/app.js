@@ -9,10 +9,10 @@ const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const fmt=v=>v===null||v===undefined?'—':Number(v).toLocaleString(undefined,{maximumFractionDigits:3});
 const playedLabel=(n,regulation)=>n>regulation?`${regulation} + ${n-regulation} EXTRA`:`${n}/${regulation}`;
 const money=v=>v===null||v===undefined?'Unassigned':Number(v).toLocaleString('en-US',{style:'currency',currency:'USD'});
-const tabs=[['settings','Players & rules'],['round1','Know Thy Nature'],['round2','Adapt or Wither'],['final','The Last Bloom'],['overview','Leaderboard']];
+const tabs=[['settings','Players & rules'],['round1','Know Your Code'],['round2','Adapt or Delete'],['final','Last Node Standing'],['overview','Leaderboard']];
 const roman=['I','II','III','IV','V'];
 const reducedMotion=()=>window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-// Royal garden audio: birds, shear snaps, compost impacts and floral fanfares. No recordings.
+// Neon Grid audio: ambient blips, purge snaps, void-bin impacts and synth fanfares. No recordings.
 window.BrawlAudio=(()=>{
  let ctx=null,muted=false,active=new Set(),lastRoar=0,lastArrived=false,birdsOn=false,lastChirp=0,nextChirpGap=0;
  function unlock(){try{const C=window.AudioContext||window.webkitAudioContext;if(!ctx&&C)ctx=new C();ctx?.resume();}catch{}}
@@ -61,7 +61,7 @@ window.BrawlAudio=(()=>{
   return first;
  }
  function stop(){for(const n of active)try{n.stop();}catch{}active.clear();birdsOn=false;}
- function roar(big=false){return noise(big?2.4:1.4,big?.10:.055,600);} // Wind rising through the hedges
+ function roar(big=false){return noise(big?2.4:1.4,big?.10:.055,600);} // Static rising through the grid
  function cheer(big=false){const a=roar(big);if(!a)return null;const notes=big?[392,494,587,784,1047]:[392,494,587];notes.forEach((hz,i)=>tone(hz,.5,.035,'sine',hz*.97,i*.15));return a;}
  function boo(){if(silent())return null;for(let i=0;i<3;i++)tone(260-i*45,.6,.045,'triangle',132-i*22,i*.12);return noise(.65,.06,420);}
  function horn(){const a=brass(196,1.1,.06);brass(293.66,1.1,.05);return a;}
@@ -71,7 +71,7 @@ window.BrawlAudio=(()=>{
  function compost(){const thud=noise(.55,.24,230);tone(63,.55,.17,'sine',32);return thud;}
  function slam(){const a=noise(.35,.2,300);tone(60,.4,.15,'sine',40);return a;}
  function victory(){const a=fanfare();cheer(true);return a;}
- // Rising wind and soft chimes build toward the Garden Opens countdown.
+ // Rising static and soft chimes build toward the Grid Powers Up countdown.
  // The cadence advances even while muted so unmuting never releases a backlog.
  function ambience(progress,arrived){
   const n=Number(progress);progress=Number.isFinite(n)?Math.min(1,Math.max(0,n)):0;arrived=!!arrived;
@@ -79,8 +79,8 @@ window.BrawlAudio=(()=>{
   if(!arrived)lastArrived=false;
   const now=Date.now();
   if(arrived&&!lastArrived){lastArrived=true;lastRoar=now;if(allowed){fanfare();roar(true);}return 'begin';}
-  // Periodic roar/murmur booms are intentionally disabled: the garden no longer
-  // randomly booms while it sits/blooms. Only the one-time arrival fanfare above
+  // Periodic roar/murmur booms are intentionally disabled: the grid no longer
+  // randomly booms while it idles/charges. Only the one-time arrival fanfare above
   // (and the morning birdsong) remain, so every non-arrival band now emits no
   // sound and returns null regardless of progress or elapsed time.
   return null;
@@ -88,7 +88,7 @@ window.BrawlAudio=(()=>{
  // A single morning birdsong phrase: a few quick, high, frequency-swept blips.
  function chirp(){if(muted||!ctx||ctx.state!=='running'||document.hidden)return;const base=1850+Math.random()*1500,blips=2+Math.floor(Math.random()*3);for(let i=0;i<blips;i++){const f=base*(.78+Math.random()*.5);tone(f,.06+Math.random()*.05,.03,'sine',f*(1.25+Math.random()*.5));}}
  return {unlock,stop,roar,cheer,boo,horn,fanfare,hook,slam,shears,compost,victory,ambience,
- // Gentle birdsong through the morning garden. The world tick passes
+ // Gentle ambient blips through the booting grid. The world tick passes
  // on=true only during the low-progress morning; chirps obey mute and document.hidden
  // and stop when the countdown intensifies or the player mutes them.
  ambientBirds(on){if(!on){birdsOn=false;return;}if(muted||document.hidden||!ctx||ctx.state!=='running')return;const now=Date.now();if(!birdsOn){birdsOn=true;lastChirp=now;nextChirpGap=0;}if(now-lastChirp>=nextChirpGap){chirp();lastChirp=now;nextChirpGap=1400+Math.random()*2600;}},
@@ -156,18 +156,18 @@ function panel(name,body,right=''){return `<section class="panel"><div class="pa
 // A visible, always-available 'Clear this round' .danger panel. The copy states the
 // exact downstream cascade (round1 clears all three, round2 clears round2+final,
 // final clears only final). Clearing routes through doDestructive so it is undoable.
-const clearRoundBlurb={round1:'Clears Know Thy Nature and every later round (Adapt or Wither and The Last Bloom). Earlier rounds do not exist for Know Thy Nature, so nothing before it is touched.',round2:'Clears Adapt or Wither and The Last Bloom. Know Thy Nature and its results are kept.',final:'Clears The Last Bloom only. Know Thy Nature and Adapt or Wither are kept.'};
+const clearRoundBlurb={round1:'Clears Know Your Code and every later round (Adapt or Delete and Last Node Standing). Earlier rounds do not exist for Know Your Code, so nothing before it is touched.',round2:'Clears Adapt or Delete and Last Node Standing. Know Your Code and its results are kept.',final:'Clears Last Node Standing only. Know Your Code and Adapt or Delete are kept.'};
 function clearRoundPanel(key){return panel('Clear this round','<p class="hint">'+clearRoundBlurb[key]+' You can Undo this straight afterwards.</p><button class="danger" data-action="clear-round" data-stage="'+key+'">'+clearRoundCopy[key]+'</button>');}
 function roomLock(key){
  if(key==='round1')return view.names_ok?'':'Enter ten unique player names in Players & rules.';
- if(key==='round2')return !view.names_ok?'Enter ten unique player names first.':view.round1.complete?'':'Finish Know Thy Nature and resolve its cut ties.';
- if(key==='final')return !view.names_ok?'Enter ten unique player names first.':!view.round1.complete?'Finish Know Thy Nature and resolve its cut ties.':view.round2.complete?'':'Finish Adapt or Wither and resolve its cut ties.';
+ if(key==='round2')return !view.names_ok?'Enter ten unique player names first.':view.round1.complete?'':'Finish Know Your Code and resolve its cut ties.';
+ if(key==='final')return !view.names_ok?'Enter ten unique player names first.':!view.round1.complete?'Finish Know Your Code and resolve its cut ties.':view.round2.complete?'':'Finish Adapt or Delete and resolve its cut ties.';
  return '';
 }
 function lockAttrs(key){const reason=roomLock(key);return reason?' disabled aria-disabled="true" title="'+esc(reason)+'"':'';}
 function gateStages(){
  const setup={key:'settings',label:'Players & rules',status:view.names_ok?'complete':'current',detail:view.names_ok?'Roster ready · rules editable':'Enter ten unique names'};
- return [setup,...[['round1','Know Thy Nature'],['round2','Adapt or Wither'],['final','The Last Bloom']].map(([key,label])=>{
+ return [setup,...[['round1','Know Your Code'],['round2','Adapt or Delete'],['final','Last Node Standing']].map(([key,label])=>{
   const v=view[key],reason=roomLock(key),status=reason?'sealed':v.complete?'complete':'current';
   const cut=v.rows.filter(r=>r.status==='CUT').map(r=>r.name);
   const detail=reason||(status==='complete'?(key==='final'?'Podium settled':cut.length?'Cut: '+cut.join(' · '):'Qualification settled'):v.ready?'Resolve extra-game ties':v.games.filter(g=>g.ready).length+' / '+v.games.length+' matches');
@@ -179,9 +179,9 @@ function renderRoom(){
  $('#room-stats').innerHTML='<div><b>'+registered+'<small> / 10</small></b><small>REGISTERED</small></div><div><b>'+money(view.pool)+'</b><small>PRIZE POOL</small></div>';
  const rooms=[
   ['settings',roman[0],'Players & rules',registered+' / 10 PLAYERS READY'],
-  ['round1',roman[1],'Know Thy Nature',view.round1.games.filter(g=>g.ready).length+' / 5 MATCHES'],
-  ['round2',roman[2],'Adapt or Wither',view.round2.games.filter(g=>g.ready).length+' / 5 MATCHES'],
-  ['final',roman[3],'The Last Bloom',view.final.games.filter(g=>g.ready).length+' / 8 MATCHES'],
+  ['round1',roman[1],'Know Your Code',view.round1.games.filter(g=>g.ready).length+' / 5 MATCHES'],
+  ['round2',roman[2],'Adapt or Delete',view.round2.games.filter(g=>g.ready).length+' / 5 MATCHES'],
+  ['final',roman[3],'Last Node Standing',view.final.games.filter(g=>g.ready).length+' / 8 MATCHES'],
   ['overview',roman[4],'Leaderboard',money(view.awarded)+' AWARDED']
  ];
  const stages=gateStages(),stageMap=Object.fromEntries(stages.map(s=>[s.key,s]));
@@ -207,9 +207,9 @@ function nextStepBanner(next,finished){
  const tieIn=key=>view[key].rows.some(r=>r.status&&r.status.startsWith('TIE'));
  let msg,label,target=next;
  if(next==='settings'){msg='Start here: enter 10 unique player names.';label='Open Players & rules';}
- else if(next==='round1'){msg=tieIn('round1')?'Resolve the Know Thy Nature tie (add extra games) before Adapt or Wither.':(view.round1.issues[0]||'Score the five Know Thy Nature games, then submit.');label='Open Know Thy Nature';}
- else if(next==='round2'){msg=view.round2.issues[0]||'Play five 4v4 games with changing teams; reshuffle before entering scores for a game.';label='Open Adapt or Wither';}
- else{msg=view.final.issues[0]||'Survive eight final matches. Only the last bloom wins $30.';label='Open The Last Bloom';}
+ else if(next==='round1'){msg=tieIn('round1')?'Resolve the Know Your Code tie (add extra games) before Adapt or Delete.':(view.round1.issues[0]||'Score the five Know Your Code games, then submit.');label='Open Know Your Code';}
+ else if(next==='round2'){msg=view.round2.issues[0]||'Play five 4v4 games with changing teams; reshuffle before entering scores for a game.';label='Open Adapt or Delete';}
+ else{msg=view.final.issues[0]||'Survive eight final matches. Only the last node standing wins $30.';label='Open Last Node Standing';}
  return `<div class="notice next-step"><div><div class="eyebrow">WHAT TO DO NEXT</div><strong>${esc(msg)}</strong></div><button class="accent" data-tab="${target}">${label} ↗</button></div>`;
 }
 function overview(){
@@ -218,7 +218,7 @@ function overview(){
  let html=title('NODE V / LIVE FEED','Leaderboard','Run every round, track every player, and settle the podium.',finished?'TOURNAMENT COMPLETE':'TOURNAMENT IN PROGRESS');
  html+=nextStepBanner(next,finished);
  html+=`<div class="cards">${card('REGISTERED PLAYERS',Object.values(state.names).filter(v=>v.trim()).length,'10 tournament places')}${card('CHAMPION PRIZE',money(view.pool),'Only 1st place wins')}${card('ROUNDS COMPLETE',`${done} / 3`,'Two cutting rounds + final')}${card('WINNER PAID',money(view.awarded),'No payout while first place is tied')}</div>`;
- html+=`<div class="round-path">${[['round1','01 · Know Thy Nature','Read your own code · 10 → 8'],['round2','02 · Adapt or Wither','Survive through change · 8 → 6'],['final','03 · The Last Bloom','Only one node survives · 6 → 1']].map(([k,t,d])=>`<button data-tab="${k}" ${lockAttrs(k)} class="${next===k?'accent':''}">${t}<small>${view[k].complete?'Complete':d}</small></button>`).join('')}</div>`;
+ html+=`<div class="round-path">${[['round1','01 · Know Your Code','Read your own code · 10 → 8'],['round2','02 · Adapt or Delete','Survive through change · 8 → 6'],['final','03 · Last Node Standing','Only one node survives · 6 → 1']].map(([k,t,d])=>`<button data-tab="${k}" ${lockAttrs(k)} class="${next===k?'accent':''}">${t}<small>${view[k].complete?'Complete':d}</small></button>`).join('')}</div>`;
  html+='<section id="screen-podium" aria-label="Live final podium"></section>';
  const rowmap=key=>Object.fromEntries(view[key].rows.map(r=>[r.id,r]));const a=rowmap('round1'),b=rowmap('round2'),c=rowmap('final');
  const everyPlayerRows=ids.map(p=>
@@ -228,7 +228,7 @@ function overview(){
  );
  html+=panel(
   'Every player',
-  table(['PLAYER','KNOW THY NATURE','ADAPT OR WITHER','FINAL RANK','TOTAL POINTS','PRIZE'],everyPlayerRows),
+  table(['PLAYER','KNOW YOUR CODE','ADAPT OR DELETE','FINAL RANK','TOTAL POINTS','PRIZE'],everyPlayerRows),
   `<button data-action="csv">Export CSV</button>`
  );
  if(final.rows.length){
@@ -316,7 +316,7 @@ document.addEventListener('submit',e=>{
 });
 
 function extras(key){const stage=state[key],v=view[key];if(!v.rows.length)return '';
- let html='<p class="hint">Enter extra-game scores only for tied players. Their totals and averages include these games, but places stay tied until everyone in the group has a score (and W/L in The Last Bloom). If a tie remains, add another game for that remaining group. Already settled places stay fixed. Remove deletes one extra game; Clear all removes every extra game in this round. Either action can be undone.</p>';
+ let html='<p class="hint">Enter extra-game scores only for tied players. Their totals and averages include these games, but places stay tied until everyone in the group has a score (and W/L in Last Node Standing). If a tie remains, add another game for that remaining group. Already settled places stay fixed. Remove deletes one extra game; Clear all removes every extra game in this round. Either action can be undone.</p>';
  stage.extras.forEach((_,i)=>{
   const cells=v.rows.map(r=>{
    const field=key==='final'
@@ -336,28 +336,28 @@ function extras(key){const stage=state[key],v=view[key];if(!v.rows.length)return
 /* Ten original competitors remain on display in every trial. A player's avatar
    grows from their cumulative, engine-scored goals; eliminated avatars are deleted,
    not removed from the grid. The opening countdown charges separately. */
-const plantStages=['round1','round2','final'];
-const plantNames=['Cold boot','First spark','Flickering node','Live node','Bright construct','Overclocked core','Full power'];
-function plantTier(goals){
+const rosterStages=['round1','round2','final'];
+const nodeTierNames=['Cold boot','First spark','Flickering node','Live node','Bright construct','Overclocked core','Full power'];
+function nodeTier(goals){
  return goals<=0?0:goals<3?1:goals<6?2:goals<10?3:goals<15?4:goals<21?5:6;
 }
-function plantGardenModel(key){
- const depth=plantStages.indexOf(key);
+function nodeRosterModel(key){
+ const depth=rosterStages.indexOf(key);
  if(depth<0)return [];
- const roundRows=Object.fromEntries(plantStages.map(k=>[k,new Map((view[k]?.rows||[]).map(r=>[r.id,r]))]));
+ const roundRows=Object.fromEntries(rosterStages.map(k=>[k,new Map((view[k]?.rows||[]).map(r=>[r.id,r]))]));
  const first=view.round1.complete?new Set(view.round1.survivors):null;
  const second=view.round2.complete?new Set(view.round2.survivors):null;
  const champion=key==='final'&&view.final.complete?new Set(view.final.rows.filter(r=>r.rank===1).map(r=>r.id)):null;
  return ids.map((id,i)=>{
-  const goals=plantStages.slice(0,depth+1).reduce((total,stage)=>total+Math.max(0,Number(roundRows[stage].get(id)?.goals)||0),0);
+  const goals=rosterStages.slice(0,depth+1).reduce((total,stage)=>total+Math.max(0,Number(roundRows[stage].get(id)?.goals)||0),0);
   const roundGoals=Math.max(0,Number(roundRows[key].get(id)?.goals)||0);
   const pruned=!!((depth>=1&&first&&!first.has(id))||(depth>=2&&second&&!second.has(id))||(champion&&!champion.has(id)));
   const name=state.names[id]?.trim()||`Player ${i+1}`;
   const status=pruned?'PRUNED':champion?.has(id)?'CHAMPION':roundRows[key].has(id)?'GROWING':'WAITING';
-  return {id,name,goals,roundGoals,tier:plantTier(goals),status,pruned};
+  return {id,name,goals,roundGoals,tier:nodeTier(goals),status,pruned};
  });
 }
-function plantSvg(level){
+function nodeSvg(level){
  // A neon avatar / data-construct: a glowing core column with boot-up fins and
  // an orbiting corona of data plates that grows denser with each goal tier.
  const tip=94-level*10,leafCount=Math.min(level+1,6);
@@ -376,28 +376,28 @@ function plantSvg(level){
   }).join('')+`<circle cx="56" cy="${tip+5}" r="${3+level*.5}" fill="#4fe6ff" stroke="#1685ad"/>`;
  }
  const base=`<ellipse cx="56" cy="126" rx="34" ry="5" fill="#071320" opacity=".5"/><path d="M39 107 L73 107 L69 125 L43 125 Z" fill="#13405c" stroke="#2fb4df" stroke-width="1.5"/><path d="M37 105 H75 V111 H37 Z" fill="#1a5c82" stroke="#5fd6f1" stroke-width="1"/>`;
- return `<svg class="plant-art" viewBox="0 0 112 135" aria-hidden="true" focusable="false">${level>=5?`<ellipse cx="56" cy="${tip+7}" rx="30" ry="26" fill="#39e3ff" opacity=".12"/>`:''}<path d="M56 109 Q${60+level} ${tip+30} 56 ${tip+8}" fill="none" stroke="#2bbfe6" stroke-width="${2.4+level*.6}" stroke-linecap="round"/>${leaf}${head}${base}</svg>`;
+ return `<svg class="node-art" viewBox="0 0 112 135" aria-hidden="true" focusable="false">${level>=5?`<ellipse cx="56" cy="${tip+7}" rx="30" ry="26" fill="#39e3ff" opacity=".12"/>`:''}<path d="M56 109 Q${60+level} ${tip+30} 56 ${tip+8}" fill="none" stroke="#2bbfe6" stroke-width="${2.4+level*.6}" stroke-linecap="round"/>${leaf}${head}${base}</svg>`;
 }
-function plantGarden(key){
- const model=plantGardenModel(key);
+function nodeRoster(key){
+ const model=nodeRosterModel(key);
  const cards=model.map((p,i)=>
-  `<li class="plant-card ${p.pruned?'pruned':''} ${p.status==='CHAMPION'?'champion':''}" data-player="${p.id}" data-goals="${p.goals}" data-tier="${p.tier}">`+
-  `<div class="plant-top"><span>NODE ${String(i+1).padStart(2,'0')}</span><span class="plant-state">${p.status}</span></div>`+
-  `${plantSvg(p.tier)}<strong class="plant-name">${esc(p.name)}</strong>`+
-  `<div class="plant-count"><b>${p.goals}</b> total ${p.goals===1?'goal':'goals'}</div>`+
-  `<small>${p.roundGoals} this round · ${plantNames[p.tier]}</small></li>`
+  `<li class="node-card ${p.pruned?'pruned':''} ${p.status==='CHAMPION'?'champion':''}" data-player="${p.id}" data-goals="${p.goals}" data-tier="${p.tier}">`+
+  `<div class="node-top"><span>NODE ${String(i+1).padStart(2,'0')}</span><span class="node-state">${p.status}</span></div>`+
+  `${nodeSvg(p.tier)}<strong class="node-name">${esc(p.name)}</strong>`+
+  `<div class="node-count"><b>${p.goals}</b> total ${p.goals===1?'goal':'goals'}</div>`+
+  `<small>${p.roundGoals} this round · ${nodeTierNames[p.tier]}</small></li>`
  ).join('');
- return `<section class="plant-garden" aria-labelledby="${key}-plant-title"><div class="plant-heading"><div>`+
+ return `<section class="node-roster" aria-labelledby="${key}-node-title"><div class="node-roster-heading"><div>`+
   `<span class="eyebrow">THE LIVE GRID / ${key==='round1'?'01':key==='round2'?'02':'03'}</span>`+
-  `<h2 id="${key}-plant-title">Ten nodes. Ten futures.</h2></div>`+
+  `<h2 id="${key}-node-title">Ten nodes. Ten futures.</h2></div>`+
   `<p>Every competitor boots as a cold node at 0 goals. More goals charge a brighter, higher-power construct. Charge carries across rounds; deleted nodes stay dark.</p></div>`+
-  `<ol class="plant-grid">${cards}</ol></section>`;
+  `<ol class="node-grid">${cards}</ol></section>`;
 }
 
 
 /* The judgement is an explicit transition, not a side effect of scoring.
-   Exactly the two engine-cut players are targeted. The original ten plants
-   remain visible, including already-pruned competitors in later rounds. */
+   Exactly the two engine-cut players are targeted. The original ten nodes
+   remain visible, including already-deleted competitors in later rounds. */
 const visitedVerdicts=new Set();
 let finalCeremonyShown=false;
 function resetCeremonyHistory(stage){
@@ -407,7 +407,7 @@ function resetCeremonyHistory(stage){
 }
 function advancementButton(stage){
  if(!view[stage]?.complete||!['round1','round2'].includes(stage))return '';
- const target=stage==='round1'?'Adapt or Wither':'The Last Bloom';
+ const target=stage==='round1'?'Adapt or Delete':'Last Node Standing';
  return `<div class="panel divine-advance"><div><span class="eyebrow">THE SYSTEM AWAITS</span><h2>Judgement before the next trial</h2><p>Enter the grid. The system will scan the surviving nodes for five seconds before deleting this round's two eliminated competitors.</p></div><button class="accent" data-action="advance-stage" data-stage="${stage}">Continue to ${target} →</button></div>`;
 }
 function divineHandSvg(){
@@ -429,7 +429,7 @@ function divineHandSvg(){
 }
 function divineModels(stage){
  const earlier=stage==='final'&&view.round2?.complete?new Set(view.round2.survivors):null;
- return plantGardenModel(stage).map(p=>({ ...p,priorPruned:earlier?!earlier.has(p.id):p.pruned }));
+ return nodeRosterModel(stage).map(p=>({ ...p,priorPruned:earlier?!earlier.has(p.id):p.pruned }));
 }
 function divineCuts(stage){
  return (view[stage]?.rows||[]).filter(p=>stage==='final'?p.rank!==1:p.status==='CUT').sort((a,b)=>stage==='final'?(b.rank||0)-(a.rank||0):(a.rank||99)-(b.rank||99)).map(p=>p.id);
@@ -438,17 +438,17 @@ function renderDivineScene(stage,cuts,latest=-1){
  const models=divineModels(stage);
  const i=latest>=0?models.findIndex(p=>p.id===cuts[latest]):-1;
  const strikeX=i<0?50:10+20*(i%5),strikeY=i<0?3:(i<5?17:43);
- const flowers=models.map((p,n)=>{
+ const avatars=models.map((p,n)=>{
   const idx=cuts.indexOf(p.id),severed=idx>=0&&idx<latest,severing=idx>=0&&idx===latest;
   const cls=p.priorPruned?'prior-pruned':severed?'severed':severing?'severing':'';
-  return `<div class="divine-plant ${cls}" data-player="${p.id}" data-goals="${p.goals}"><div class="divine-stems">${plantSvg(p.tier)}</div><strong class="divine-name">${esc(p.name)}</strong><small>${p.goals} ${p.goals===1?'GOAL':'GOALS'}</small><em class="divine-stage-name">${esc(plantNames[p.tier]||'Node')}</em><b class="divine-cut-label">${p.priorPruned||severed?'DELETED':severing?'TARGETED':''}</b></div>`;
+  return `<div class="divine-plant ${cls}" data-player="${p.id}" data-goals="${p.goals}"><div class="divine-stems">${nodeSvg(p.tier)}</div><strong class="divine-name">${esc(p.name)}</strong><small>${p.goals} ${p.goals===1?'GOAL':'GOALS'}</small><em class="divine-stage-name">${esc(nodeTierNames[p.tier]||'Node')}</em><b class="divine-cut-label">${p.priorPruned||severed?'DELETED':severing?'TARGETED':''}</b></div>`;
  }).join('');
  const html=`<div class="divine-scene ${latest>=0?'is-cutting':'is-thinking'}" data-stage="${stage}" style="--strike-x:${strikeX}%;--strike-y:${strikeY}%">`+
   `<canvas class="divine-canvas" aria-label="A gigantic neon mech arm and plasma grip-claw descending through a vortex above ten three-dimensional neon avatars"></canvas>`+
   `<div class="divine-stars"></div><div class="divine-halo"></div><div class="divine-portal" aria-hidden="true"></div>`+
   `<div class="divine-judge">${divineHandSvg()}</div>`+
   `<div class="divine-oracle">${latest<0?'THE SYSTEM SCANS':'THE VERDICT IS ABSOLUTE'}</div>`+
-  `<div class="divine-plants">${flowers}</div><div class="divine-flash"></div>`+
+  `<div class="divine-plants">${avatars}</div><div class="divine-flash"></div>`+
   `<div class="divine-progress">${latest<0?'VERDICT IN 5 SECONDS':`DELETING ${latest+1} OF ${cuts.length}`}</div></div>`;
  const host=$('#cutscene-stage');
  // One continuous WebGL scene: do not destroy the canvas, reset the portal
@@ -488,7 +488,7 @@ function strikeDivinePlant(stage,cuts,i){
   if(stage==='final'){
    const winner=view.final.rows.find(p=>p.rank===1);
    window.Divine3D?.celebrate?.(winner?.id);
-   $('#cutscene-caption').innerHTML='<strong>THE CHAMPION COMES ONLINE</strong><br>'+esc(winner?.name||'THE LAST BLOOM');
+   $('#cutscene-caption').innerHTML='<strong>THE CHAMPION COMES ONLINE</strong><br>'+esc(winner?.name||'LAST NODE STANDING');
    const label=Array.from($('#cutscene-stage').querySelectorAll?.('.divine-plant')||[]).find(el=>el.dataset.player===winner?.id);
    label?.classList.add('divine-champion');
    const badge=label?.querySelector('.divine-cut-label');if(badge)badge.textContent='CHAMPION NODE';
@@ -556,7 +556,7 @@ async function advanceTournament(stage){
 // Per-match submit + popup/fullscreen. Submitting a non-final match shows cumulative
 // round standings THROUGH that match (computed client-side); submitting the last match
 // shows the fullscreen total round ranking with ADVANCE/CUT/TIE and the add-extra flow.
-const stageMeta={round1:{count:5,label:'Know Thy Nature'},round2:{count:5,label:'Adapt or Wither'},final:{count:8,label:'The Last Bloom'}};
+const stageMeta={round1:{count:5,label:'Know Your Code'},round2:{count:5,label:'Adapt or Delete'},final:{count:8,label:'Last Node Standing'}};
 function provisionalRanks(rows,compare){
  rows.sort((a,b)=>compare(a,b)||a.name.localeCompare(b.name));
  let rank=1;
@@ -575,7 +575,7 @@ function cumulativeStandings(key,n){
   });
   return provisionalRanks(rows,(a,b)=>b.total-a.total);
  }
- // Know Thy Nature has no sit-out schedule; every player plays every game. Derive an
+ // Know Your Code has no sit-out schedule; every player plays every game. Derive an
  // {A,B,sit:[]} shape from the per-game cosmetic lineups so the popup grouping
  // matches, falling back to all-of-A when a game's split is not yet generated.
  const schedule=v.schedule||v.games.map(m=>({A:(m.teams&&m.teams.A.length?m.teams.A.concat(m.teams.B):ids),B:[],sit:[]}));
@@ -589,7 +589,7 @@ function cumulativeStandings(key,n){
  });
  return provisionalRanks(rows,(a,b)=>b.total*(a.played||1)-a.total*(b.played||1));
 }
-// The accent 'Submit Match N of X' panel for Know Thy Nature and The Last Bloom (mirrors Adapt or Wither's
+// The accent 'Submit Match N of X' panel for Know Your Code and Last Node Standing (mirrors Adapt or Delete's
 // .match-completion look). Disabled until that match's view games[match].ready is true
 // and the stage is not stale. Client-side: validates readiness then opens the popup.
 function matchSubmit(key,match){
@@ -693,13 +693,13 @@ function closeResult(){
 function round(key){
  if(key==='round2')return round2Page();
  const v=view.round1;
- let html=title('ROUND 01 · THE ROOTS','Know Thy Nature','The first principle: growth begins with understanding your own roots. Confront your weaknesses, study your mistakes, and change your play. Across five 5v5 games, only eight of ten take root.','10 → 8 PLAYERS')+notice(v.issues);
- html+=plantGarden('round1');
+ let html=title('ROUND 01 · COLD BOOT','Know Your Code','The first principle: power begins with understanding your own code. Confront your weaknesses, study your mistakes, and change your play. Across five 5v5 games, only eight of ten stay online.','10 → 8 PLAYERS')+notice(v.issues);
+ html+=nodeRoster('round1');
  html+=`<div class="games">${v.games.map(g=>`<div class="game ${g.ready?'ready':''}"><b>Game ${g.game}</b>A: ${g.counts.A}/5 · B: ${g.counts.B}/5</div>`).join('')}</div>`;
  round1Game=Math.min(round1Game,4);
  html+=matchScoreboard('round1',round1Game);
  const g=round1Game,match=v.games[g].teams,rowmap=Object.fromEntries(v.rows.map(r=>[r.id,r]));
- html+=`<div class="match-tabs" aria-label="Know Thy Nature match selector">${v.games.map((m,i)=>`<button data-r1-game="${i}" aria-pressed="${i===round1Game}" class="${i===round1Game?'active':''} ${m.ready?'ready':''}">G${i+1}</button>`).join('')}</div>`;
+ html+=`<div class="match-tabs" aria-label="Know Your Code match selector">${v.games.map((m,i)=>`<button data-r1-game="${i}" aria-pressed="${i===round1Game}" class="${i===round1Game?'active':''} ${m.ready?'ready':''}">G${i+1}</button>`).join('')}</div>`;
  const scored=v.games[g].counts.A+v.games[g].counts.B>0;
  const rerollOff=lineupBusy||scored;
  const rerollWhy=scored?'This game already has scores. Clear them before reshuffling.':lineupBusy?'Wait for the current draw to finish.':'';
@@ -732,10 +732,10 @@ function round(key){
 }
 function round2Page(){
  const v=view.round2;round2Game=Math.min(round2Game,Math.max(0,v.draw.revealed-1));const g=round2Game;
- let html=title('ROUND 02 · NATURAL SELECTION','Adapt or Wither','Nature rewards those who change with their environment. Abandon familiar habits, adapt to unfamiliar teammates, and survive five shifting 4v4 games. Only six of eight remain.','8 → 6 PLAYERS')+notice(v.issues);
- html+=plantGarden('round2');
+ let html=title('ROUND 02 · ADAPT OR DELETE','Adapt or Delete','The grid rewards constructs that rewrite themselves. Abandon familiar habits, adapt to unfamiliar teammates, and survive five shifting 4v4 games. Only six of eight stay online.','8 → 6 PLAYERS')+notice(v.issues);
+ html+=nodeRoster('round2');
  if(v.stale)return html+notice(['The survivor list changed. Clear this round and the final to generate new 4v4 matchups.'])+clearRoundPanel('round2');
- if(!v.rows.length)return html+panel('Waiting for survivors','<div class="empty">Finish Know Thy Nature. The eight survivors enter five varied 4v4 matches.</div>')+clearRoundPanel('round2');
+ if(!v.rows.length)return html+panel('Waiting for survivors','<div class="empty">Finish Know Your Code. The eight survivors enter five varied 4v4 matches.</div>')+clearRoundPanel('round2');
  if(!v.draw.order.length)return html+panel('Draw 4v4 matchups','<p>Create five different 4v4 team assignments. No player sits out, and you can reshuffle the next game before recording any goals.</p><button class="accent" data-action="r2-start" '+(lineupBusy?'disabled':'')+'>Generate balanced 4v4 games ↗</button>')+clearRoundPanel('round2');
  html+='<div class="score-help">FIVE 4v4 GAMES · CHANGING TEAMS · ALL EIGHT PLAY EVERY GAME · INDIVIDUAL GOALS DECIDE ADVANCEMENT</div>';
  const r2Tabs=v.games.map((m,i)=>{
@@ -782,16 +782,16 @@ function round2Page(){
 
 function counter(path,label,disabled=false){const n=value(path)||0,rule=goalRule(path);return `<div class="counter"><button data-step="-1" data-target="${path}" aria-label="Subtract one goal for ${esc(label)}" ${disabled||n<=0?'disabled':''}>−</button>${inp(path,label+' goals','number',disabled)}<button data-step="1" data-target="${path}" aria-label="Add one goal for ${esc(label)}" ${disabled||(rule&&n>=rule.max)?'disabled':''}>+</button></div>`;}
 function finalPage(){const v=view.final,g=finalGame;
- let html=title('ROUND 03 · THE WILL TO LIVE','The Last Bloom','Six reach the final garden, but only one can bloom. Stay composed, act decisively, and endure eight 3v3 matches. First place alone receives $30; the other five receive $0.',`GAMES 1 & 2 ×${fmt(state.settings.multiplier)}`)+notice(v.issues);
+ let html=title('ROUND 03 · LAST NODE STANDING','Last Node Standing','Six reach the final grid, but only one stays lit. Stay composed, act decisively, and endure eight 3v3 matches. First place alone receives $30; the other five receive $0.',`GAMES 1 & 2 ×${fmt(state.settings.multiplier)}`)+notice(v.issues);
  html+='<section id="screen-podium" aria-label="Live final podium"></section>';
- html+=plantGarden('final');
- if(v.stale)html+=notice(['This roster changed since The Last Bloom was scored. Clearing The Last Bloom re-syncs it to the current finalists.']);
- if(!v.rows.length)return html+panel('Waiting for finalists','<div class="empty">Finish Adapt or Wither and resolve cut ties. Your six finalists will appear automatically.</div>')+clearRoundPanel('final');
+ html+=nodeRoster('final');
+ if(v.stale)html+=notice(['This roster changed since Last Node Standing was scored. Clearing Last Node Standing re-syncs it to the current finalists.']);
+ if(!v.rows.length)return html+panel('Waiting for finalists','<div class="empty">Finish Adapt or Delete and resolve cut ties. Your six finalists will appear automatically.</div>')+clearRoundPanel('final');
  html+=`<div class="score-help">GOAL = ${fmt(state.settings.goal_points)} PTS / WIN = ${fmt(state.settings.win_points)} PTS · Games 1–2 ×${fmt(state.settings.multiplier)} · Games 3–8 ×1</div>`;
  html+=`<div class="match-tabs" aria-label="Final match selector">${v.games.map((m,i)=>`<button data-game="${i}" aria-pressed="${i===g}" class="${i===g?'active':''} ${m.ready?'ready':''}">G${i+1}${i<2?' ×'+fmt(state.settings.multiplier):''}</button>`).join('')}</div>`;
  const schedule=v.schedule[g],rowmap=Object.fromEntries(v.rows.map(r=>[r.id,r]));
  html+=matchScoreboard('final',g);
- const fClearOff=v.stale||lineupBusy,fClearWhy=v.stale?'Clear The Last Bloom first — the roster changed since these scores.':'Wait for the current draw to finish.';
+ const fClearOff=v.stale||lineupBusy,fClearWhy=v.stale?'Clear Last Node Standing first — the roster changed since these scores.':'Wait for the current draw to finish.';
  html+=`<div class="match-topline"><div><h2>Game ${g+1} <span class="stage-title-number">/ 8</span></h2><p>Enter each player’s goals, then mark the winning team.</p>`+
   `${fClearOff?`<p class="hint reason">${esc(fClearWhy)}</p>`:''}</div>`+
   `<button class="danger clear-score" data-action="clear-game" ${fClearOff?`disabled title="${esc(fClearWhy)}" aria-disabled="true"`:''}>Clear this game</button></div><div class="teams-grid">`;
@@ -801,7 +801,7 @@ function finalPage(){const v=view.final,g=finalGame;
    `<div class="player-score"><div class="player-name">${esc(state.names[p])}<small>${fmt(rowmap[p].game_points[g])} POINTS THIS GAME</small></div>`+
    `${counter(`final.players.${p}.goals.${g}`,`${state.names[p]} game ${g+1}`,v.stale||lineupBusy)}</div>`
   ).join('');
-  const winnerBtnAttr=v.stale?`disabled title="${esc(v.issues[0]||'Clear The Last Bloom first — the roster changed since these scores.')}" aria-disabled="true"`:'';
+  const winnerBtnAttr=v.stale?`disabled title="${esc(v.issues[0]||'Clear Last Node Standing first — the roster changed since these scores.')}" aria-disabled="true"`:'';
   html+=`<section class="team-score team-${team.toLowerCase()}"><div class="team-head"><div><small>GAME ${g+1}</small><h2>Team ${team}</h2></div>`+
    `<button data-winner="${team}" aria-pressed="${won}" class="${won?'accent':''}" ${winnerBtnAttr}>${won?'✓ WIN RECORDED':lost?'LOSS RECORDED':'Mark win +1'}</button></div>`+
    `${teamPlayers}</section>`;
@@ -836,7 +836,7 @@ async function rerollRound1Game(game){
  lineupBusy=true;
  // Snapshot the pre-reroll state so Undo can restore the prior split. The server
  // echo overwrites state below, so capture before the PUT and keep the snapshot.
- const snap={state:clone(state),label:'Undo: Reshuffle Know Thy Nature Game '+(game+1)};
+ const snap={state:clone(state),label:'Undo: Reshuffle Know Your Code Game '+(game+1)};
  try{
   await flush();
   const res=await fetch('/api/round1-lineup',{method:'PUT',headers:{'Content-Type':'application/json','X-Session-Token':token},body:JSON.stringify({action:'reroll',game:game+1,revision})});
@@ -846,7 +846,7 @@ async function rerollRound1Game(game){
 }
 async function progressRound2(action,game){
  if(lineupBusy)return false;
- const snap=action==='reroll'?{state:clone(state),label:'Undo: Reshuffle Adapt or Wither Game '+game}:null;
+ const snap=action==='reroll'?{state:clone(state),label:'Undo: Reshuffle Adapt or Delete Game '+game}:null;
  lineupBusy=true;
  try{
   await flush();
@@ -869,7 +869,7 @@ function render(){
  $('#nav').innerHTML=tabs.map(([k,label],i)=>`<button data-tab="${k}" ${lockAttrs(k)} class="${tab===k?'active':''}" aria-current="${tab===k?'page':'false'}"><b>${roman[i]}</b>${label}<span>${view[k]?.complete?'✓':''}</span></button>`).join('');
  $('#breadcrumb').textContent=`BH / NODE ${roman[tabs.findIndex(t=>t[0]===tab)]} / ${tabs.find(t=>t[0]===tab)[1].toUpperCase()}`;
  const legacyNotice=(state.legacy_round2_rotation||state.legacy_round2)
-  ?'<div class="notice">Your old Round 2 and final are archived in the downloadable backup. Adapt or Wither uses five 4v4 games with reshuffled teams. Any prior incompatible round scores are archived. Know Thy Nature, names, and settings are preserved.</div>'
+  ?'<div class="notice">Your old Round 2 and final are archived in the downloadable backup. Adapt or Delete uses five 4v4 games with reshuffled teams. Any prior incompatible round scores are archived. Know Your Code, names, and settings are preserved.</div>'
   :state.legacy_final
    ?'<div class="notice">Your old five-game final is archived in the downloadable backup.</div>'
    :'';
@@ -987,8 +987,8 @@ async function performUndo(){
 }
 const resetCascade=key=>key==='round1'?['round1','round2','final']:key==='round2'?['round2','final']:['final'];
 // Human-readable labels for the per-round clear-round controls and their cascade.
-const clearRoundLabel={round1:'Clear Know Thy Nature',round2:'Clear Adapt or Wither',final:'Clear The Last Bloom'};
-const clearRoundCopy={round1:'Clear Know Thy Nature (also clears Adapt or Wither &amp; The Last Bloom)',round2:'Clear Adapt or Wither (also clears The Last Bloom)',final:'Clear The Last Bloom'};
+const clearRoundLabel={round1:'Clear Know Your Code',round2:'Clear Adapt or Delete',final:'Clear Last Node Standing'};
+const clearRoundCopy={round1:'Clear Know Your Code (also clears Adapt or Delete &amp; Last Node Standing)',round2:'Clear Adapt or Delete (also clears Last Node Standing)',final:'Clear Last Node Standing'};
 function resetStage(key){resetCeremonyHistory(key);for(const k of resetCascade(key)){state[k].extras=[];state[k].roster=[];if(k==='round2')state[k].draw={order:[],lineups:[],revealed:0,completed:0,mode:'random'};if(k==='round1')state[k].lineups=[];for(const d of Object.values(state[k].players)){d.goals=Array(k==='final'?8:5).fill(null);if(k==='final')d.results=Array(8).fill('');}}}
 function markWinner(team,game=finalGame){const match=view.final.schedule[game];if(!match||view.final.stale)return;for(const t of ['A','B'])for(const p of match[t])state.final.players[p].results[game]=t===team?'W':'L';}
 document.addEventListener('input',e=>{
@@ -1033,9 +1033,9 @@ document.addEventListener('click',async e=>{const b=e.target.closest('button');i
  if(action==='remove-extra'){await flush();const index=Number(b.dataset.index);doDestructive('Undo: Remove extra game '+(index+1),()=>{state[key].extras.splice(index,1);});await save();}
  if(action==='clear-extras'){await flush();doDestructive('Undo: Clear all extra games',()=>{state[key].extras=[];});await save();}
  if(action==='undo'){await performUndo();return;}
- if(action==='clear-r1-game'){await flush();const g=round1Game;doDestructive('Undo: Clear Know Thy Nature Game '+(g+1),()=>{for(const p of ids)state.round1.players[p].goals[g]=null;});await save();}
- if(action==='clear-r2-game'){await flush();const g=round2Game;doDestructive('Undo: Clear Adapt or Wither Game '+(g+1),()=>{for(const p of view.round2.rows.map(r=>r.id))state.round2.players[p].goals[g]=null;});await save();}
- if(action==='clear-game'){await flush();const g=finalGame;doDestructive('Undo: Clear The Last Bloom Game '+(g+1),()=>{for(const p of view.final.schedule[g].A.concat(view.final.schedule[g].B)){state.final.players[p].goals[g]=null;state.final.players[p].results[g]='';}});await save();}
+ if(action==='clear-r1-game'){await flush();const g=round1Game;doDestructive('Undo: Clear Know Your Code Game '+(g+1),()=>{for(const p of ids)state.round1.players[p].goals[g]=null;});await save();}
+ if(action==='clear-r2-game'){await flush();const g=round2Game;doDestructive('Undo: Clear Adapt or Delete Game '+(g+1),()=>{for(const p of view.round2.rows.map(r=>r.id))state.round2.players[p].goals[g]=null;});await save();}
+ if(action==='clear-game'){await flush();const g=finalGame;doDestructive('Undo: Clear Last Node Standing Game '+(g+1),()=>{for(const p of view.final.schedule[g].A.concat(view.final.schedule[g].B)){state.final.players[p].goals[g]=null;state.final.players[p].results[g]='';}});await save();}
  if(action==='clear-round'){await flush();doDestructive('Undo: '+clearRoundLabel[key],()=>resetStage(key));await save();}
  if(action==='clear-names'){
   await flush();
@@ -1145,10 +1145,10 @@ function clock(){$('#room-clock').textContent=new Date().toLocaleTimeString([],{
 let cutsceneActive=false;
 const worldClick=e=>{const b=e.target.closest('button');if(!b)return;if(b.id==='world-toggle'){const paused=document.body.classList.toggle('world-paused');b.setAttribute('aria-pressed',String(paused));const span=b.querySelector&&b.querySelector('span');if(span)span.textContent=paused?'Resume grid':'Pause grid';if(b.firstChild)b.firstChild.textContent=paused?'▶ ':'Ⅱ ';window.CityWorld?.setPaused(paused);}};
 
-// Elimination cutscene: the gardener's shears and compost heap. Plays BEFORE the end-of-round
+// Elimination cutscene: the mech-arm effector and void bin. Plays BEFORE the end-of-round
 // fullscreen standings, once per settled round when its final match is submitted.
 // Cut players are decided by the engine. In the winner-take-all final,
-// the sole first-place champion survives; all five other finalists are pruned.
+// the sole first-place champion survives; all five other finalists are purged.
 
 
 // Five seconds per eliminated player. Only engine-cut players are judged.
@@ -1163,7 +1163,7 @@ const verdictCaptions={enter:'THE SYSTEM LOCKS YOUR NODE',judge:'THE BEAM CHARGE
 const verdictSounds={judge:a=>a.horn(),down:a=>a.shears(),hook:a=>a.hook(),drag:a=>a.compost(),gone:a=>a.slam()};
 function verdictBackdrop(){
  // Neon-city fallback art reusing the gv-* class hooks: dark grid, holo arch,
- // a mech-arm effector and a void bin instead of the garden/gardener/shears.
+ // a mech-arm effector and a void bin instead of the old pastoral purge props.
  return '<div class="gv-sky"></div><div class="gv-palace"></div><div class="gv-hedge gv-hedge-left"></div><div class="gv-hedge gv-hedge-right"></div>'
   +'<div class="gv-path"></div><div class="gv-rose-arch"></div><div class="gv-compost"><b>VOID BIN</b><i></i><i></i><i></i></div>'
   +'<div class="gv-gardener"><svg viewBox="0 0 130 190" aria-hidden="true"><path class="gv-hat" d="M14 45L62 7L110 45Z M0 47H125V57H0Z"/><circle cx="63" cy="66" r="21"/><path class="gv-coat" d="M37 91L87 91L108 145L20 145Z"/><path class="gv-body" d="M43 144L36 189M83 144L91 189M38 103L17 134M87 103L112 131"/></svg></div>'
@@ -1179,7 +1179,7 @@ const laurelSvg=cls=>'<svg class="'+cls+'" viewBox="0 0 120 80" aria-hidden="tru
 function buildVerdictScene(name,index=0,total=1){
  const count='<div class="gv-pruning-count">PRUNING '+(index+1)+' / '+total+'</div>';
  $('#cutscene-stage').innerHTML='<div class="arena-verdict garden-verdict">'+verdictBackdrop()+stickman(name)+count+'</div>';
- if(ceremonyStage==='final')$('#cutscene-label').textContent='The Last Bloom · '+(index+1)+' OF '+total;
+ if(ceremonyStage==='final')$('#cutscene-label').textContent='Last Node Standing · '+(index+1)+' OF '+total;
 }
 function setVerdictClass(phase){
  const overlay=$('#cutscene');
@@ -1269,9 +1269,9 @@ function revealFinalWinners(run){
  const name=rank=>finalWinners?.find(x=>x.rank===rank)?.name||'-';
  const block=(rank,cls)=>'<div class="fc-medal '+cls+'">'+laurelSvg('fc-laurel')+'<span class="fc-winner-name">'+esc(name(rank))+'</span><div class="fc-plinth">'+rank+'</div></div>';
  const petals=Array.from({length:25},(_,i)=>'<span class="fc-petal" style="--x:'+((i*41)%98+1)+'%;--y:'+((i*61)%87+5)+'%;--delay:'+(-(i%8)*.29)+'s"></span>').join('');
- $('#cutscene-stage').innerHTML='<div class="fc-victory"><div class="fc-victory-title">THE LAST BLOOM · $30 CHAMPION</div><div class="fc-podium">'+block(1,'gold')+'</div>'+petals+'</div>';
+ $('#cutscene-stage').innerHTML='<div class="fc-victory"><div class="fc-victory-title">LAST NODE STANDING · $30 CHAMPION</div><div class="fc-podium">'+block(1,'gold')+'</div>'+petals+'</div>';
  $('#cutscene .eyebrow').textContent='TOURNAMENT COMPLETE';
- $('#cutscene-label').textContent='The Last Bloom';
+ $('#cutscene-label').textContent='Last Node Standing';
  finalTitle('SOLE CHAMPION · $30',name(1));
  overlay.hidden=false;overlay.setAttribute('aria-hidden','false');if(!overlay.open)overlay.showModal();
  window.BrawlAudio?.victory();
