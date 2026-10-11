@@ -115,7 +115,7 @@ function makeWorld({gl=null}={}){
  assert.equal(S.elements['city-status'].textContent,'THE REEF IS FULLY AWAKE');
  assert.equal(S.elements['city-damage'].textContent,'100% AWAKE');
  assert.equal(S.elements['city-progress'].style.width,'100%');
- assert.equal(S.status().phase,'THE DEPTHS ARE OPEN');
+ assert.equal(S.status().phase,'THE REEF IS AWAKE');
  assert.equal(status.gates.find(g=>g.key==='round2').state,'sealed','bloom does not unlock rounds');
  await S.advance(60000);
  assert.equal(S.status().bloomLevel,1,'the garden stays open after the countdown');

@@ -20,7 +20,7 @@ const table=[
  [7300,7/60,52700,'REEF ASLEEP'],[7500,7/60,52500,'REEF ASLEEP'],[8000,8/60,52000,'FIRST LIGHT'],
  [17999,17/60,42001,'FIRST LIGHT'],[18000,.3,42000,'REEF AWAKENING'],[33000,.55,27000,'THE DEEP STIRS'],
  [47999,47/60,12001,'THE DEEP STIRS'],[48000,.8,12000,'THE DESCENT BEGINS'],[59999,59/60,1,'THE DESCENT BEGINS'],
- [60000,1,0,'THE DEPTHS ARE OPEN'],[90000,1,0,'THE DEPTHS ARE OPEN']];
+ [60000,1,0,'THE REEF IS AWAKE'],[90000,1,0,'THE REEF IS AWAKE']];
 for(const [ms,progress,remaining,phase] of table){
  const s=sample(short,t0+ms);
  assert.ok(Math.abs(s.progress-progress)<1e-12,ms+': progress '+s.progress+' != '+progress);
@@ -41,8 +41,8 @@ const at=p=>sample(hundred,h0+p*240000);
 assert.equal(at(.1).phase,'REEF ASLEEP');assert.equal(at(.125).phase,'FIRST LIGHT');
 assert.equal(at(.29).phase,'FIRST LIGHT');assert.equal(at(.3).phase,'REEF AWAKENING');
 assert.equal(at(.5).phase,'REEF AWAKENING');assert.equal(at(.55).phase,'THE DEEP STIRS');
-assert.equal(at(.79).phase,'THE DEEP STIRS');assert.equal(at(.8).phase,'THE DESCENT BEGINS');assert.equal(at(1).phase,'THE DEPTHS ARE OPEN');
+assert.equal(at(.79).phase,'THE DEEP STIRS');assert.equal(at(.8).phase,'THE DESCENT BEGINS');assert.equal(at(1).phase,'THE REEF IS AWAKE');
 
 const phases=new Set([...table.map(t=>t[3]),'DEPTHS DORMANT']);
-assert.deepEqual([...phases].sort(),['DEPTHS DORMANT','THE DESCENT BEGINS','FIRST LIGHT','THE DEEP STIRS','REEF ASLEEP','REEF AWAKENING','THE DEPTHS ARE OPEN'].sort());
+assert.deepEqual([...phases].sort(),['DEPTHS DORMANT','THE DESCENT BEGINS','FIRST LIGHT','THE DEEP STIRS','REEF ASLEEP','REEF AWAKENING','THE REEF IS AWAKE'].sort());
 console.log('City timeline passed: Deep Sea phases, thresholds .12/.3/.55/.8, rest/arrival states and unchanged progress values.');
