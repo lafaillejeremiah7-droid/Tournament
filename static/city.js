@@ -243,33 +243,42 @@ void main(){
     if(Math.abs(x)<10)continue;m.box(x,1.2,z,4,2.4,5,[.06,.12,.24]);}
   });
   part('charge-nodes',()=>{
-   // The countdown charges the grid: a field of charge nodes lights up one by one.
-   // A stable permutation scatters the nodes between the towers and keeps their
-   // positions across reloads. As charge approaches 1 the lit nodes surge into a
-   // dramatic, HUGE power-up: the ramp starts around 55% charge and peaks ~3.4x at
-   // full charge, when extra neon rings and a bright beacon crown each node.
+   // The countdown charges the grid: a field of vertical data-towers powers up one by
+   // one. Each node is a flat holo data-pad flush to the floor carrying a thin dark
+   // pylon; as it lights, a stack of glowing window quads climbs its face. A stable
+   // permutation scatters the towers between the city blocks and keeps their positions
+   // across reloads. As charge approaches 1 the lit towers surge into a dramatic, HUGE
+   // power-up: the ramp starts around 55% charge and peaks ~3.4x at full charge, when
+   // extra window rows, a rooftop beacon + antenna and a neon cornice ring crown each.
    const chargeScale=1+smooth(clamp((bloomLevel-.55)/.45))*2.4;
+   const towH=k=>2.1+(k-1)*1.3;// pylon height ramps with charge so the tower rises
    for(let i=0;i<112;i++){
     const lane=i%8,rank=Math.floor(i/8),side=lane<4?-1:1;
     const x=side*(5+(lane%4)*8)+Math.sin(i*13.1)*1.4,z=-19-rank*7.3;
     const col=nodeColors[i%nodeColors.length];
-    m.box(x,.3*Math.max(1,chargeScale*.6),z,.13,.6*Math.max(1,chargeScale*.6),.13,[.08,.14,.26]);
     const lit=(i*37)%112<litNodes;
+    // Flat holo data-pad tile flush to the grid floor, in a dim tint of the node color.
+    m.box(x,.05,z,2.1,.1,2.1,lit?color(col,[.02,.03,.08],.72):[.05,.07,.14]);
+    // Thin dark pylon body rising from the pad; it grows taller as the node charges.
+    const h=lit?towH(chargeScale):2.1;
+    m.box(x,h/2,z,.5,h,.5,[.07,.10,.20]);
     if(lit){
-     const by=.95+(chargeScale-1)*.55,pr=.4*chargeScale,ph=.76+(chargeScale-1)*.4;
-     m.gem(x,by,z,.62*chargeScale,col,3,.55);gardenFlowers++;
-     for(let k=0;k<5;k++){const angle=k*TAU/5;m.gem(x+Math.sin(angle)*pr,ph,z+Math.cos(angle)*pr,.28*chargeScale,
-      color(col,[.85,.95,1.0],.15),3,.4);}
-     // Full charge only: an outer halo of neon sparks plus a tall white-hot beacon
-     // crown each node. Gated on bloomLevel>=1 so partial charge never inflates the
-     // triangle budget (the full-vs-partial tri delta is the revert-sensitive pin).
+     gardenFlowers++;
+     // Stacked glowing window quads up the pylon face read as a tower powering up. The
+     // windows alternate left/right columns so the stack stays angular, never radial.
+     const rows=3,step=h/(rows+1);
+     for(let k=0;k<rows;k++){const wy=step*(k+1),wx=x+(k%2?.26:-.26);
+      m.box(wx,wy,z+.26,.3,step*.62,.06,color(col,[.9,.97,1.0],.12),3);}
+     // Full charge only: extra lit window rows across the whole face, a rooftop beacon
+     // box with an antenna finial and a neon cornice ring crown each tower. Gated on
+     // bloomLevel>=1 so partial charge never inflates the triangle budget (the
+     // full-vs-partial tri delta is the revert-sensitive pin).
      if(bloomLevel>=1){
-      const outer=pr*1.55,oy=ph-.18*chargeScale;
-      for(let k=0;k<3;k++){const angle=k*TAU/3+.6;m.gem(x+Math.sin(angle)*outer,oy,z+Math.cos(angle)*outer,.3*chargeScale,
-       color(col,[.90,.98,1.0],.3),3,.5);}
-      m.gem(x,by+.5*chargeScale,z,.22*chargeScale,[.95,.98,1.0],3,.9);
+      m.box(x,h+.35,z,.72,.5,.72,color(col,[.95,.98,1.0],.5),3);// rooftop beacon block
+      m.box(x,h+1.1,z,.12,1,.12,[.95,.98,1.0],3);// white-hot antenna finial
+      m.loop([x,h+.08,z],[1,0,0],[0,0,-1],.62,.14,color(col,[.9,.98,1.0],.3),3,4);// cornice ring
      }
-    }else m.gem(x,.75,z,.19,[.14,.10,.22],3,1.2);
+    }
    }
   });
   part('nodes',()=>{
