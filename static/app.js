@@ -9,10 +9,10 @@ const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const fmt=v=>v===null||v===undefined?'—':Number(v).toLocaleString(undefined,{maximumFractionDigits:3});
 const playedLabel=(n,regulation)=>n>regulation?`${regulation} + ${n-regulation} EXTRA`:`${n}/${regulation}`;
 const money=v=>v===null||v===undefined?'Unassigned':Number(v).toLocaleString('en-US',{style:'currency',currency:'USD'});
-const tabs=[['settings','Players & rules'],['round1','Know Your Code'],['round2','Adapt or Delete'],['final','Last Node Standing'],['overview','Leaderboard']];
+const tabs=[['settings','Players & rules'],['round1','Know Your Depth'],['round2','Adapt or Sink'],['final','The Abyssal Crown'],['overview','Leaderboard']];
 const roman=['I','II','III','IV','V'];
 const reducedMotion=()=>window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-// Neon Grid audio: ambient blips, purge snaps, void-bin impacts and synth fanfares. No recordings.
+// Deep Sea audio: sonar pings, pressure impacts and abyssal fanfares. No recordings.
 window.BrawlAudio=(()=>{
  let ctx=null,muted=false,active=new Set(),lastRoar=0,lastArrived=false,birdsOn=false,lastChirp=0,nextChirpGap=0;
  function unlock(){try{const C=window.AudioContext||window.webkitAudioContext;if(!ctx&&C)ctx=new C();ctx?.resume();}catch{}}
@@ -71,7 +71,7 @@ window.BrawlAudio=(()=>{
  function compost(){const thud=noise(.55,.24,230);tone(63,.55,.17,'sine',32);return thud;}
  function slam(){const a=noise(.35,.2,300);tone(60,.4,.15,'sine',40);return a;}
  function victory(){const a=fanfare();cheer(true);return a;}
- // Rising static and soft chimes build toward the Grid Powers Up countdown.
+ // Rising static and soft chimes build toward the Reef Awakening countdown.
  // The cadence advances even while muted so unmuting never releases a backlog.
  function ambience(progress,arrived){
   const n=Number(progress);progress=Number.isFinite(n)?Math.min(1,Math.max(0,n)):0;arrived=!!arrived;
@@ -85,14 +85,14 @@ window.BrawlAudio=(()=>{
   // sound and returns null regardless of progress or elapsed time.
   return null;
  }
- // A single morning birdsong phrase: a few quick, high, frequency-swept blips.
- function chirp(){if(muted||!ctx||ctx.state!=='running'||document.hidden)return;const base=1850+Math.random()*1500,blips=2+Math.floor(Math.random()*3);for(let i=0;i<blips;i++){const f=base*(.78+Math.random()*.5);tone(f,.06+Math.random()*.05,.03,'sine',f*(1.25+Math.random()*.5));}}
+ // Sparse low-frequency sonar clicks and soft underwater pings.
+ function chirp(){if(muted||!ctx||ctx.state!=='running'||document.hidden)return;const base=480+Math.random()*260,blips=2+Math.floor(Math.random()*2);for(let i=0;i<blips;i++){const f=base*(.78+Math.random()*.5);tone(f,.10+Math.random()*.07,.025,'sine',f*(1.05+Math.random()*.20));}}
  return {unlock,stop,roar,cheer,boo,horn,fanfare,hook,slam,shears,compost,victory,ambience,
- // Gentle ambient blips through the booting grid. The world tick passes
+ // Gentle ambient blips through the awakening reef. The world tick passes
  // on=true only during the low-progress morning; chirps obey mute and document.hidden
  // and stop when the countdown intensifies or the player mutes them.
  ambientBirds(on){if(!on){birdsOn=false;return;}if(muted||document.hidden||!ctx||ctx.state!=='running')return;const now=Date.now();if(!birdsOn){birdsOn=true;lastChirp=now;nextChirpGap=0;}if(now-lastChirp>=nextChirpGap){chirp();lastChirp=now;nextChirpGap=1400+Math.random()*2600;}},
- toggle(){muted=!muted;if(muted)stop();else unlock();const b=$('#sound-toggle');if(b){b.textContent=muted?'Grid audio off':'Grid audio on';b.setAttribute('aria-pressed',String(!muted));}return !muted;},getStatus(){return {muted,unlocked:ctx?.state==='running'};}};
+ toggle(){muted=!muted;if(muted)stop();else unlock();const b=$('#sound-toggle');if(b){b.textContent=muted?'Ocean audio off':'Ocean audio on';b.setAttribute('aria-pressed',String(!muted));}return !muted;},getStatus(){return {muted,unlocked:ctx?.state==='running'};}};
 })();
 const value=path=>path.split('.').reduce((a,k)=>a[k],state);
 const setValue=(path,v)=>{const a=path.split('.');const k=a.pop();a.reduce((o,p)=>o[p],state)[k]=v;};
@@ -156,18 +156,18 @@ function panel(name,body,right=''){return `<section class="panel"><div class="pa
 // A visible, always-available 'Clear this round' .danger panel. The copy states the
 // exact downstream cascade (round1 clears all three, round2 clears round2+final,
 // final clears only final). Clearing routes through doDestructive so it is undoable.
-const clearRoundBlurb={round1:'Clears Know Your Code and every later round (Adapt or Delete and Last Node Standing). Earlier rounds do not exist for Know Your Code, so nothing before it is touched.',round2:'Clears Adapt or Delete and Last Node Standing. Know Your Code and its results are kept.',final:'Clears Last Node Standing only. Know Your Code and Adapt or Delete are kept.'};
+const clearRoundBlurb={round1:'Clears Know Your Depth and every later round (Adapt or Sink and The Abyssal Crown). Earlier rounds do not exist for Know Your Depth, so nothing before it is touched.',round2:'Clears Adapt or Sink and The Abyssal Crown. Know Your Depth and its results are kept.',final:'Clears The Abyssal Crown only. Know Your Depth and Adapt or Sink are kept.'};
 function clearRoundPanel(key){return panel('Clear this round','<p class="hint">'+clearRoundBlurb[key]+' You can Undo this straight afterwards.</p><button class="danger" data-action="clear-round" data-stage="'+key+'">'+clearRoundCopy[key]+'</button>');}
 function roomLock(key){
  if(key==='round1')return view.names_ok?'':'Enter ten unique player names in Players & rules.';
- if(key==='round2')return !view.names_ok?'Enter ten unique player names first.':view.round1.complete?'':'Finish Know Your Code and resolve its cut ties.';
- if(key==='final')return !view.names_ok?'Enter ten unique player names first.':!view.round1.complete?'Finish Know Your Code and resolve its cut ties.':view.round2.complete?'':'Finish Adapt or Delete and resolve its cut ties.';
+ if(key==='round2')return !view.names_ok?'Enter ten unique player names first.':view.round1.complete?'':'Finish Know Your Depth and resolve its cut ties.';
+ if(key==='final')return !view.names_ok?'Enter ten unique player names first.':!view.round1.complete?'Finish Know Your Depth and resolve its cut ties.':view.round2.complete?'':'Finish Adapt or Sink and resolve its cut ties.';
  return '';
 }
 function lockAttrs(key){const reason=roomLock(key);return reason?' disabled aria-disabled="true" title="'+esc(reason)+'"':'';}
 function gateStages(){
  const setup={key:'settings',label:'Players & rules',status:view.names_ok?'complete':'current',detail:view.names_ok?'Roster ready · rules editable':'Enter ten unique names'};
- return [setup,...[['round1','Know Your Code'],['round2','Adapt or Delete'],['final','Last Node Standing']].map(([key,label])=>{
+ return [setup,...[['round1','Know Your Depth'],['round2','Adapt or Sink'],['final','The Abyssal Crown']].map(([key,label])=>{
   const v=view[key],reason=roomLock(key),status=reason?'sealed':v.complete?'complete':'current';
   const cut=v.rows.filter(r=>r.status==='CUT').map(r=>r.name);
   const detail=reason||(status==='complete'?(key==='final'?'Podium settled':cut.length?'Cut: '+cut.join(' · '):'Qualification settled'):v.ready?'Resolve extra-game ties':v.games.filter(g=>g.ready).length+' / '+v.games.length+' matches');
@@ -179,9 +179,9 @@ function renderRoom(){
  $('#room-stats').innerHTML='<div><b>'+registered+'<small> / 10</small></b><small>REGISTERED</small></div><div><b>'+money(view.pool)+'</b><small>PRIZE POOL</small></div>';
  const rooms=[
   ['settings',roman[0],'Players & rules',registered+' / 10 PLAYERS READY'],
-  ['round1',roman[1],'Know Your Code',view.round1.games.filter(g=>g.ready).length+' / 5 MATCHES'],
-  ['round2',roman[2],'Adapt or Delete',view.round2.games.filter(g=>g.ready).length+' / 5 MATCHES'],
-  ['final',roman[3],'Last Node Standing',view.final.games.filter(g=>g.ready).length+' / 8 MATCHES'],
+  ['round1',roman[1],'Know Your Depth',view.round1.games.filter(g=>g.ready).length+' / 5 MATCHES'],
+  ['round2',roman[2],'Adapt or Sink',view.round2.games.filter(g=>g.ready).length+' / 5 MATCHES'],
+  ['final',roman[3],'The Abyssal Crown',view.final.games.filter(g=>g.ready).length+' / 8 MATCHES'],
   ['overview',roman[4],'Leaderboard',money(view.awarded)+' AWARDED']
  ];
  const stages=gateStages(),stageMap=Object.fromEntries(stages.map(s=>[s.key,s]));
@@ -190,8 +190,8 @@ function renderRoom(){
  window.CityWorld?.setTournament?.(stages);
  $('#monitors').innerHTML=rooms.map(([key,no,label,sub])=>
   '<button class="city-room '+(stageMap[key]?.status||'')+'" data-open="'+key+'" '+lockAttrs(key)+' aria-label="Enter '+label+' node">'+
-  '<span class="room-entry">'+(roomLock(key)?'LOCKED':'JACK IN ↗')+'</span>'+
-  '<span class="room-label"><small>NODE '+no+' / '+(stageMap[key]?.status.toUpperCase()||'OPEN')+'</small>'+
+  '<span class="room-entry">'+(roomLock(key)?'LOCKED':'DIVE IN ↗')+'</span>'+
+  '<span class="room-label"><small>DIVE '+no+' / '+(stageMap[key]?.status.toUpperCase()||'OPEN')+'</small>'+
   '<strong>'+label+'</strong><span>'+esc(roomLock(key)||sub)+'</span></span></button>'
  ).join('');
  window.BrawlMonuments?.render(view);
@@ -207,18 +207,18 @@ function nextStepBanner(next,finished){
  const tieIn=key=>view[key].rows.some(r=>r.status&&r.status.startsWith('TIE'));
  let msg,label,target=next;
  if(next==='settings'){msg='Start here: enter 10 unique player names.';label='Open Players & rules';}
- else if(next==='round1'){msg=tieIn('round1')?'Resolve the Know Your Code tie (add extra games) before Adapt or Delete.':(view.round1.issues[0]||'Score the five Know Your Code games, then submit.');label='Open Know Your Code';}
- else if(next==='round2'){msg=view.round2.issues[0]||'Play five 4v4 games with changing teams; reshuffle before entering scores for a game.';label='Open Adapt or Delete';}
- else{msg=view.final.issues[0]||'Survive eight final matches. Only the last node standing wins $30.';label='Open Last Node Standing';}
+ else if(next==='round1'){msg=tieIn('round1')?'Resolve the Know Your Depth tie (add extra games) before Adapt or Sink.':(view.round1.issues[0]||'Score the five Know Your Depth games, then submit.');label='Open Know Your Depth';}
+ else if(next==='round2'){msg=view.round2.issues[0]||'Play five 4v4 games with changing teams; reshuffle before entering scores for a game.';label='Open Adapt or Sink';}
+ else{msg=view.final.issues[0]||'Survive eight final matches. Only the Abyssal Crown wins $30.';label='Open The Abyssal Crown';}
  return `<div class="notice next-step"><div><div class="eyebrow">WHAT TO DO NEXT</div><strong>${esc(msg)}</strong></div><button class="accent" data-tab="${target}">${label} ↗</button></div>`;
 }
 function overview(){
  const final=view.final, finished=final.complete; const next=!view.names_ok?'settings':!view.round1.complete?'round1':!view.round2.complete?'round2':'final';
  const done=[view.round1,view.round2,final].filter(r=>r.complete).length;
- let html=title('NODE V / LIVE FEED','Leaderboard','Run every round, track every player, and settle the podium.',finished?'TOURNAMENT COMPLETE':'TOURNAMENT IN PROGRESS');
+ let html=title('DIVE V / LIVE FEED','Leaderboard','Run every round, track every player, and settle the podium.',finished?'TOURNAMENT COMPLETE':'TOURNAMENT IN PROGRESS');
  html+=nextStepBanner(next,finished);
  html+=`<div class="cards">${card('REGISTERED PLAYERS',Object.values(state.names).filter(v=>v.trim()).length,'10 tournament places')}${card('CHAMPION PRIZE',money(view.pool),'Only 1st place wins')}${card('ROUNDS COMPLETE',`${done} / 3`,'Two cutting rounds + final')}${card('WINNER PAID',money(view.awarded),'No payout while first place is tied')}</div>`;
- html+=`<div class="round-path">${[['round1','01 · Know Your Code','Read your own code · 10 → 8'],['round2','02 · Adapt or Delete','Survive through change · 8 → 6'],['final','03 · Last Node Standing','Only one node survives · 6 → 1']].map(([k,t,d])=>`<button data-tab="${k}" ${lockAttrs(k)} class="${next===k?'accent':''}">${t}<small>${view[k].complete?'Complete':d}</small></button>`).join('')}</div>`;
+ html+=`<div class="round-path">${[['round1','01 · Know Your Depth','Know your limits · 10 → 8'],['round2','02 · Adapt or Sink','Adapt to rising pressure · 8 → 6'],['final','03 · The Abyssal Crown','Only one node survives · 6 → 1']].map(([k,t,d])=>`<button data-tab="${k}" ${lockAttrs(k)} class="${next===k?'accent':''}">${t}<small>${view[k].complete?'Complete':d}</small></button>`).join('')}</div>`;
  html+='<section id="screen-podium" aria-label="Live final podium"></section>';
  const rowmap=key=>Object.fromEntries(view[key].rows.map(r=>[r.id,r]));const a=rowmap('round1'),b=rowmap('round2'),c=rowmap('final');
  const everyPlayerRows=ids.map(p=>
@@ -228,7 +228,7 @@ function overview(){
  );
  html+=panel(
   'Every player',
-  table(['PLAYER','KNOW YOUR CODE','ADAPT OR DELETE','FINAL RANK','TOTAL POINTS','PRIZE'],everyPlayerRows),
+  table(['PLAYER','KNOW YOUR DEPTH','ADAPT OR SINK','FINAL RANK','TOTAL POINTS','PRIZE'],everyPlayerRows),
   `<button data-action="csv">Export CSV</button>`
  );
  if(final.rows.length){
@@ -273,7 +273,7 @@ function playerSettings(){
   'Start over',
   '<p>Download a backup first if you want to keep this tournament.</p><button class="danger" data-action="reset-all">Clear tournament</button>'
  );
- return title('NODE I / CONFIGURATION','Players & rules','Enter ten unique names. Set scoring rules and compete for the fixed $30 champion prize.')+
+ return title('DIVE I / CONFIGURATION','Players & rules','Enter ten unique names. Set scoring rules and compete for the fixed $30 champion prize.')+
   `<div class="settings-grid">${rosterPanel}<div>${scoringPanel}${prizePanel}</div></div>`+
   notice(view.names_ok?[]:['Names must be filled in and unique before anyone advances.'])+
   startOverPanel;
@@ -295,7 +295,7 @@ function countdownSettings(){
   esc(current)+
   '" aria-describedby="start-help"></label><button type="submit" class="accent">Save countdown</button><button type="button" class="danger" data-action="clear-start" '+
   (!state.settings.start_at?'disabled':'')+
-  '>Clear countdown</button></form><p id="start-help">Saving a new future start time begins at 0% charge. The grid powers up as the countdown runs and reaches 100% when it hits zero. Refreshing preserves progress. Clearing the countdown returns the grid to a cold boot. Pause grid stops decorative motion; the countdown and charge keep advancing.</p></section>';
+  '>Clear countdown</button></form><p id="start-help">Saving a new future start time begins at 0% reef awakening. Bioluminescence rises as the countdown runs and reaches 100% at zero. Refreshing preserves progress. Clearing the countdown returns the grid to a cold boot. Pause ocean stops decorative motion; the countdown and charge keep advancing.</p></section>';
 }
 function settings(){
  const html=playerSettings(),at=html.indexOf('<div class="settings-grid">');
@@ -316,7 +316,7 @@ document.addEventListener('submit',e=>{
 });
 
 function extras(key){const stage=state[key],v=view[key];if(!v.rows.length)return '';
- let html='<p class="hint">Enter extra-game scores only for tied players. Their totals and averages include these games, but places stay tied until everyone in the group has a score (and W/L in Last Node Standing). If a tie remains, add another game for that remaining group. Already settled places stay fixed. Remove deletes one extra game; Clear all removes every extra game in this round. Either action can be undone.</p>';
+ let html='<p class="hint">Enter extra-game scores only for tied players. Their totals and averages include these games, but places stay tied until everyone in the group has a score (and W/L in The Abyssal Crown). If a tie remains, add another game for that remaining group. Already settled places stay fixed. Remove deletes one extra game; Clear all removes every extra game in this round. Either action can be undone.</p>';
  stage.extras.forEach((_,i)=>{
   const cells=v.rows.map(r=>{
    const field=key==='final'
@@ -337,7 +337,7 @@ function extras(key){const stage=state[key],v=view[key];if(!v.rows.length)return
    grows from their cumulative, engine-scored goals; eliminated avatars are deleted,
    not removed from the grid. The opening countdown charges separately. */
 const rosterStages=['round1','round2','final'];
-const nodeTierNames=['Cold boot','First spark','Flickering node','Live node','Bright construct','Overclocked core','Full power'];
+const nodeTierNames=['Hatchling','First glow','Reef swimmer','Deep diver','Reef hunter','Abyssal predator','Leviathan'];
 function nodeTier(goals){
  return goals<=0?0:goals<3?1:goals<6?2:goals<10?3:goals<15?4:goals<21?5:6;
 }
@@ -353,44 +353,47 @@ function nodeRosterModel(key){
   const roundGoals=Math.max(0,Number(roundRows[key].get(id)?.goals)||0);
   const pruned=!!((depth>=1&&first&&!first.has(id))||(depth>=2&&second&&!second.has(id))||(champion&&!champion.has(id)));
   const name=state.names[id]?.trim()||`Player ${i+1}`;
-  const status=pruned?'PRUNED':champion?.has(id)?'CHAMPION':roundRows[key].has(id)?'GROWING':'WAITING';
+  const status=pruned?'SUNK':champion?.has(id)?'CHAMPION':roundRows[key].has(id)?'EVOLVING':'WAITING';
   return {id,name,goals,roundGoals,tier:nodeTier(goals),status,pruned};
  });
 }
 function nodeSvg(level){
- // A neon avatar / data-construct: a glowing core column with boot-up fins and
- // an orbiting corona of data plates that grows denser with each goal tier.
- const tip=94-level*10,leafCount=Math.min(level+1,6);
- const leaf=Array.from({length:leafCount},(_,i)=>{
-  const y=101-i*9,dir=i%2?-1:1,edge=18+level*1.7;
-  return `<path d="M56 ${y} Q${56+dir*11} ${y-14} ${56+dir*edge} ${y-6} Q${56+dir*9} ${y+5} 56 ${y}Z" fill="${i%2?'#1f9fd0':'#3fd6ec'}" stroke="#0d5c86" stroke-width="0.8"/>`;
+ // Seven progressively larger bioluminescent sea creatures, beginning with a hatchling.
+ const tier=Math.max(0,Math.min(6,Number(level)||0));
+ const length=15+tier*4.2,half=8+tier*1.65,cx=57,cy=72;
+ const glow=tier===0?'#4e9d98':tier<3?'#56cbb8':tier<5?'#71e6ce':'#b7f6cf';
+ const edge=tier<3?'#225966':'#31878e';
+ const spots=Array.from({length:tier*2},(_,i)=>{
+   const x=cx-length*.46+i%4*length*.24,y=cy+(i%3-1)*half*.43;
+   return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(1.1+tier*.18).toFixed(1)}" fill="#d0fff0" opacity=".65"/>`;
  }).join('');
- let head='<ellipse cx="56" cy="99" rx="5" ry="6" fill="#4fd8ea" stroke="#0f6a8c"/>';
- if(level===1)head=`<ellipse cx="56" cy="${tip+5}" rx="6" ry="9" fill="#ff79cf" stroke="#ffd0ef"/>`;
- if(level>=2){
-  const count=level>=5?9:level>=4?8:6,r=5+level*1.25;
-  head=(level>=5?`<circle cx="56" cy="${tip+5}" r="${19+level*2}" fill="none" stroke="#39e3ff" stroke-opacity=".58" stroke-width="2" stroke-dasharray="3 5"/>`:'');
-  head+=Array.from({length:count},(_,i)=>{
-   const angle=(i/count)*Math.PI*2,x=56+Math.cos(angle)*r,y=tip+5+Math.sin(angle)*r;
-   return `<ellipse cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" rx="${(6+level*.8).toFixed(1)}" ry="${(4.4+level*.6).toFixed(1)}" fill="${i%2?'#ff8fd6':'#e64bb0'}" stroke="#ffd6ef" stroke-width=".6"/>`;
-  }).join('')+`<circle cx="56" cy="${tip+5}" r="${3+level*.5}" fill="#4fe6ff" stroke="#1685ad"/>`;
- }
- const base=`<ellipse cx="56" cy="126" rx="34" ry="5" fill="#071320" opacity=".5"/><path d="M39 107 L73 107 L69 125 L43 125 Z" fill="#13405c" stroke="#2fb4df" stroke-width="1.5"/><path d="M37 105 H75 V111 H37 Z" fill="#1a5c82" stroke="#5fd6f1" stroke-width="1"/>`;
- return `<svg class="node-art" viewBox="0 0 112 135" aria-hidden="true" focusable="false">${level>=5?`<ellipse cx="56" cy="${tip+7}" rx="30" ry="26" fill="#39e3ff" opacity=".12"/>`:''}<path d="M56 109 Q${60+level} ${tip+30} 56 ${tip+8}" fill="none" stroke="#2bbfe6" stroke-width="${2.4+level*.6}" stroke-linecap="round"/>${leaf}${head}${base}</svg>`;
+ const bubbles=Array.from({length:tier+1},(_,i)=>`<circle cx="${76+i%3*8}" cy="${63-i*8}" r="${1.1+i*.35}" fill="none" stroke="#89dfd5" stroke-width=".9" opacity=".48"/>`).join('');
+ const fins=tier>1?`<path d="M${cx-7} ${cy-half*.85} L${cx-3} ${cy-half-6-tier*1.5} L${cx+10} ${cy-half*.75}Z" fill="${edge}" stroke="${glow}" stroke-width="1"/>`:'';
+ const crest=tier>=5?`<path d="M${cx-4} ${cy-half-7} Q${cx+7} ${cy-half-16} ${cx+18} ${cy-half-6}" fill="none" stroke="#b6fff0" stroke-width="1.8" opacity=".8"/>`:'';
+ return `<svg class="node-art" viewBox="0 0 112 135" aria-hidden="true" focusable="false">
+ <defs><radialGradient id="deep-fish-${tier}"><stop stop-color="#b2f4d9"/><stop offset=".62" stop-color="${glow}"/><stop offset="1" stop-color="${edge}"/></radialGradient></defs>
+ <ellipse cx="55" cy="121" rx="${20+tier*3}" ry="4" fill="#011922" opacity=".6"/>
+ <path d="M${cx-length} ${cy} L${cx-length-13-tier} ${cy-half*.8} L${cx-length-11-tier} ${cy+half*.8}Z" fill="${edge}" stroke="${glow}" stroke-width="1.1"/>
+ ${fins}<ellipse cx="${cx}" cy="${cy}" rx="${length}" ry="${half}" fill="url(#deep-fish-${tier})" stroke="${glow}" stroke-width="1.1"/>
+ <path d="M${cx-2} ${cy+half*.2} L${cx-8-tier} ${cy+half+5} L${cx+9} ${cy+half*.55}Z" fill="${edge}" stroke="${glow}" stroke-width=".7"/>
+ ${spots}<circle cx="${cx+length*.53}" cy="${cy-half*.29}" r="${2.5+tier*.15}" fill="#02171e"/>
+ <circle cx="${cx+length*.71}" cy="${cy-half*.36}" r="1" fill="#f1fff4"/>
+ ${crest}${bubbles}
+ </svg>`;
 }
 function nodeRoster(key){
  const model=nodeRosterModel(key);
  const cards=model.map((p,i)=>
   `<li class="node-card ${p.pruned?'pruned':''} ${p.status==='CHAMPION'?'champion':''}" data-player="${p.id}" data-goals="${p.goals}" data-tier="${p.tier}">`+
-  `<div class="node-top"><span>NODE ${String(i+1).padStart(2,'0')}</span><span class="node-state">${p.status}</span></div>`+
+  `<div class="node-top"><span>DIVER ${String(i+1).padStart(2,'0')}</span><span class="node-state">${p.status}</span></div>`+
   `${nodeSvg(p.tier)}<strong class="node-name">${esc(p.name)}</strong>`+
   `<div class="node-count"><b>${p.goals}</b> total ${p.goals===1?'goal':'goals'}</div>`+
   `<small>${p.roundGoals} this round · ${nodeTierNames[p.tier]}</small></li>`
  ).join('');
  return `<section class="node-roster" aria-labelledby="${key}-node-title"><div class="node-roster-heading"><div>`+
-  `<span class="eyebrow">THE LIVE GRID / ${key==='round1'?'01':key==='round2'?'02':'03'}</span>`+
-  `<h2 id="${key}-node-title">Ten nodes. Ten futures.</h2></div>`+
-  `<p>Every competitor boots as a cold node at 0 goals. More goals charge a brighter, higher-power construct. Charge carries across rounds; deleted nodes stay dark.</p></div>`+
+  `<span class="eyebrow">THE LIVING REEF / ${key==='round1'?'01':key==='round2'?'02':'03'}</span>`+
+  `<h2 id="${key}-node-title">Ten divers. One crown.</h2></div>`+
+  `<p>Every diver begins as a hatchling at 0 goals. Goals evolve them into brighter and larger deep-sea creatures. Evolution carries across rounds; eliminated divers remain visible.</p></div>`+
   `<ol class="node-grid">${cards}</ol></section>`;
 }
 
@@ -407,8 +410,8 @@ function resetCeremonyHistory(stage){
 }
 function advancementButton(stage){
  if(!view[stage]?.complete||!['round1','round2'].includes(stage))return '';
- const target=stage==='round1'?'Adapt or Delete':'Last Node Standing';
- return `<div class="panel divine-advance"><div><span class="eyebrow">THE SYSTEM AWAITS</span><h2>Judgement before the next trial</h2><p>Enter the grid. The system will scan the surviving nodes for five seconds before deleting this round's two eliminated competitors.</p></div><button class="accent" data-action="advance-stage" data-stage="${stage}">Continue to ${target} →</button></div>`;
+ const target=stage==='round1'?'Adapt or Sink':'The Abyssal Crown';
+ return `<div class="panel divine-advance"><div><span class="eyebrow">THE ABYSS AWAITS</span><h2>Judgement before the next trial</h2><p>Descend into the abyss. Its guardian surveys all ten divers for five seconds before sinking this round's two eliminated competitors.</p></div><button class="accent" data-action="advance-stage" data-stage="${stage}">Continue to ${target} →</button></div>`;
 }
 function divineHandSvg(){
  // A giant robotic/mech arm with a plasma grip-claw effector. Keeps the
@@ -441,15 +444,15 @@ function renderDivineScene(stage,cuts,latest=-1){
  const avatars=models.map((p,n)=>{
   const idx=cuts.indexOf(p.id),severed=idx>=0&&idx<latest,severing=idx>=0&&idx===latest;
   const cls=p.priorPruned?'prior-pruned':severed?'severed':severing?'severing':'';
-  return `<div class="divine-plant ${cls}" data-player="${p.id}" data-goals="${p.goals}"><div class="divine-stems">${nodeSvg(p.tier)}</div><strong class="divine-name">${esc(p.name)}</strong><small>${p.goals} ${p.goals===1?'GOAL':'GOALS'}</small><em class="divine-stage-name">${esc(nodeTierNames[p.tier]||'Node')}</em><b class="divine-cut-label">${p.priorPruned||severed?'DELETED':severing?'TARGETED':''}</b></div>`;
+  return `<div class="divine-plant ${cls}" data-player="${p.id}" data-goals="${p.goals}"><div class="divine-stems">${nodeSvg(p.tier)}</div><strong class="divine-name">${esc(p.name)}</strong><small>${p.goals} ${p.goals===1?'GOAL':'GOALS'}</small><em class="divine-stage-name">${esc(nodeTierNames[p.tier]||'Node')}</em><b class="divine-cut-label">${p.priorPruned||severed?'SUNK':severing?'MARKED':''}</b></div>`;
  }).join('');
  const html=`<div class="divine-scene ${latest>=0?'is-cutting':'is-thinking'}" data-stage="${stage}" style="--strike-x:${strikeX}%;--strike-y:${strikeY}%">`+
-  `<canvas class="divine-canvas" aria-label="A gigantic neon mech arm and plasma grip-claw descending through a vortex above ten three-dimensional neon avatars"></canvas>`+
+  `<canvas class="divine-canvas" aria-label="The abyssal guardian's immense claw descending through a whirlpool above ten evolving deep-sea creatures"></canvas>`+
   `<div class="divine-stars"></div><div class="divine-halo"></div><div class="divine-portal" aria-hidden="true"></div>`+
   `<div class="divine-judge">${divineHandSvg()}</div>`+
-  `<div class="divine-oracle">${latest<0?'THE SYSTEM SCANS':'THE VERDICT IS ABSOLUTE'}</div>`+
+  `<div class="divine-oracle">${latest<0?'THE ABYSS WATCHES':'THE DEPTHS HAVE SPOKEN'}</div>`+
   `<div class="divine-plants">${avatars}</div><div class="divine-flash"></div>`+
-  `<div class="divine-progress">${latest<0?'VERDICT IN 5 SECONDS':`DELETING ${latest+1} OF ${cuts.length}`}</div></div>`;
+  `<div class="divine-progress">${latest<0?'VERDICT IN 5 SECONDS':`SINKING ${latest+1} OF ${cuts.length}`}</div></div>`;
  const host=$('#cutscene-stage');
  // One continuous WebGL scene: do not destroy the canvas, reset the portal
  // clock, or teleport the camera between targets.
@@ -463,10 +466,10 @@ function renderDivineScene(stage,cuts,latest=-1){
    if(!plant)continue;
    plant.className='divine-plant '+(p.priorPruned?'prior-pruned':old?'severed':selected?'severing':'');
    const badge=plant.querySelector('.divine-cut-label');
-   if(badge)badge.textContent=p.priorPruned||old?'DELETED':selected?'TARGETED':'';
+   if(badge)badge.textContent=p.priorPruned||old?'SUNK':selected?'MARKED':'';
   }
   const oracle=host.querySelector('.divine-oracle');
-  if(oracle)oracle.textContent='THE VERDICT IS ABSOLUTE';
+  if(oracle)oracle.textContent='THE DEPTHS HAVE SPOKEN';
   const progress=host.querySelector('.divine-progress');
   if(progress)progress.textContent='DELETING '+(latest+1)+' OF '+cuts.length;
   return;
@@ -488,13 +491,13 @@ function strikeDivinePlant(stage,cuts,i){
   if(stage==='final'){
    const winner=view.final.rows.find(p=>p.rank===1);
    window.Divine3D?.celebrate?.(winner?.id);
-   $('#cutscene-caption').innerHTML='<strong>THE CHAMPION COMES ONLINE</strong><br>'+esc(winner?.name||'LAST NODE STANDING');
+   $('#cutscene-caption').innerHTML='<strong>THE ABYSSAL CROWN IS CLAIMED</strong><br>'+esc(winner?.name||'THE ABYSSAL CROWN');
    const label=Array.from($('#cutscene-stage').querySelectorAll?.('.divine-plant')||[]).find(el=>el.dataset.player===winner?.id);
    label?.classList.add('divine-champion');
-   const badge=label?.querySelector('.divine-cut-label');if(badge)badge.textContent='CHAMPION NODE';
+   const badge=label?.querySelector('.divine-cut-label');if(badge)badge.textContent='ABYSSAL CHAMPION';
    schedule(()=>{window.Divine3D?.stop?.();revealFinalWinners(cutsceneRunId);},4500);
   }else{
-   $('#cutscene-caption').innerHTML='<strong>THE TWO HAVE BEEN DELETED</strong><br>THE NEXT TRIAL AWAITS';
+   $('#cutscene-caption').innerHTML='<strong>TWO DIVERS HAVE SUNK</strong><br>THE NEXT TRIAL AWAITS';
    schedule(()=>{const overlay=$('#cutscene');overlay.classList.add('divine-leaving');schedule(endCutscene,650);},850);
   }
   return;
@@ -502,7 +505,7 @@ function strikeDivinePlant(stage,cuts,i){
  renderDivineScene(stage,cuts,i);
  const p=view[stage].rows.find(r=>r.id===cuts[i]);
  const finale=stage==='final'&&i>=3;
- $('#cutscene-caption').innerHTML=finale?'<strong>'+ (i===3?'THREE AVATARS REMAIN':'TWO AVATARS REMAIN')+'</strong><br>THE BEAM HESITATES':'<strong>THE SYSTEM TARGETS.</strong><br>'+esc(p?.name||'');
+ $('#cutscene-caption').innerHTML=finale?'<strong>'+ (i===3?'THREE AVATARS REMAIN':'TWO AVATARS REMAIN')+'</strong><br>THE CURRENT STILLS':'<strong>THE GUARDIAN CHOOSES.</strong><br>'+esc(p?.name||'');
  // Contact happens 950ms after the movement starts; the name, grip closure,
  // power-down and audio belong to that same moment, not the scene start.
  schedule(()=>{
@@ -511,14 +514,14 @@ function strikeDivinePlant(stage,cuts,i){
     .find(e=>e.dataset.player===cuts[i]);
   plant?.classList.remove('severing');plant?.classList.add('severed');
   const badge=plant?.querySelector('.divine-cut-label');
-  if(badge)badge.textContent='DELETED';
-  $('#cutscene-caption').innerHTML='<strong>DELETE! · PURGED</strong><br>'+esc(p?.name||'');
+  if(badge)badge.textContent='SUNK';
+  $('#cutscene-caption').innerHTML='<strong>SUNK · LOST BELOW</strong><br>'+esc(p?.name||'');
  },divineCutContact(stage,i));
  schedule(()=>strikeDivinePlant(stage,cuts,i+1),divineCutDuration(stage,i));
 }
 function beginDivineJudgement(stage,cuts){
  renderDivineScene(stage,cuts);
- $('#cutscene-caption').innerHTML='<strong>SILENCE. THE SYSTEM SCANS.</strong><br>TEN NODES. ONLY THE STRONG REMAIN ONLINE.';
+ $('#cutscene-caption').innerHTML='<strong>SILENCE. THE ABYSS WATCHES.</strong><br>TEN DIVERS. ONLY THE STRONG SURFACE.';
  schedule(()=>strikeDivinePlant(stage,cuts,0),5000);
 }
 function playDivineCutscene(stage){
@@ -532,8 +535,8 @@ function playDivineCutscene(stage){
 
   overlay.classList.remove('divine-leaving');overlay.classList.add('divine-mode','open');
   overlay.hidden=false;overlay.setAttribute?.('aria-hidden','false');
-  $('#cutscene .eyebrow').textContent='THE SYSTEM’S VERDICT';
-  $('#cutscene-label').textContent=stageMeta[stage].label+' · SYSTEM PURGE';
+  $('#cutscene .eyebrow').textContent='THE ABYSS DECIDES';
+  $('#cutscene-label').textContent=stageMeta[stage].label+' · ABYSSAL VERDICT';
   overlay.showModal();overlay.focus?.({preventScroll:true});
   cutsceneKeyHandler=e=>{if(e.key==='Escape'||e.key==='Esc'){e.preventDefault?.();e.stopPropagation?.();endCutscene();}};
   document.addEventListener?.('keydown',cutsceneKeyHandler,true);
@@ -556,7 +559,7 @@ async function advanceTournament(stage){
 // Per-match submit + popup/fullscreen. Submitting a non-final match shows cumulative
 // round standings THROUGH that match (computed client-side); submitting the last match
 // shows the fullscreen total round ranking with ADVANCE/CUT/TIE and the add-extra flow.
-const stageMeta={round1:{count:5,label:'Know Your Code'},round2:{count:5,label:'Adapt or Delete'},final:{count:8,label:'Last Node Standing'}};
+const stageMeta={round1:{count:5,label:'Know Your Depth'},round2:{count:5,label:'Adapt or Sink'},final:{count:8,label:'The Abyssal Crown'}};
 function provisionalRanks(rows,compare){
  rows.sort((a,b)=>compare(a,b)||a.name.localeCompare(b.name));
  let rank=1;
@@ -575,7 +578,7 @@ function cumulativeStandings(key,n){
   });
   return provisionalRanks(rows,(a,b)=>b.total-a.total);
  }
- // Know Your Code has no sit-out schedule; every player plays every game. Derive an
+ // Know Your Depth has no sit-out schedule; every player plays every game. Derive an
  // {A,B,sit:[]} shape from the per-game cosmetic lineups so the popup grouping
  // matches, falling back to all-of-A when a game's split is not yet generated.
  const schedule=v.schedule||v.games.map(m=>({A:(m.teams&&m.teams.A.length?m.teams.A.concat(m.teams.B):ids),B:[],sit:[]}));
@@ -589,7 +592,7 @@ function cumulativeStandings(key,n){
  });
  return provisionalRanks(rows,(a,b)=>b.total*(a.played||1)-a.total*(b.played||1));
 }
-// The accent 'Submit Match N of X' panel for Know Your Code and Last Node Standing (mirrors Adapt or Delete's
+// The accent 'Submit Match N of X' panel for Know Your Depth and The Abyssal Crown (mirrors Adapt or Sink's
 // .match-completion look). Disabled until that match's view games[match].ready is true
 // and the stage is not stale. Client-side: validates readiness then opens the popup.
 function matchSubmit(key,match){
@@ -693,13 +696,13 @@ function closeResult(){
 function round(key){
  if(key==='round2')return round2Page();
  const v=view.round1;
- let html=title('ROUND 01 · COLD BOOT','Know Your Code','The first principle: power begins with understanding your own code. Confront your weaknesses, study your mistakes, and change your play. Across five 5v5 games, only eight of ten stay online.','10 → 8 PLAYERS')+notice(v.issues);
+ let html=title('ROUND 01 · FIRST DESCENT','Know Your Depth','The first descent reveals your limits. Recognize your mistakes, learn from them, and earn your place among the eight survivors. Across five 5v5 games, only eight of ten stay online.','10 → 8 PLAYERS')+notice(v.issues);
  html+=nodeRoster('round1');
  html+=`<div class="games">${v.games.map(g=>`<div class="game ${g.ready?'ready':''}"><b>Game ${g.game}</b>A: ${g.counts.A}/5 · B: ${g.counts.B}/5</div>`).join('')}</div>`;
  round1Game=Math.min(round1Game,4);
  html+=matchScoreboard('round1',round1Game);
  const g=round1Game,match=v.games[g].teams,rowmap=Object.fromEntries(v.rows.map(r=>[r.id,r]));
- html+=`<div class="match-tabs" aria-label="Know Your Code match selector">${v.games.map((m,i)=>`<button data-r1-game="${i}" aria-pressed="${i===round1Game}" class="${i===round1Game?'active':''} ${m.ready?'ready':''}">G${i+1}</button>`).join('')}</div>`;
+ html+=`<div class="match-tabs" aria-label="Know Your Depth match selector">${v.games.map((m,i)=>`<button data-r1-game="${i}" aria-pressed="${i===round1Game}" class="${i===round1Game?'active':''} ${m.ready?'ready':''}">G${i+1}</button>`).join('')}</div>`;
  const scored=v.games[g].counts.A+v.games[g].counts.B>0;
  const rerollOff=lineupBusy||scored;
  const rerollWhy=scored?'This game already has scores. Clear them before reshuffling.':lineupBusy?'Wait for the current draw to finish.':'';
@@ -732,10 +735,10 @@ function round(key){
 }
 function round2Page(){
  const v=view.round2;round2Game=Math.min(round2Game,Math.max(0,v.draw.revealed-1));const g=round2Game;
- let html=title('ROUND 02 · ADAPT OR DELETE','Adapt or Delete','The grid rewards constructs that rewrite themselves. Abandon familiar habits, adapt to unfamiliar teammates, and survive five shifting 4v4 games. Only six of eight stay online.','8 → 6 PLAYERS')+notice(v.issues);
+ let html=title('ROUND 02 · ADAPT OR SINK','Adapt or Sink','The deep sea rewards those who adapt to pressure. Abandon familiar habits, adapt to unfamiliar teammates, and survive five shifting 4v4 games. Only six of eight stay online.','8 → 6 PLAYERS')+notice(v.issues);
  html+=nodeRoster('round2');
  if(v.stale)return html+notice(['The survivor list changed. Clear this round and the final to generate new 4v4 matchups.'])+clearRoundPanel('round2');
- if(!v.rows.length)return html+panel('Waiting for survivors','<div class="empty">Finish Know Your Code. The eight survivors enter five varied 4v4 matches.</div>')+clearRoundPanel('round2');
+ if(!v.rows.length)return html+panel('Waiting for survivors','<div class="empty">Finish Know Your Depth. The eight survivors enter five varied 4v4 matches.</div>')+clearRoundPanel('round2');
  if(!v.draw.order.length)return html+panel('Draw 4v4 matchups','<p>Create five different 4v4 team assignments. No player sits out, and you can reshuffle the next game before recording any goals.</p><button class="accent" data-action="r2-start" '+(lineupBusy?'disabled':'')+'>Generate balanced 4v4 games ↗</button>')+clearRoundPanel('round2');
  html+='<div class="score-help">FIVE 4v4 GAMES · CHANGING TEAMS · ALL EIGHT PLAY EVERY GAME · INDIVIDUAL GOALS DECIDE ADVANCEMENT</div>';
  const r2Tabs=v.games.map((m,i)=>{
@@ -782,16 +785,16 @@ function round2Page(){
 
 function counter(path,label,disabled=false){const n=value(path)||0,rule=goalRule(path);return `<div class="counter"><button data-step="-1" data-target="${path}" aria-label="Subtract one goal for ${esc(label)}" ${disabled||n<=0?'disabled':''}>−</button>${inp(path,label+' goals','number',disabled)}<button data-step="1" data-target="${path}" aria-label="Add one goal for ${esc(label)}" ${disabled||(rule&&n>=rule.max)?'disabled':''}>+</button></div>`;}
 function finalPage(){const v=view.final,g=finalGame;
- let html=title('ROUND 03 · LAST NODE STANDING','Last Node Standing','Six reach the final grid, but only one stays lit. Stay composed, act decisively, and endure eight 3v3 matches. First place alone receives $30; the other five receive $0.',`GAMES 1 & 2 ×${fmt(state.settings.multiplier)}`)+notice(v.issues);
+ let html=title('ROUND 03 · THE ABYSSAL CROWN','The Abyssal Crown','Six reach the deepest trench, but only one will emerge. Stay composed, act decisively, and endure eight 3v3 matches. First place alone receives $30; the other five receive $0.',`GAMES 1 & 2 ×${fmt(state.settings.multiplier)}`)+notice(v.issues);
  html+='<section id="screen-podium" aria-label="Live final podium"></section>';
  html+=nodeRoster('final');
- if(v.stale)html+=notice(['This roster changed since Last Node Standing was scored. Clearing Last Node Standing re-syncs it to the current finalists.']);
- if(!v.rows.length)return html+panel('Waiting for finalists','<div class="empty">Finish Adapt or Delete and resolve cut ties. Your six finalists will appear automatically.</div>')+clearRoundPanel('final');
+ if(v.stale)html+=notice(['This roster changed since The Abyssal Crown was scored. Clearing The Abyssal Crown re-syncs it to the current finalists.']);
+ if(!v.rows.length)return html+panel('Waiting for finalists','<div class="empty">Finish Adapt or Sink and resolve cut ties. Your six finalists will appear automatically.</div>')+clearRoundPanel('final');
  html+=`<div class="score-help">GOAL = ${fmt(state.settings.goal_points)} PTS / WIN = ${fmt(state.settings.win_points)} PTS · Games 1–2 ×${fmt(state.settings.multiplier)} · Games 3–8 ×1</div>`;
  html+=`<div class="match-tabs" aria-label="Final match selector">${v.games.map((m,i)=>`<button data-game="${i}" aria-pressed="${i===g}" class="${i===g?'active':''} ${m.ready?'ready':''}">G${i+1}${i<2?' ×'+fmt(state.settings.multiplier):''}</button>`).join('')}</div>`;
  const schedule=v.schedule[g],rowmap=Object.fromEntries(v.rows.map(r=>[r.id,r]));
  html+=matchScoreboard('final',g);
- const fClearOff=v.stale||lineupBusy,fClearWhy=v.stale?'Clear Last Node Standing first — the roster changed since these scores.':'Wait for the current draw to finish.';
+ const fClearOff=v.stale||lineupBusy,fClearWhy=v.stale?'Clear The Abyssal Crown first — the roster changed since these scores.':'Wait for the current draw to finish.';
  html+=`<div class="match-topline"><div><h2>Game ${g+1} <span class="stage-title-number">/ 8</span></h2><p>Enter each player’s goals, then mark the winning team.</p>`+
   `${fClearOff?`<p class="hint reason">${esc(fClearWhy)}</p>`:''}</div>`+
   `<button class="danger clear-score" data-action="clear-game" ${fClearOff?`disabled title="${esc(fClearWhy)}" aria-disabled="true"`:''}>Clear this game</button></div><div class="teams-grid">`;
@@ -801,7 +804,7 @@ function finalPage(){const v=view.final,g=finalGame;
    `<div class="player-score"><div class="player-name">${esc(state.names[p])}<small>${fmt(rowmap[p].game_points[g])} POINTS THIS GAME</small></div>`+
    `${counter(`final.players.${p}.goals.${g}`,`${state.names[p]} game ${g+1}`,v.stale||lineupBusy)}</div>`
   ).join('');
-  const winnerBtnAttr=v.stale?`disabled title="${esc(v.issues[0]||'Clear Last Node Standing first — the roster changed since these scores.')}" aria-disabled="true"`:'';
+  const winnerBtnAttr=v.stale?`disabled title="${esc(v.issues[0]||'Clear The Abyssal Crown first — the roster changed since these scores.')}" aria-disabled="true"`:'';
   html+=`<section class="team-score team-${team.toLowerCase()}"><div class="team-head"><div><small>GAME ${g+1}</small><h2>Team ${team}</h2></div>`+
    `<button data-winner="${team}" aria-pressed="${won}" class="${won?'accent':''}" ${winnerBtnAttr}>${won?'✓ WIN RECORDED':lost?'LOSS RECORDED':'Mark win +1'}</button></div>`+
    `${teamPlayers}</section>`;
@@ -836,7 +839,7 @@ async function rerollRound1Game(game){
  lineupBusy=true;
  // Snapshot the pre-reroll state so Undo can restore the prior split. The server
  // echo overwrites state below, so capture before the PUT and keep the snapshot.
- const snap={state:clone(state),label:'Undo: Reshuffle Know Your Code Game '+(game+1)};
+ const snap={state:clone(state),label:'Undo: Reshuffle Know Your Depth Game '+(game+1)};
  try{
   await flush();
   const res=await fetch('/api/round1-lineup',{method:'PUT',headers:{'Content-Type':'application/json','X-Session-Token':token},body:JSON.stringify({action:'reroll',game:game+1,revision})});
@@ -846,7 +849,7 @@ async function rerollRound1Game(game){
 }
 async function progressRound2(action,game){
  if(lineupBusy)return false;
- const snap=action==='reroll'?{state:clone(state),label:'Undo: Reshuffle Adapt or Delete Game '+game}:null;
+ const snap=action==='reroll'?{state:clone(state),label:'Undo: Reshuffle Adapt or Sink Game '+game}:null;
  lineupBusy=true;
  try{
   await flush();
@@ -867,9 +870,9 @@ function render(){
  const scrollTop=$('#screen-scroll').scrollTop,scrolls=[...document.querySelectorAll('#content .scroll')].map(e=>e.scrollLeft);
  const openDetails=[...document.querySelectorAll('#content details')].map(d=>d.open);
  $('#nav').innerHTML=tabs.map(([k,label],i)=>`<button data-tab="${k}" ${lockAttrs(k)} class="${tab===k?'active':''}" aria-current="${tab===k?'page':'false'}"><b>${roman[i]}</b>${label}<span>${view[k]?.complete?'✓':''}</span></button>`).join('');
- $('#breadcrumb').textContent=`BH / NODE ${roman[tabs.findIndex(t=>t[0]===tab)]} / ${tabs.find(t=>t[0]===tab)[1].toUpperCase()}`;
+ $('#breadcrumb').textContent=`BH / DIVE ${roman[tabs.findIndex(t=>t[0]===tab)]} / ${tabs.find(t=>t[0]===tab)[1].toUpperCase()}`;
  const legacyNotice=(state.legacy_round2_rotation||state.legacy_round2)
-  ?'<div class="notice">Your old Round 2 and final are archived in the downloadable backup. Adapt or Delete uses five 4v4 games with reshuffled teams. Any prior incompatible round scores are archived. Know Your Code, names, and settings are preserved.</div>'
+  ?'<div class="notice">Your old Round 2 and final are archived in the downloadable backup. Adapt or Sink uses five 4v4 games with reshuffled teams. Any prior incompatible round scores are archived. Know Your Depth, names, and settings are preserved.</div>'
   :state.legacy_final
    ?'<div class="notice">Your old five-game final is archived in the downloadable backup.</div>'
    :'';
@@ -987,8 +990,8 @@ async function performUndo(){
 }
 const resetCascade=key=>key==='round1'?['round1','round2','final']:key==='round2'?['round2','final']:['final'];
 // Human-readable labels for the per-round clear-round controls and their cascade.
-const clearRoundLabel={round1:'Clear Know Your Code',round2:'Clear Adapt or Delete',final:'Clear Last Node Standing'};
-const clearRoundCopy={round1:'Clear Know Your Code (also clears Adapt or Delete &amp; Last Node Standing)',round2:'Clear Adapt or Delete (also clears Last Node Standing)',final:'Clear Last Node Standing'};
+const clearRoundLabel={round1:'Clear Know Your Depth',round2:'Clear Adapt or Sink',final:'Clear The Abyssal Crown'};
+const clearRoundCopy={round1:'Clear Know Your Depth (also clears Adapt or Sink &amp; The Abyssal Crown)',round2:'Clear Adapt or Sink (also clears The Abyssal Crown)',final:'Clear The Abyssal Crown'};
 function resetStage(key){resetCeremonyHistory(key);for(const k of resetCascade(key)){state[k].extras=[];state[k].roster=[];if(k==='round2')state[k].draw={order:[],lineups:[],revealed:0,completed:0,mode:'random'};if(k==='round1'||k==='final')state[k].lineups=[];for(const d of Object.values(state[k].players)){d.goals=Array(k==='final'?8:5).fill(null);if(k==='final')d.results=Array(8).fill('');}}}
 function markWinner(team,game=finalGame){const match=view.final.schedule[game];if(!match||view.final.stale)return;for(const t of ['A','B'])for(const p of match[t])state.final.players[p].results[game]=t===team?'W':'L';}
 document.addEventListener('input',e=>{
@@ -1033,9 +1036,9 @@ document.addEventListener('click',async e=>{const b=e.target.closest('button');i
  if(action==='remove-extra'){await flush();const index=Number(b.dataset.index);doDestructive('Undo: Remove extra game '+(index+1),()=>{state[key].extras.splice(index,1);});await save();}
  if(action==='clear-extras'){await flush();doDestructive('Undo: Clear all extra games',()=>{state[key].extras=[];});await save();}
  if(action==='undo'){await performUndo();return;}
- if(action==='clear-r1-game'){await flush();const g=round1Game;doDestructive('Undo: Clear Know Your Code Game '+(g+1),()=>{for(const p of ids)state.round1.players[p].goals[g]=null;});await save();}
- if(action==='clear-r2-game'){await flush();const g=round2Game;doDestructive('Undo: Clear Adapt or Delete Game '+(g+1),()=>{for(const p of view.round2.rows.map(r=>r.id))state.round2.players[p].goals[g]=null;});await save();}
- if(action==='clear-game'){await flush();const g=finalGame;doDestructive('Undo: Clear Last Node Standing Game '+(g+1),()=>{for(const p of view.final.schedule[g].A.concat(view.final.schedule[g].B)){state.final.players[p].goals[g]=null;state.final.players[p].results[g]='';}});await save();}
+ if(action==='clear-r1-game'){await flush();const g=round1Game;doDestructive('Undo: Clear Know Your Depth Game '+(g+1),()=>{for(const p of ids)state.round1.players[p].goals[g]=null;});await save();}
+ if(action==='clear-r2-game'){await flush();const g=round2Game;doDestructive('Undo: Clear Adapt or Sink Game '+(g+1),()=>{for(const p of view.round2.rows.map(r=>r.id))state.round2.players[p].goals[g]=null;});await save();}
+ if(action==='clear-game'){await flush();const g=finalGame;doDestructive('Undo: Clear The Abyssal Crown Game '+(g+1),()=>{for(const p of view.final.schedule[g].A.concat(view.final.schedule[g].B)){state.final.players[p].goals[g]=null;state.final.players[p].results[g]='';}});await save();}
  if(action==='clear-round'){await flush();doDestructive('Undo: '+clearRoundLabel[key],()=>resetStage(key));await save();}
  if(action==='clear-names'){
   await flush();
@@ -1124,15 +1127,15 @@ function updateCountdown(){
   const card=$('.games-clock');
   if(card)card.dataset.phase='unset';
   ['days','hours','minutes','seconds'].forEach(k=>{const e=$('#countdown-'+k);if(e)e.textContent='--';});
-  $('#countdown-phase').textContent='SYSTEM AWAITING START';
-  $('#games-status').textContent='Set a start time. The grid will boot.';
+  $('#countdown-phase').textContent='AWAITING THE DIVE';
+  $('#games-status').textContent='Set a start time. The descent will begin.';
   if(box.setAttribute)box.setAttribute('aria-label','Tournament start time is not set');
   return;
  }
  const ms=Math.max(0,new Date(target).getTime()-Date.now()), total=Math.ceil(ms/1000);
  const d=Math.floor(total/86400),h=Math.floor(total%86400/3600),m=Math.floor(total%3600/60),sec=total%60;
  [['days',d],['hours',h],['minutes',m],['seconds',sec]].forEach(([k,v])=>{const e=$('#countdown-'+k);if(e)e.textContent=String(v).padStart(2,'0');});
- const started=ms<=0;$('#countdown-phase').textContent=started?'THE GRID IS ONLINE':'THE GRID BOOTS IN';$('#games-status').textContent=started?'THE GRID IS ONLINE. Jack into the nodes.':'Grid boots '+new Date(target).toLocaleString([], {dateStyle:'medium',timeStyle:'short'});if(box.setAttribute)box.setAttribute('aria-label',started?'The grid is online':'Tournament starts in '+d+' days '+h+' hours '+m+' minutes '+sec+' seconds');
+ const started=ms<=0;$('#countdown-phase').textContent=started?'THE DEPTHS ARE OPEN':'THE DESCENT BEGINS IN';$('#games-status').textContent=started?'THE DEPTHS ARE OPEN. Enter the dive chambers.':'Descent begins '+new Date(target).toLocaleString([], {dateStyle:'medium',timeStyle:'short'});if(box.setAttribute)box.setAttribute('aria-label',started?'The grid is online':'Tournament starts in '+d+' days '+h+' hours '+m+' minutes '+sec+' seconds');
  if($('#schedule-label'))$('#schedule-label').textContent='CHANGE START TIME';const card=$('.games-clock');if(card)card.dataset.phase=started?'started':'waiting';
 }
 async function setStartTime(){
@@ -1142,7 +1145,7 @@ async function setStartTime(){
 function clock(){$('#room-clock').textContent=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',hour12:false});updateCountdown();}clock();setInterval(clock,1000);
 // Shared guard: true while the elimination cutscene owns the screen.
 let cutsceneActive=false;
-const worldClick=e=>{const b=e.target.closest('button');if(!b)return;if(b.id==='world-toggle'){const paused=document.body.classList.toggle('world-paused');b.setAttribute('aria-pressed',String(paused));const span=b.querySelector&&b.querySelector('span');if(span)span.textContent=paused?'Resume grid':'Pause grid';if(b.firstChild)b.firstChild.textContent=paused?'▶ ':'Ⅱ ';window.CityWorld?.setPaused(paused);}};
+const worldClick=e=>{const b=e.target.closest('button');if(!b)return;if(b.id==='world-toggle'){const paused=document.body.classList.toggle('world-paused');b.setAttribute('aria-pressed',String(paused));const span=b.querySelector&&b.querySelector('span');if(span)span.textContent=paused?'Resume ocean':'Pause ocean';if(b.firstChild)b.firstChild.textContent=paused?'▶ ':'Ⅱ ';window.CityWorld?.setPaused(paused);}};
 
 // Elimination cutscene: the mech-arm effector and void bin. Plays BEFORE the end-of-round
 // fullscreen standings, once per settled round when its final match is submitted.
@@ -1171,9 +1174,9 @@ function revealFinalWinners(run){
  const name=rank=>finalWinners?.find(x=>x.rank===rank)?.name||'-';
  const block=(rank,cls)=>'<div class="fc-medal '+cls+'">'+laurelSvg('fc-laurel')+'<span class="fc-winner-name">'+esc(name(rank))+'</span><div class="fc-plinth">'+rank+'</div></div>';
  const petals=Array.from({length:25},(_,i)=>'<span class="fc-petal" style="--x:'+((i*41)%98+1)+'%;--y:'+((i*61)%87+5)+'%;--delay:'+(-(i%8)*.29)+'s"></span>').join('');
- $('#cutscene-stage').innerHTML='<div class="fc-victory"><div class="fc-victory-title">LAST NODE STANDING · $30 CHAMPION</div><div class="fc-podium">'+block(1,'gold')+'</div>'+petals+'</div>';
+ $('#cutscene-stage').innerHTML='<div class="fc-victory"><div class="fc-victory-title">THE ABYSSAL CROWN · $30 CHAMPION</div><div class="fc-podium">'+block(1,'gold')+'</div>'+petals+'</div>';
  $('#cutscene .eyebrow').textContent='TOURNAMENT COMPLETE';
- $('#cutscene-label').textContent='Last Node Standing';
+ $('#cutscene-label').textContent='The Abyssal Crown';
  finalTitle('SOLE CHAMPION · $30',name(1));
  overlay.hidden=false;overlay.setAttribute('aria-hidden','false');if(!overlay.open)overlay.showModal();
  window.BrawlAudio?.victory();

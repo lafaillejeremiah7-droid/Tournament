@@ -79,7 +79,7 @@ function makeWorld({gl=null}={}){
   assert.ok(status.debug.parts[key]>0,'neon-city mesh part '+key+' missing');
  const labels=S.elements['door-labels'];
  assert.equal(labels.children.length,5,'only real tournament pavilions have scene labels');
- assert.equal(S.elements['city-damage'].textContent,'0% CHARGE');
+ assert.equal(S.elements['city-damage'].textContent,'0% AWAKE');
  // Tournament results cannot grow the flowers. The timer advances them even
  // with locked pavilions, no player scores, or paused decorative animation.
  S.W.setTournament(stages('complete','complete','complete'));await S.step(301);
@@ -87,11 +87,11 @@ function makeWorld({gl=null}={}){
  S.W.setTournament(stages());S.W.setSettings(settingsAt(0));await S.step(301);
  await S.advance(25000);
  assert.equal(S.status().bloomLevel,.25);
- assert.equal(S.elements['city-damage'].textContent,'25% CHARGE');
+ assert.equal(S.elements['city-damage'].textContent,'25% AWAKE');
  assert.equal(S.status().gardenFlowers,28,'one quarter of the roses open');
  await S.advance(25000);
  assert.equal(S.status().bloomLevel,.5);
- assert.equal(S.elements['city-damage'].textContent,'50% CHARGE');
+ assert.equal(S.elements['city-damage'].textContent,'50% AWAKE');
  assert.equal(S.status().gardenFlowers,56);
  // Capture the charge-node geometry at mid charge so we can prove the nodes surge into a
  // dramatic HUGE full-charge power-up (extra neon spark halo + white-hot beacon gated
@@ -105,17 +105,17 @@ function makeWorld({gl=null}={}){
  assert.equal(S.status().gardenFlowers,84);
  S.W.setSuspended(true);await S.advance(24000);
  assert.equal(S.status().bloomLevel,.99);
- assert.equal(S.elements['city-damage'].textContent,'99% CHARGE');
+ assert.equal(S.elements['city-damage'].textContent,'99% AWAKE');
  assert(S.status().gardenFlowers<112,'full bloom waits for zero');
  await S.advance(1000);
  status=S.status();assert.equal(status.bloomLevel,1);
  assert.equal(status.gardenFlowers,112,'all roses open exactly at the deadline');
- assert.ok(status.debug.staticTriangles<16000,'full-bloom garden mesh stays within raised budget');
+ assert.ok(status.debug.staticTriangles<16000,'full-awake reef mesh remains under 16k triangles: '+status.debug.staticTriangles);
  assert.ok(status.debug.parts['charge-nodes']>midChargeNodes+4000,'full charge surges the nodes into a dramatically richer power-up');
- assert.equal(S.elements['city-status'].textContent,'THE GRID IS FULLY CHARGED');
- assert.equal(S.elements['city-damage'].textContent,'100% CHARGE');
+ assert.equal(S.elements['city-status'].textContent,'THE REEF IS FULLY AWAKE');
+ assert.equal(S.elements['city-damage'].textContent,'100% AWAKE');
  assert.equal(S.elements['city-progress'].style.width,'100%');
- assert.equal(S.status().phase,'THE GRID IS ONLINE');
+ assert.equal(S.status().phase,'THE REEF IS AWAKE');
  assert.equal(status.gates.find(g=>g.key==='round2').state,'sealed','bloom does not unlock rounds');
  await S.advance(60000);
  assert.equal(S.status().bloomLevel,1,'the garden stays open after the countdown');
@@ -125,7 +125,7 @@ function makeWorld({gl=null}={}){
  S.W.setSettings({disaster_started_at:at(160),start_at:at(400)});await S.step(301);
  assert.equal(S.status().bloomLevel,0,'a new countdown begins closed');
  await S.advance(239000);
- assert.equal(S.elements['city-damage'].textContent,'99% CHARGE','99.58% cannot round up early');
+ assert.equal(S.elements['city-damage'].textContent,'99% AWAKE','99.58% cannot round up early');
  assert.equal(S.status().gardenFlowers,111,'the last rose waits for zero');
  await S.advance(1000);
  assert.equal(S.status().gardenFlowers,112);
@@ -162,5 +162,5 @@ function makeWorld({gl=null}={}){
  assert.equal(G.status().debug.rebuilds,oldBuilds+1,'bloom transition rebuilds flowers');
  assert.equal(G.status().gardenFlowers,112);
  assert.deepEqual(G.warnings,[]);
- console.log('Neon Grid renderer passed: countdown charge, exact arrival, no early 100%, huge full-charge node surge, pause, resets, scoring independence, 2D/WebGL, camera and podium navigation.');
+ console.log('Deep Sea renderer passed: countdown charge, exact arrival, no early 100%, huge full-charge node surge, pause, resets, scoring independence, 2D/WebGL, camera and podium navigation.');
 })().catch(e=>{console.error(e);process.exit(1);});

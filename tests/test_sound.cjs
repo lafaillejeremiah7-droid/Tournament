@@ -44,10 +44,10 @@ assert.deepEqual([...new Set(notes)],[3,3.19,3.38,3.57],'fanfare notes are stagg
 const live=nodes.filter(n=>n.onended&&n.kind!=='gain'&&n.kind!=='filter');assert(live.length>0);
 a.toggle();
 assert(live.every(n=>n.stopCalls.at(-1)?.length===0),'mute stops active nodes immediately');
-assert.equal(button.textContent,'Grid audio off');
+assert.equal(button.textContent,'Ocean audio off');
 let count=nodes.length;for(const g of generators)assert.equal(a[g](),null,g+' returns null when muted');
 assert.equal(nodes.length,count,'mute blocks every generator');
-a.toggle();assert.equal(button.textContent,'Grid audio on');
+a.toggle();assert.equal(button.textContent,'Ocean audio on');
 // document.hidden blocks every generator too.
 doc.hidden=true;count=nodes.length;for(const g of generators)a[g]();assert.equal(nodes.length,count,'hidden tab blocks every generator');doc.hidden=false;
 // Ambience cadence. The periodic roar/murmur booms are disabled: the only
@@ -69,11 +69,11 @@ clock.now+=10000;assert.equal(a.ambience(1,true),null,'no periodic boom even whi
 // Muted arrival edge still advances but emits no sound. Re-arm the begin edge
 // (leave arrival), mute, then re-enter arrival: 'begin' fires on the edge yet
 // creates no audio nodes while muted, and unmuting releases no backlog.
-clock.now+=1;a.ambience(.8,false);a.toggle();assert.equal(button.textContent,'Grid audio off');
+clock.now+=1;a.ambience(.8,false);a.toggle();assert.equal(button.textContent,'Ocean audio off');
 clock.now+=1;count=nodes.length;assert.equal(a.ambience(1,true),'begin','muted arrival edge still advances');
 assert.equal(nodes.length,count,'muted arrival makes no nodes');
 assert.equal(a.ambience(1,true),null,'muted begin edge still fires only once');
-a.toggle();assert.equal(button.textContent,'Grid audio on');
+a.toggle();assert.equal(button.textContent,'Ocean audio on');
 count=nodes.length;assert.equal(a.ambience(1,true),null,'unmuting releases no backlog');assert.equal(nodes.length,count,'no deferred arrival nodes after unmute');
 // Leaving arrival re-arms the begin edge; progress is clamped and non-finite becomes 0.
 assert.equal(a.ambience(NaN,false),null);clock.now+=1;assert.equal(a.ambience(1,true),'begin','leaving arrival re-arms the begin edge');

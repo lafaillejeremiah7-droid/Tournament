@@ -1,4 +1,4 @@
-// Neon Grid theme, payout and visible copy regression checks.
+// Deep Sea theme, payout and visible copy regression checks.
 // Run: node tests/test_theme_copy.cjs
 'use strict';
 const assert=require('node:assert/strict');
@@ -8,14 +8,14 @@ const read=p=>fs.readFileSync(path.join(root,p),'utf8');
 const index=read('static/index.html'),app=read('static/app.js');
 const city=read('static/city.js'),style=read('static/style.css');
 const cityStyle=read('static/city.css'),monuments=read('static/monuments.js');
-const stages=['Know Your Code','Adapt or Delete','Last Node Standing'];
-assert(index.includes('<title>The Neon Grid - Brawl Hockey</title>'),'page title');
-assert(index.includes('THE GRID BOOTS'),'opening countdown');
+const stages=['Know Your Depth','Adapt or Sink','The Abyssal Crown'];
+assert(index.includes('<title>The Deep Sea - Brawl Hockey</title>'),'page title');
+assert(index.includes('THE DESCENT BEGINS'),'opening countdown');
 for(const name of stages){
  assert(index.includes(name),'home missing '+name);
  assert(app.includes(name),'game navigation missing '+name);
 }
-for(const old of ['Face Your Weakness','Abandon Your Comfort','Prove Your Resolve','COLISEUM DIVISION']){
+for(const old of ['Face Your Weakness','Abandon Your Comfort','Prove Your Resolve','COLISEUM DIVISION','KNOW YOUR CODE','ADAPT OR DELETE','LAST NODE STANDING']){
  assert(!index.includes(old)&&!app.includes(old),'obsolete displayed label: '+old);
 }
 // The Royal Garden chrome has been replaced entirely: no garden/rose/pavilion wording
@@ -55,9 +55,9 @@ for(const [label,src] of [['index.html',index],['app.js',app]]){
 // Match the user-visible caption word (uppercase with the bang) so the preserved
 // internal 'gv-snip' art class hook and "audible snip" comments are left alone.
 assert(!app.includes('SNIP!'),'verdict caption must not use garden-shears SNIP! wording in app.js');
-// Positive cyberpunk anchors so the test still fails if the copy is blanked.
-for(const neon of ["THE NEON GRID","GRID CHARGE","JACK INTO AN OPEN NODE","Grid audio on","Pause grid","THE SYSTEM'S VERDICT"]){
- assert(index.includes(neon),'missing neon chrome anchor in index.html: '+neon);
+// Positive deep-sea anchors so the test still fails if the copy is blanked.
+for(const neon of ["THE DEEP SEA","REEF AWAKENING","ENTER AN OPEN DIVE CHAMBER","Ocean audio on","Pause ocean","THE ABYSS DECIDES"]){
+ assert(index.includes(neon),'missing abyss interface anchor in index.html: '+neon);
 }
 assert(index.includes('ONE $30 CHAMPION'),'single champion on home screen');
 assert(app.includes('Winner-take-all prize'),'settings show fixed prize');
@@ -65,11 +65,14 @@ assert(!app.includes("inp('settings.prizes."),'payouts must not be editable');
 assert(app.includes("prizes:[30,0,0]"),'reset-all keeps $30/0/0');
 assert(monuments.includes('const slots=[1].map(place=>'),'only one trophy pedestal');
 assert(monuments.includes('$30'),'only $30 champion');
+assert(app.includes("'Hatchling','First glow','Reef swimmer','Deep diver','Reef hunter','Abyssal predator','Leviathan'"),'seven sea-creature progression tiers');
 for(const geometry of ["part('skyline'","part('charge-nodes'","part('nodes'","part('holo-signs'","part('megastructure'","part('neon-arches'"]){
  assert(city.includes(geometry),'missing 3D scenery: '+geometry);
 }
-assert(cityStyle.includes('#walkway-view{')&&cityStyle.includes('position:fixed;inset:0'),'full viewport garden');
+assert(cityStyle.includes('#walkway-view{')&&cityStyle.includes('position:fixed;inset:0'),'full viewport reef');
 assert(!style.includes('.garden-verdict'),'obsolete 2D garden verdict removed');
+assert(city.includes('Hydrothermal vents')&&city.includes('coral arches')&&city.includes('stone temple'),'real submerged scene geometry must exist');
+assert(style.includes('ABYSS INTERFACE'),'deep-sea CSS theme required');
 assert(!app.includes('function playCutscene('),'unused name-based verdict removed');
 assert(!city.includes('crownGate('),'unused gate ceremony removed');
 assert(!index.includes('ceremony-hud'),'retired ceremony HUD removed');
@@ -81,4 +84,4 @@ assert(!style.includes('.fc-judgment'),'removed abandoned lineup animation');
 const braces=text=>(text.match(/{/g)||[]).length-(text.match(/}/g)||[]).length;
 assert.equal(braces(style),0,'style.css braces');
 assert.equal(braces(cityStyle),0,'city.css braces');
-console.log('PASS: Neon Grid copy, code rounds, $30 champion, viewport, scene, lean styles, and no garden/old-round regression.');
+console.log('PASS: Deep Sea copy, code rounds, $30 champion, viewport, scene, lean styles, and no garden/old-round regression.');
