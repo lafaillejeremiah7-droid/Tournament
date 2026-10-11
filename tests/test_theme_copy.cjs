@@ -9,14 +9,23 @@ const index=read('static/index.html'),app=read('static/app.js');
 const city=read('static/city.js'),style=read('static/style.css');
 const cityStyle=read('static/city.css'),monuments=read('static/monuments.js');
 const stages=['Know Thy Nature','Adapt or Wither','The Last Bloom'];
-assert(index.includes('<title>The Royal Garden - Brawl Hockey</title>'),'page title');
-assert(index.includes('THE GARDEN OPENS'),'opening countdown');
+assert(index.includes('<title>The Neon Grid - Brawl Hockey</title>'),'page title');
+assert(index.includes('THE GRID BOOTS'),'opening countdown');
 for(const name of stages){
  assert(index.includes(name),'home missing '+name);
  assert(app.includes(name),'game navigation missing '+name);
 }
 for(const old of ['Face Your Weakness','Abandon Your Comfort','Prove Your Resolve','COLISEUM DIVISION']){
  assert(!index.includes(old)&&!app.includes(old),'obsolete displayed label: '+old);
+}
+// The Royal Garden chrome has been replaced entirely: no garden/rose/pavilion wording
+// survives in the index.html scaffold (fails if the reskin regresses to garden copy or goes blank).
+for(const garden of ['ROYAL GARDEN','ROYAL HEDGE MAZE','ROSE BLOOM','ROSES WAITING','Pause garden','Garden sound on','BACK TO GARDEN','THE GARDENER','PAVILION','PRUNED']){
+ assert(!index.includes(garden),'garden chrome must be reskinned out of index.html: '+garden);
+}
+// Positive cyberpunk anchors so the test still fails if the copy is blanked.
+for(const neon of ["THE NEON GRID","GRID CHARGE","JACK INTO AN OPEN NODE","Grid audio on","Pause grid","THE SYSTEM'S VERDICT"]){
+ assert(index.includes(neon),'missing neon chrome anchor in index.html: '+neon);
 }
 assert(index.includes('ONE $30 CHAMPION'),'single champion on home screen');
 assert(app.includes('Winner-take-all prize'),'settings show fixed prize');

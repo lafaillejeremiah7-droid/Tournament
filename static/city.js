@@ -428,8 +428,8 @@ void main(){
  }
  function updateBloomHud(){
   const label=document.getElementById('city-status'),pct=document.getElementById('city-damage'),bar=document.getElementById('city-progress');
-  if(label)label.textContent=bloomLevel>=1?'ROYAL GARDEN IN FULL BLOOM':bloomLevel>0?'THE ROSES ARE BLOOMING':state.phase;
-  if(pct)pct.textContent=Math.floor(bloomLevel*100)+'% BLOOM';
+  if(label)label.textContent=bloomLevel>=1?'THE GRID IS FULLY CHARGED':bloomLevel>0?'THE GRID IS POWERING UP':state.phase;
+  if(pct)pct.textContent=Math.floor(bloomLevel*100)+'% CHARGE';
   if(bar)bar.style.width=(bloomLevel*100)+'%';
  }
  function sample(now){
@@ -485,7 +485,7 @@ void main(){
   if(ceremony&&ceremony.at!==null){
    const age=(now-ceremony.at)/1000;
    if(age>=1.4&&ceremony.phase!=='crowned'){ceremony.phase='crowned';geometryDirty=true;ceremony.onCrown?.();}
-   const hud=document.getElementById('ceremony-status');if(hud)hud.textContent=age<1.4?'FLOWERS AWAKEN':'THE PAVILION BLOOMS';
+   const hud=document.getElementById('ceremony-status');if(hud)hud.textContent=age<1.4?'NODE POWERING ON':'THE NODE IS ONLINE';
    if(age>=5){const done=ceremony.done;ceremony=null;done?.();}
    dirty=true;
   }

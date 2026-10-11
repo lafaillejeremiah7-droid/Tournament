@@ -79,7 +79,7 @@ function makeWorld({gl=null}={}){
   assert.ok(status.debug.parts[key]>0,'garden mesh part '+key+' missing');
  const labels=S.elements['door-labels'];
  assert.equal(labels.children.length,5,'only real tournament pavilions have scene labels');
- assert.equal(S.elements['city-damage'].textContent,'0% BLOOM');
+ assert.equal(S.elements['city-damage'].textContent,'0% CHARGE');
  // Tournament results cannot grow the flowers. The timer advances them even
  // with locked pavilions, no player scores, or paused decorative animation.
  S.W.setTournament(stages('complete','complete','complete'));await S.step(301);
@@ -87,11 +87,11 @@ function makeWorld({gl=null}={}){
  S.W.setTournament(stages());S.W.setSettings(settingsAt(0));await S.step(301);
  await S.advance(25000);
  assert.equal(S.status().bloomLevel,.25);
- assert.equal(S.elements['city-damage'].textContent,'25% BLOOM');
+ assert.equal(S.elements['city-damage'].textContent,'25% CHARGE');
  assert.equal(S.status().gardenFlowers,28,'one quarter of the roses open');
  await S.advance(25000);
  assert.equal(S.status().bloomLevel,.5);
- assert.equal(S.elements['city-damage'].textContent,'50% BLOOM');
+ assert.equal(S.elements['city-damage'].textContent,'50% CHARGE');
  assert.equal(S.status().gardenFlowers,56);
  // Capture the rose geometry at mid bloom so we can prove the roses swell into a
  // dramatic HUGE full-bloom flourish (extra outer petals + golden coronet gated
@@ -105,17 +105,17 @@ function makeWorld({gl=null}={}){
  assert.equal(S.status().gardenFlowers,84);
  S.W.setSuspended(true);await S.advance(24000);
  assert.equal(S.status().bloomLevel,.99);
- assert.equal(S.elements['city-damage'].textContent,'99% BLOOM');
+ assert.equal(S.elements['city-damage'].textContent,'99% CHARGE');
  assert(S.status().gardenFlowers<112,'full bloom waits for zero');
  await S.advance(1000);
  status=S.status();assert.equal(status.bloomLevel,1);
  assert.equal(status.gardenFlowers,112,'all roses open exactly at the deadline');
  assert.ok(status.debug.staticTriangles<16000,'full-bloom garden mesh stays within raised budget');
  assert.ok(status.debug.parts['rose-beds']>midRoseBeds+4000,'full bloom grows the roses into a dramatically richer flourish');
- assert.equal(S.elements['city-status'].textContent,'ROYAL GARDEN IN FULL BLOOM');
- assert.equal(S.elements['city-damage'].textContent,'100% BLOOM');
+ assert.equal(S.elements['city-status'].textContent,'THE GRID IS FULLY CHARGED');
+ assert.equal(S.elements['city-damage'].textContent,'100% CHARGE');
  assert.equal(S.elements['city-progress'].style.width,'100%');
- assert.equal(S.status().phase,'THE GARDEN IS OPEN');
+ assert.equal(S.status().phase,'THE GRID IS ONLINE');
  assert.equal(status.gates.find(g=>g.key==='round2').state,'sealed','bloom does not unlock rounds');
  await S.advance(60000);
  assert.equal(S.status().bloomLevel,1,'the garden stays open after the countdown');
@@ -125,7 +125,7 @@ function makeWorld({gl=null}={}){
  S.W.setSettings({disaster_started_at:at(160),start_at:at(400)});await S.step(301);
  assert.equal(S.status().bloomLevel,0,'a new countdown begins closed');
  await S.advance(239000);
- assert.equal(S.elements['city-damage'].textContent,'99% BLOOM','99.58% cannot round up early');
+ assert.equal(S.elements['city-damage'].textContent,'99% CHARGE','99.58% cannot round up early');
  assert.equal(S.status().gardenFlowers,111,'the last rose waits for zero');
  await S.advance(1000);
  assert.equal(S.status().gardenFlowers,112);
@@ -142,7 +142,7 @@ function makeWorld({gl=null}={}){
  await S.step(1600);
  assert.equal(bloomCalls,1);
  assert.equal(S.status().ceremony.phase,'crowned');
- assert.equal(S.elements['ceremony-status'].textContent,'THE PAVILION BLOOMS');
+ assert.equal(S.elements['ceremony-status'].textContent,'THE NODE IS ONLINE');
  await S.step(3900);await ceremony;
  assert.equal(S.status().ceremony,null,'ceremony resolves');
  S.W.cancelCeremony();

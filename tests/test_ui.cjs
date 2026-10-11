@@ -589,17 +589,17 @@ const flushMicro=async()=>{for(let i=0;i<20;i++)await Promise.resolve();};
  const pausedCalls=[];const savedWorld=context.window.CityWorld;
  context.window.CityWorld={setPaused:p=>pausedCalls.push(p)};
  vm.runInContext('document.body.classList.remove("world-paused");',context);
- const toggleSpan={textContent:'Pause garden'},toggleGlyph={textContent:'Ⅱ '},toggleAttrs={};
+ const toggleSpan={textContent:'Pause grid'},toggleGlyph={textContent:'Ⅱ '},toggleAttrs={};
  const worldToggleBtn={id:'world-toggle',dataset:{},setAttribute(k,v){toggleAttrs[k]=v;},querySelector:s=>s==='span'?toggleSpan:null,firstChild:toggleGlyph};
  events.click({target:{closest:()=>worldToggleBtn}});   // first toggle -> paused
- assert.equal(vm.runInContext('document.body.classList.contains("world-paused")',context),true,'toggle pauses the garden');
- assert.equal(toggleSpan.textContent,'Resume garden');assert.equal(toggleGlyph.textContent,'▶ ');assert.equal(toggleAttrs['aria-pressed'],'true');
+ assert.equal(vm.runInContext('document.body.classList.contains("world-paused")',context),true,'toggle pauses the grid');
+ assert.equal(toggleSpan.textContent,'Resume grid');assert.equal(toggleGlyph.textContent,'▶ ');assert.equal(toggleAttrs['aria-pressed'],'true');
  events.click({target:{closest:()=>worldToggleBtn}});   // second toggle -> resumed
- assert.equal(vm.runInContext('document.body.classList.contains("world-paused")',context),false,'toggle resumes the garden');
- assert.equal(toggleSpan.textContent,'Pause garden');assert.equal(toggleGlyph.textContent,'Ⅱ ');assert.equal(toggleAttrs['aria-pressed'],'false');
+ assert.equal(vm.runInContext('document.body.classList.contains("world-paused")',context),false,'toggle resumes the grid');
+ assert.equal(toggleSpan.textContent,'Pause grid');assert.equal(toggleGlyph.textContent,'Ⅱ ');assert.equal(toggleAttrs['aria-pressed'],'false');
  assert.deepEqual(pausedCalls,[true,false],'CityWorld.setPaused follows the toggle');
  context.window.CityWorld=savedWorld;
- console.log('Pause garden: #world-toggle toggles world-paused, Pause garden / Resume garden label and glyph, aria-pressed, CityWorld.setPaused(true/false), and no DOM ambient effect loop passed.');
+ console.log('Pause grid: #world-toggle toggles world-paused, Pause grid / Resume grid label and glyph, aria-pressed, CityWorld.setPaused(true/false), and no DOM ambient effect loop passed.');
 
  // FEAT-003: verify the active Divine Selection cut list rather than retired name-mapping code.
  vm.runInContext('state=fixture.state;view=fixture.view;render=()=>{};flush=async()=>{};save=async()=>{};',context);
