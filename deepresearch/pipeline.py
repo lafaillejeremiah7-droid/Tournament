@@ -42,6 +42,7 @@ from deepresearch.sources.commentary import CommentaryConnector
 from deepresearch.sources.registry import SourceRegistry
 from deepresearch.sources.strongs import StrongsConnector
 from deepresearch.synthesis import synthesize
+from deepresearch.neutrality import check_neutrality
 
 # A loose Bible reference matcher: "Book C:V" / "Book C:V-V" / "1 John 2:3".
 _REFERENCE_RE = re.compile(
@@ -239,6 +240,12 @@ class Pipeline:
         out_dir = Path(self.config.output_dir)
         out_dir.mkdir(parents=True, exist_ok=True)
 
+        # Deterministic denominational-neutrality scan. It only READS the
+        # synthesized prose and RECORDS advisory findings for the human
+        # reviewer; it never mutates or censors the dossier's statements or
+        # talking points. Runs on every path, including dry-run/offline.
+        dossier.review_flags = check_neutrality(dossier)
+
         dossier.validate()
 
         slug = _slugify(dossier.resolved_reference or dossier.query or "dossier")
@@ -382,6 +389,16 @@ def _render_markdown(dossier: Dossier) -> str:
     if dossier.gaps:
         for g in dossier.gaps:
             lines.append(f"- `{g.source}`: {g.reason}")
+    else:
+        lines.append("- (none)")
+    lines.append("")
+
+    lines.append("## Review Flags (neutrality)")
+    if dossier.review_flags:
+        for f in dossier.review_flags:
+            lines.append(
+                f"- **{f.category}** ({f.severity}): \"{f.snippet}\" - {f.reason}"
+            )
     else:
         lines.append("- (none)")
     lines.append("")

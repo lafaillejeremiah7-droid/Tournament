@@ -29,12 +29,27 @@ These rules are enforced in the prompts **and** re-checked in code
 - **Denominational neutrality.** The shared **66-book canon** is the baseline.
   Where traditions differ (canon, interpretation), the difference is noted
   neutrally; no denomination is favored. The person and teaching of Jesus Christ
-  stay at the center. **Note (v1 limitation):** neutrality is enforced only by
-  the system prompt — there is no programmatic neutrality check — so for the
-  live `openai`/`anthropic` providers it is *unverified* and rests on the model
-  honoring the instruction. The human-review gate is the backstop; a
-  programmatic neutrality check is future work. In dry-run the stub echoes
-  neutral boilerplate, so neutrality there is deterministic by construction.
+  stay at the center. Neutrality is now enforced **both** by the system prompt
+  **and** by a programmatic check. `deepresearch/neutrality.py` is a
+  **deterministic**, data-driven scanner (a curated lexicon of phrasings that
+  assert one tradition's distinctive *as settled fact* — the one true church,
+  papal/magisterial infallibility, Marian doctrine, purgatory, baptismal
+  regeneration/mode as required, eucharistic real-presence vs. "merely symbolic"
+  as settled, predestination / once-saved-always-saved, faith-alone vs. works,
+  tongues-required, King-James-only). It scans the model's generated prose
+  (title, summary, the misconception/deeper-truth statements, and every talking
+  point) case-insensitively on word/phrase boundaries, and is wired into the
+  pipeline **after `synthesize`, inside `write_output` before `validate()`**, so
+  it runs on **every** path including dry-run/offline. Findings surface in the
+  optional, additive **`review_flags`** field (JSON) and a **"Review Flags
+  (neutrality)"** Markdown section. **Scope and limits (honest):** this is a
+  **heuristic aid for the human reviewer, not a guarantee** — it uses a curated
+  keyword lexicon, will not catch every side-taking phrasing or understand
+  nuance, and is conservative to avoid false positives (neutral mentions like
+  "traditions differ" are not flagged). Crucially it **flags, never censors**:
+  it only records structured findings and never edits the dossier's statements
+  or talking points. The human-review gate remains the real backstop. In dry-run
+  the stub echoes neutral boilerplate, so it produces zero flags by construction.
 - **No scraping of copyrighted modern translations.** Only public-domain
   scripture is ever fetched. Copyrighted modern translations (NIV, ESV, NASB,
   NLT, …) are refused *before* any URL is built, and commentary fetches are
@@ -282,6 +297,12 @@ Top-level fields:
 | `gaps` | object[] | Sources that were unavailable or returned nothing. |
 | `citations` | citation[] | **Required.** Flat index of every distinct citation. |
 | `provider`, `model` | string / null | Which LLM produced the synthesis. |
+| `review_flags` | object[] | *Optional, additive.* Advisory neutrality findings `{category, snippet, reason, severity}` from `deepresearch/neutrality.py`. Not in `required`; `[]`/absent is valid. |
+
+> **`schema_version` stays `0.1.0`.** Adding `review_flags` is an **additive,
+> backward-compatible** change: the field is optional (not in the schema's
+> `required` list), so every pre-existing dossier — and any run that produces no
+> findings — validates unchanged. No version bump is warranted.
 
 A **claim** is `{ "statement": string, "citations": [citation, …] }` with at
 least one citation. A **citation** is

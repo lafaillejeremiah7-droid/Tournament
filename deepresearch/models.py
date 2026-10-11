@@ -23,6 +23,10 @@ from deepresearch import SCHEMA_VERSION
 # without reaching into deepresearch.sources.base.
 from deepresearch.sources.base import Citation
 
+# Re-exported so callers can import the neutrality finding shape from the model
+# module alongside the dossier it attaches to.
+from deepresearch.neutrality import ReviewFlag
+
 _SCHEMA_PATH = Path(__file__).resolve().parent / "schema" / "dossier.schema.json"
 
 
@@ -194,6 +198,10 @@ class Dossier:
     citations: list[Citation] = field(default_factory=list)
     provider: str = "stub"
     model: Optional[str] = None
+    # Optional, additive neutrality findings (see deepresearch/neutrality.py).
+    # Always emitted in to_dict() as a list ([] when empty), which stays
+    # schema-valid because review_flags is NOT in the schema's required list.
+    review_flags: list[ReviewFlag] = field(default_factory=list)
 
     # ----------------------------------------------------------- citation index
 
@@ -256,6 +264,7 @@ class Dossier:
             "citations": _citations_to_list(self.citations),
             "provider": self.provider,
             "model": self.model,
+            "review_flags": [f.to_dict() for f in self.review_flags],
         }
         return payload
 

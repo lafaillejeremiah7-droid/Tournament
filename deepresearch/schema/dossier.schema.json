@@ -160,7 +160,22 @@
       "items": { "$ref": "#/definitions/citation" }
     },
     "provider": { "type": "string" },
-    "model": { "type": ["string", "null"] }
+    "model": { "type": ["string", "null"] },
+    "review_flags": {
+      "type": "array",
+      "description": "Optional, additive advisory findings from the deterministic denominational-neutrality scanner (deepresearch/neutrality.py). Not in 'required': absent/empty is valid, so existing dossiers validate unchanged and schema_version stays 0.1.0. The scanner only flags for the human reviewer; it never edits content.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["category", "snippet", "reason", "severity"],
+        "properties": {
+          "category": { "type": "string", "description": "Which family of denominational distinctive matched." },
+          "snippet": { "type": "string", "description": "Matched phrase plus minimal surrounding context." },
+          "reason": { "type": "string", "description": "Why the phrasing may be non-neutral." },
+          "severity": { "type": "string", "description": "Advisory level (e.g. 'advisory')." }
+        }
+      }
+    }
   },
   "definitions": {
     "citation": {
